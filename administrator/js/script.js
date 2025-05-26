@@ -65,6 +65,73 @@ document.addEventListener('DOMContentLoaded', function() {
         } else {
             console.warn('[settings_users_events] Delete User Modal element (#deleteUserModal) not found. Delete functionality might not work.');
         }
+
+        // NEW: Reset Password Modal Event Listener
+        const resetPasswordModal = document.getElementById('resetPasswordModal');
+        if (resetPasswordModal) {
+            resetPasswordModal.addEventListener('show.bs.modal', function (event) {
+                const button = event.relatedTarget;
+                const userId = button.getAttribute('data-user-id');
+                const username = button.getAttribute('data-username');
+
+                console.log("[settings_users_events] Reset Password button clicked!");
+                console.log("[settings_users_events] Captured User ID for reset:", userId);
+                console.log("[settings_users_events] Captured Username for reset:", username);
+
+                const modalUserIdSpan = resetPasswordModal.querySelector('#resetModalUserId');
+                const modalUsernameSpan = resetPasswordModal.querySelector('#resetModalUsername');
+                const hiddenUserIdInput = resetPasswordModal.querySelector('#resetUserId');
+
+                if (modalUserIdSpan) modalUserIdSpan.textContent = userId;
+                if (modalUsernameSpan) modalUsernameSpan.textContent = username;
+                if (hiddenUserIdInput) hiddenUserIdInput.value = userId;
+
+                console.log("[settings_users_events] Reset Modal display ID:", modalUserIdSpan ? modalUserIdSpan.textContent : 'N/A (span not found)');
+                console.log("[settings_users_events] Reset Modal display Username:", modalUsernameSpan ? modalUsernameSpan.textContent : 'N/A (span not found)');
+                console.log("[settings_users_events] Reset hidden input value set to:", hiddenUserIdInput ? hiddenUserIdInput.value : 'N/A (input not found)');
+
+                // Clear password fields when modal opens
+                resetPasswordModal.querySelector('#new_password').value = '';
+                resetPasswordModal.querySelector('#confirm_new_password').value = '';
+                console.log('[settings_users_events] Reset Password fields cleared.');
+            });
+            console.log('[settings_users_events] Reset Password Modal event listener attached.');
+        } else {
+            console.warn('[settings_users_events] Reset Password Modal element (#resetPasswordModal) not found. Reset functionality might not work.');
+        }
+    }
+
+    // NEW: Function to initialize events specific to the products.php page
+    function initializeProductsPageEvents() {
+        console.log('[products_events] Initializing events for Products page.');
+
+        const deleteProductModal = document.getElementById('deleteProductModal');
+        if (deleteProductModal) {
+            deleteProductModal.addEventListener('show.bs.modal', function (event) {
+                const button = event.relatedTarget; // Button that triggered the modal
+                const productId = button.getAttribute('data-product-id'); // Get product ID from button
+                const productName = button.getAttribute('data-product-name'); // Get product name from button
+
+                console.log("[products_events] Delete Product button clicked!");
+                console.log("[products_events] Captured Product ID:", productId);
+                console.log("[products_events] Captured Product Name:", productName);
+
+                const modalProductIdSpan = deleteProductModal.querySelector('#modalProductId');
+                const modalProductNameSpan = deleteProductModal.querySelector('#modalProductName');
+                const deleteProductIdInput = deleteProductModal.querySelector('#deleteProductId');
+
+                if (modalProductIdSpan) modalProductIdSpan.textContent = productId;
+                if (modalProductNameSpan) modalProductNameSpan.textContent = productName;
+                if (deleteProductIdInput) deleteProductIdInput.value = productId;
+
+                console.log("[products_events] Modal display ID:", modalProductIdSpan ? modalProductIdSpan.textContent : 'N/A (span not found)');
+                console.log("[products_events] Modal display Name:", modalProductNameSpan ? modalProductNameSpan.textContent : 'N/A (span not found)');
+                console.log("[products_events] Hidden input value set to:", deleteProductIdInput ? deleteProductIdInput.value : 'N/A (input not found)');
+            });
+            console.log('[products_events] Delete Product Modal event listener attached.');
+        } else {
+            console.warn('[products_events] Delete Product Modal element (#deleteProductModal) not found. Product delete functionality might not work.');
+        }
     }
 
 
@@ -102,6 +169,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 // --- IMPORTANT: Load and initialize specific scripts based on contentId ---
                 if (contentId === 'products') {
                     console.log('[loadContent] Products page loaded. Loading products.js and initializing its logic.');
+                    // Remove existing products.js script if it was loaded before
                     const oldScript = document.querySelector('script[src="js/products.js"]');
                     if (oldScript) oldScript.remove();
 
@@ -114,6 +182,8 @@ document.addEventListener('DOMContentLoaded', function() {
                         } else {
                             console.error('[loadContent] initializeProductForm not found after loading products.js. Check products.js.');
                         }
+                        // Call the products page specific event initializer after products.js is loaded
+                        initializeProductsPageEvents();
                     };
                     script.onerror = () => {
                         console.error('[loadContent] Failed to load products.js. Check path.');
@@ -134,7 +204,7 @@ document.addEventListener('DOMContentLoaded', function() {
             });
     }
 
-    // Function to set the active class on sidebar links (unchanged)
+    // Function to set the active class on sidebar links
     function setActiveLink(contentId) {
         console.log(`[setActiveLink] Setting active link for ID: "${contentId}"`);
         sidebarLinks.forEach(item => item.classList.remove('active'));
@@ -160,7 +230,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // Sidebar Toggle Button Event Listener (unchanged)
+    // Sidebar Toggle Button Event Listener
     if (sidebarToggle) {
         sidebarToggle.addEventListener('click', function() {
             console.log('[sidebarToggle] Toggle button clicked.');
@@ -189,15 +259,14 @@ document.addEventListener('DOMContentLoaded', function() {
             console.log(`[Link Clicked] Extracted URL: "${url}", Extracted Content ID: "${contentId}"`);
 
             if (url && contentId) {
-                // --- ADDED: URL Cleaning Logic Here ---
+                // URL Cleaning Logic Here
                 const baseUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
                 const newCleanUrl = baseUrl + '#' + contentId;
                 history.replaceState(null, '', newCleanUrl);
                 console.log(`[Link Clicked] URL cleaned to: "${newCleanUrl}"`);
-                // --- END ADDED ---
 
                 setActiveLink(contentId);
-                loadContent(url, contentId); // This loadContent will implicitly handle the hash update later
+                loadContent(url, contentId);
             } else {
                 console.error('[Link Clicked] ERROR: Clicked link is missing "href" or "data-content-id". Link:', this);
             }
@@ -217,13 +286,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
     console.log(`[Initial Load] Current URL hash: "${initialHash}"`);
 
-    // --- ADDED: Initial URL Cleaning ---
+    // Initial URL Cleaning
     const baseUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
     if (window.location.search) { // If there are query parameters
         console.log('[Initial Load] Cleaning URL: Detected existing query parameters.');
         history.replaceState(null, '', baseUrl + window.location.hash);
     }
-    // --- END ADDED ---
 
     if (initialHash) {
         const linkForHash = document.querySelector(`#sidebar-wrapper .list-group-item[data-content-id="${initialHash}"]`);

@@ -90,14 +90,14 @@ if (isset($_SESSION['log_clear_message'])) {
 
 <div class="d-flex justify-content-between align-items-center mb-3">
     <h4>Recent Actions</h4>
-    <form action="http://localhost/bongbicycleshop/administrator/index.php#log_history" method="GET" class="d-flex align-items-center me-3">
+    <form action="http://localhost/ecommerce-bikeshop/administrator/index.php#log_history" method="GET" class="d-flex align-items-center me-3">
         <label for="start_date" class="form-label me-2 mb-0">From:</label>
         <input type="date" class="form-control form-control-sm me-2" id="start_date" name="start_date" value="<?php echo htmlspecialchars($startDate); ?>">
 
         <label for="end_date" class="form-label me-2 mb-0">To:</label>
         <input type="date" class="form-control form-control-sm me-2" id="end_date" name="end_date" value="<?php echo htmlspecialchars($endDate); ?>">
 
-        <button type="submit" class="btn btn-primary btn-sm me-2">Filter</button>
+        <button type="submit" class="btn btn-accent btn-sm me-2">Filter</button>
         <button type="submit" class="btn btn-secondary btn-sm" name="reset_filter" value="1">Reset</button>
     </form>
 
@@ -147,7 +147,7 @@ if (isset($_SESSION['log_clear_message'])) {
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                 <form id="clearLogForm" action="api/clear_logs_action.php" method="POST">
-                    <input type="hidden" name="redirect_url" value="http://localhost/bongbicycleshop/administrator/index.php#products">
+                    <input type="hidden" name="redirect_url" value="http://localhost/ecommerce-bikeshop/administrator/index.php#products">
                     <button type="submit" name="action" value="clear" class="btn btn-danger">
                         <i class="bi bi-trash me-2"></i>Clear History
                     </button>

@@ -261,6 +261,26 @@
             transform: rotate(180deg); /* Rotate arrow when sidebar is open */
         }
     }
+
+    .navbar-brand,
+    .nav-link {
+      color: var(--text-light) !important;
+      position: relative;
+      padding-bottom: 5px;
+      font-weight: 500;
+    }
+
+    .navbar-logo {
+      width: 40px;
+      height: 40px;
+      margin-right: 10px;
+      object-fit: contain;
+    }
+
+    .navbar-brand-text {
+      font-weight: 600;
+      font-size: 1.2rem;
+    }
   </style>
 <?php
 // This is typically part of your index.php or main admin layout file
@@ -270,17 +290,15 @@ $adminUsername = $_SESSION['admin_username'] ?? 'Admin User'; // Default if not 
 ?>
 
 <header id="header">
-    <a class="navbar-brand" href="#">
-      <i class="bi bi-gear-fill me-2"></i>Admin Dashboard
+    <a class="navbar-brand d-flex align-items-center" href="index.php">
+       <img src="../assets/images/logos/logo.svg" alt="Bong Bicycle Shop Logo" class="navbar-logo" />
+       <span class="navbar-brand-text">Bong Bicycle Shop</span>
     </a>
     <div class="dropdown">
       <button class="btn btn-accent dropdown-toggle" type="button" id="adminDropdown" data-bs-toggle="dropdown" aria-expanded="false">
         <i class="bi bi-person-circle me-2"></i><?php echo htmlspecialchars($adminUsername); ?>
       </button>
       <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="adminDropdown">
-        <li><a class="dropdown-item" href="#"><i class="bi bi-person me-2"></i>Profile</a></li>
-        <li><a class="dropdown-item" href="#"><i class="bi bi-key me-2"></i>Change Password</a></li>
-        <li><hr class="dropdown-divider bg-light"></li>
         <li><a class="dropdown-item" href="../administrator/api/logout.php"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
       </ul>
     </div>

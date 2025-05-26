@@ -1,0 +1,34 @@
+
+
+-- Create products table (price column removed)
+CREATE TABLE IF NOT EXISTS products (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    category_key VARCHAR(50) NOT NULL COMMENT 'Stores the key from productsData, e.g., BIK, APP',
+    subcategory_key VARCHAR(50) NOT NULL COMMENT 'Stores the key from productsData, e.g., MTB, JRS',
+    description TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+-- Create product_variations table (price column added)
+CREATE TABLE IF NOT EXISTS product_variations (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    product_id INT NOT NULL,
+    color_name VARCHAR(100) NOT NULL,
+    size_name VARCHAR(100) NOT NULL,
+    quantity INT NOT NULL DEFAULT 0,
+    price DECIMAL(10, 2) NOT NULL, -- NEW: Price for this specific variation
+    UNIQUE (product_id, color_name, size_name),
+    FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
+);
+
+-- Create product_images table (unchanged)
+CREATE TABLE IF NOT EXISTS product_images (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    product_id INT NOT NULL,
+    image_path VARCHAR(255) NOT NULL COMMENT 'Relative or absolute path to the image file',
+    is_main TINYINT(1) DEFAULT 0 COMMENT 'Optional: Set one image as main/featured',
+    display_order INT DEFAULT 0 COMMENT 'Optional: For controlling image order',
+    FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
+);

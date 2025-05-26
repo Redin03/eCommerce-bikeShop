@@ -28,368 +28,537 @@ const productsData = [
     "key": "APP",
     "subcategories": [
       {"name": "Jerseys", "key": "JRS"},
-      {"name": "Cycling Shorts & Bibs", "key": "SHT"},
-      {"name": "Jackets & Vests", "key": "JAC"},
+      {"name": "Shorts & Bibs", "key": "SHB"},
+      {"name": "Jackets & Vests", "key": "JKV"},
       {"name": "Gloves", "key": "GLV"},
       {"name": "Socks", "key": "SCK"},
-      {"name": "Helmets", "key": "HLM"},
-      {"name": "Cycling Shoes", "key": "SHS"},
-      {"name": "Base Layers", "key": "BSE"},
-      {"name": "Arm/Leg Warmers", "key": "WRM"},
-      {"name": "Headwear & Bandanas", "key": "HDW"},
-      {"name": "Eyewear (Glasses/Goggles)", "key": "EYE"},
-      {"name": "Casual Cycling Apparel", "key": "CSP"},
-      {"name": "Protective Gear (Pads, Guards)", "key": "PRT"},
-      {"name": "Rain Gear", "key": "RNG"}
+      {"name": "Headwear", "key": "HDW"},
+      {"name": "Footwear", "key": "FTW"},
+      {"name": "Eyewear", "key": "EYW"}
+    ]
+  },
+  {
+    "name": "Components",
+    "key": "COM",
+    "subcategories": [
+      {"name": "Drivetrain", "key": "DRV"},
+      {"name": "Brakes", "key": "BRK"},
+      {"name": "Wheels & Tires", "key": "WNT"},
+      {"name": "Frames & Forks", "key": "FRF"},
+      {"name": "Handlebars, Stems & Seatposts", "key": "HSS"},
+      {"name": "Saddles", "key": "SDL"},
+      {"name": "Pedals", "key": "PDL"},
+      {"name": "Bearings & Headsets", "key": "BHS"}
     ]
   },
   {
     "name": "Accessories",
     "key": "ACC",
     "subcategories": [
-      {"name": "Lights (Front & Rear)", "key": "LGT"},
+      {"name": "Helmets", "key": "HLM"},
+      {"name": "Lights", "key": "LGT"},
       {"name": "Locks", "key": "LCK"},
-      {"name": "Pumps (Floor & Frame)", "key": "PMP"},
-      {"name": "Bags & Panniers (Frame, Seat, Handlebar)", "key": "BAG"},
-      {"name": "Water Bottles & Cages", "key": "WTR"},
-      {"name": "Bike Computers & GPS", "key": "CMP"},
+      {"name": "Bags & Racks", "key": "BGR"},
+      {"name": "Bottles & Cages", "key": "BTC"},
+      {"name": "Computers & GPS", "key": "CPG"},
       {"name": "Fenders", "key": "FND"},
-      {"name": "Racks (Front & Rear)", "key": "RCK"},
-      {"name": "Trainers & Rollers", "key": "TRN"},
-      {"name": "Stands & Storage", "key": "STD"},
-      {"name": "Tools & Maintenance Kits", "key": "TOL"},
-      {"name": "Repair Kits & Patches", "key": "RPK"},
-      {"name": "Bike Covers", "key": "CVR"},
-      {"name": "Bells & Horns", "key": "BLL"},
-      {"name": "Mirrors", "key": "MRR"},
-      {"name": "Child Seats", "key": "CHD"},
-      {"name": "Trailers", "key": "TRL"},
-      {"name": "Action Cameras & Mounts", "key": "CAM"}
+      {"name": "Kickstands", "key": "KST"},
+      {"name": "Child Seats & Trailers", "key": "CST"}
     ]
   },
   {
-    "name": "Parts & Components",
-    "key": "PAR",
+    "name": "Maintenance",
+    "key": "MNT",
     "subcategories": [
-      {"name": "Drivetrain (Chains, Cassettes, Derailleurs, Cranks)", "key": "DRV"},
-      {"name": "Brakes (Calipers, Levers, Rotors, Pads)", "key": "BRK"},
-      {"name": "Wheels & Tires (Rims, Hubs, Spokes, Tubes, Tubeless)", "key": "WHL"},
-      {"name": "Handlebars & Stems", "key": "HND"},
-      {"name": "Saddles & Seatposts", "key": "SAD"},
-      {"name": "Pedals (Flat, Clipless, Toe Clip)", "key": "PED"},
-      {"name": "Forks & Shocks", "key": "FOR"},
-      {"name": "Frames", "key": "FRM"},
-      {"name": "Headsets", "key": "HDS"},
-      {"name": "Bottom Brackets", "key": "BBK"},
-      {"name": "Grips & Bar Tape", "key": "GRP"},
-      {"name": "Cables & Housing", "key": "CBL"},
-      {"name": "Bearings", "key": "BRG"},
-      {"name": "Small Parts & Hardware", "key": "SMP"},
-      {"name": "Electronic Shifting Components", "key": "ELS"}
+      {"name": "Tools", "key": "TLS"},
+      {"name": "Lubricants & Cleaners", "key": "LNC"},
+      {"name": "Pumps & Inflators", "key": "PNI"},
+      {"name": "Repair Kits & Patches", "key": "RKP"},
+      {"name": "Storage Solutions", "key": "STS"}
     ]
   }
 ];
 
-// Array to store selected variations (color, size, quantity)
-let selectedVariations = [];
-let currentImages = new DataTransfer(); // To manage files in the input field
+// Global arrays to manage variations and images for ADD and EDIT modals
+let newProductVariations = []; // For Add Product Modal
+let newProductImages = new DataTransfer(); // For Add Product Modal images
 
-// Function to populate categories dropdown
-function populateCategories() {
-    console.log('[products.js] Populating categories.');
-    const newProductCategorySelect = document.getElementById('newProductCategory');
-    if (!newProductCategorySelect) {
-        console.warn('[products.js] #newProductCategory select element not found. Not on products page?');
+let editProductCurrentVariations = []; // For Edit Product Modal
+let editProductNewFiles = new DataTransfer(); // For Edit Product Modal (for new additions)
+let existingImageIdsToDelete = new Set(); // To track images marked for deletion
+
+
+// --- Helper Functions for Categories/Subcategories ---
+function populateCategoryDropdown(selectElement, selectedCategoryKey = null) {
+    if (!selectElement) {
+        console.error("Category select element not found:", selectElement);
         return;
     }
+    selectElement.innerHTML = '<option selected disabled value="">Select Category</option>';
+    productsData.forEach(category => {
+        const option = document.createElement('option');
+        option.value = category.key;
+        option.textContent = category.name;
+        if (selectedCategoryKey && category.key === selectedCategoryKey) {
+            option.selected = true;
+        }
+        selectElement.appendChild(option);
+    });
+}
 
-    newProductCategorySelect.innerHTML = '<option selected disabled value="">Select Category</option>';
+function populateSubcategoryDropdown(selectElement, categoryKey, selectedSubcategoryKey = null) {
+    if (!selectElement) {
+        console.error("Subcategory select element not found:", selectElement);
+        return;
+    }
+    selectElement.innerHTML = '<option selected disabled value="">Select Subcategory</option>';
+    selectElement.disabled = true;
 
-    if (productsData && productsData.length > 0) {
-        productsData.forEach(category => {
-            if (category.key && category.name) {
-                const option = document.createElement('option');
-                option.value = category.key; // Use key for value
-                option.textContent = category.name;
-                newProductCategorySelect.appendChild(option);
-            } else {
-                console.warn('[products.js] Skipping malformed category entry:', category);
+    const selectedCategory = productsData.find(cat => cat.key === categoryKey);
+    if (selectedCategory && selectedCategory.subcategories) {
+        selectedCategory.subcategories.forEach(subcat => {
+            const option = document.createElement('option');
+            option.value = subcat.key;
+            option.textContent = subcat.name;
+            if (selectedSubcategoryKey && subcat.key === selectedSubcategoryKey) {
+                option.selected = true;
             }
+            selectElement.appendChild(option);
         });
-        console.log('[products.js] Categories dropdown populated.');
-    } else {
-        console.warn('[products.js] productsData is empty or not an array. No categories to populate.');
-        newProductCategorySelect.innerHTML = '<option selected disabled value="">No categories found</option>';
+        selectElement.disabled = false;
     }
 }
 
-// Function to populate subcategories based on selected category
-function populateSubcategories(selectedCategoryKey) {
-    console.log(`[products.js] Populating subcategories for category key: ${selectedCategoryKey}`);
-    const newProductSubcategorySelect = document.getElementById('newProductSubcategory');
-    if (!newProductSubcategorySelect) {
-        console.warn('[products.js] #newProductSubcategory select element not found. Not on products page?');
-        return;
-    }
 
-    newProductSubcategorySelect.innerHTML = '<option selected disabled value="">Select Subcategory</option>';
-    newProductSubcategorySelect.disabled = true;
+// --- Functions for Image Management (Shared Logic) ---
 
-    const selectedCategory = productsData.find(cat => cat.key === selectedCategoryKey);
-
-    if (selectedCategory && selectedCategory.subcategories && Array.isArray(selectedCategory.subcategories) && selectedCategory.subcategories.length > 0) {
-        selectedCategory.subcategories.forEach(subcategory => {
-            if (subcategory.key && subcategory.name) {
-                const option = document.createElement('option');
-                option.value = subcategory.key; // Use key for value
-                option.textContent = subcategory.name;
-                newProductSubcategorySelect.appendChild(option);
-            } else {
-                 console.warn('[products.js] Skipping malformed subcategory entry:', subcategory);
-            }
-        });
-        newProductSubcategorySelect.disabled = false;
-        console.log(`[products.js] Subcategories populated for category: ${selectedCategoryKey}`);
-    } else {
-        newProductSubcategorySelect.innerHTML = '<option selected disabled value="">No Subcategories</option>';
-        console.warn(`[products.js] No subcategories found or selected category invalid/empty for: ${selectedCategoryKey}`);
-    }
-}
-
-// Function to handle image preview
-function handleImageUpload(event) {
-    console.log('[products.js] Image input changed.');
-    const imagePreviewContainer = document.getElementById('imagePreviewContainer');
-    imagePreviewContainer.innerHTML = ''; // Clear previous previews
-    currentImages = new DataTransfer(); // Reset DataTransfer object for new selection
-
+// This function now specifically handles adding new files,
+// and doesn't implicitly handle "replacement" of existing images.
+function handleNewImageUpload(event, imagePreviewContainerId, dataTransferObject) {
     const files = event.target.files;
-    if (files.length > 0) {
-        Array.from(files).forEach(file => {
-            if (file.type.startsWith('image/')) {
-                currentImages.items.add(file); // Add valid image file to DataTransfer
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    const imgDiv = document.createElement('div');
-                    imgDiv.classList.add('position-relative', 'me-2', 'mb-2'); // For positioning remove button
+    const imagePreviewContainer = document.getElementById(imagePreviewContainerId);
 
-                    const img = document.createElement('img');
-                    img.src = e.target.result;
-                    img.classList.add('img-thumbnail');
-                    img.style.maxWidth = '100px';
-                    img.style.maxHeight = '100px';
-                    img.style.objectFit = 'cover';
-
-                    const removeBtn = document.createElement('button');
-                    removeBtn.classList.add('btn', 'btn-danger', 'btn-sm', 'position-absolute', 'top-0', 'start-100', 'translate-middle', 'rounded-circle', 'p-0', 'd-flex', 'align-items-center', 'justify-content-center');
-                    removeBtn.style.width = '24px';
-                    removeBtn.style.height = '24px';
-                    removeBtn.innerHTML = '<i class="bi bi-x"></i>';
-                    removeBtn.onclick = () => {
-                        imgDiv.remove(); // Remove the image preview from DOM
-                        updateFileInput(file); // Call helper to remove the file from the DataTransfer object
-                    };
-
-                    imgDiv.appendChild(img);
-                    imgDiv.appendChild(removeBtn);
-                    imagePreviewContainer.appendChild(imgDiv);
-                };
-                reader.readAsDataURL(file);
-            } else {
-                console.warn('[products.js] Non-image file selected:', file.name);
-            }
-        });
+    if (!imagePreviewContainer) {
+        console.error("Image preview container not found for ID:", imagePreviewContainerId);
+        return;
     }
-    // Assign the updated DataTransfer files back to the input
-    // This is important to ensure the input's .files property is correct for submission
-    document.getElementById('newProductImages').files = currentImages.files;
+
+    if (files.length > 0) {
+        for (let i = 0; i < files.length; i++) {
+            dataTransferObject.items.add(files[i]);
+        }
+    }
+    // Re-render ALL images: existing (if edit modal) + newly added files
+    if (imagePreviewContainerId === 'editImagePreviewContainer') {
+        // We need the original existing images data from fetch, so pass it along
+        // For simplicity, we'll refetch it or store it globally if more complex scenarios arise
+        // For now, assume renderImagePreviews will use `product.images` passed from fetchAndPopulateEditModal
+        renderImagePreviews(imagePreviewContainer, dataTransferObject, currentProductData.images);
+    } else {
+        renderImagePreviews(imagePreviewContainer, dataTransferObject);
+    }
+    updateFileInput(event.target.id, dataTransferObject);
 }
 
-// Helper function to remove a file from the DataTransfer object
-function updateFileInput(removedFile) {
-    const newItems = new DataTransfer();
-    Array.from(currentImages.files).forEach(file => {
-        if (file !== removedFile) {
-            newItems.items.add(file);
+
+// Global variable to store the fetched product data
+let currentProductData = {};
+
+function renderImagePreviews(containerElement, newFilesDataTransfer, existingImages = []) {
+    containerElement.innerHTML = ''; // Clear previous previews
+
+    // 1. Render existing images (for edit modal only)
+    existingImages.forEach(img => {
+        // Only render if not marked for deletion
+        if (!existingImageIdsToDelete.has(img.id)) {
+            const imgDiv = createImagePreviewElement(img.image_path, img.id, containerElement.id);
+            containerElement.appendChild(imgDiv);
         }
     });
-    currentImages = newItems; // Update the global DataTransfer object
-    document.getElementById('newProductImages').files = currentImages.files;
-    console.log('[products.js] File input updated after removal. Current files:', currentImages.files);
+
+    // 2. Render newly selected images (from DataTransfer object)
+    for (let i = 0; i < newFilesDataTransfer.files.length; i++) {
+        const file = newFilesDataTransfer.files[i];
+        if (file.type.startsWith('image/')) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                // Pass a unique identifier for new files (e.g., 'new_idx_' + i)
+                const imgDiv = createImagePreviewElement(e.target.result, 'new_idx_' + i, containerElement.id, i);
+                containerElement.appendChild(imgDiv);
+            };
+            reader.readAsDataURL(file);
+        }
+    }
 }
 
-// Function to add a product variation (color, size, quantity)
-function addVariation() {
-    const colorInput = document.getElementById('newProductColorInput');
-    const sizeInput = document.getElementById('newProductSizeInput');
-    const quantityInput = document.getElementById('newProductQuantityInput');
-    const variationsContainer = document.getElementById('productVariationsContainer');
-    const noVariationsMessage = document.getElementById('noVariationsMessage');
+
+function createImagePreviewElement(src, id, containerId, fileIndex = null) {
+    const imgDiv = document.createElement('div');
+    imgDiv.classList.add('position-relative', 'me-2', 'mb-2');
+    imgDiv.style.width = '100px';
+    imgDiv.style.height = '100px';
+    imgDiv.style.overflow = 'hidden';
+    imgDiv.style.border = '1px solid #ddd';
+
+    const img = document.createElement('img');
+    img.src = src.startsWith('uploads/') ? `../../${src}` : src; // Adjust path for existing images
+    img.classList.add('img-fluid', 'rounded');
+    img.style.objectFit = 'cover';
+    img.style.width = '100%';
+    img.style.height = '100%';
+
+    const removeBtn = document.createElement('button');
+    removeBtn.classList.add('btn', 'btn-danger', 'btn-sm', 'position-absolute', 'top-0', 'end-0', 'translate-middle', 'rounded-circle', 'p-0');
+    removeBtn.style.width = '24px';
+    removeBtn.style.height = '24px';
+    removeBtn.innerHTML = '<i class="bi bi-x"></i>';
+    removeBtn.setAttribute('type', 'button'); // Prevent form submission
+
+    removeBtn.addEventListener('click', () => {
+        if (typeof id === 'number' && id !== null) { // This is an existing image (has a numeric ID)
+            existingImageIdsToDelete.add(id); // Mark for deletion
+            imgDiv.remove(); // Remove from UI
+            // Update the hidden input for imagesToDelete on the form
+            updateImagesToDeleteInput();
+            console.log(`Marked image ID ${id} for deletion. Current IDs to delete:`, Array.from(existingImageIdsToDelete));
+        } else if (typeof id === 'string' && id.startsWith('new_idx_') && fileIndex !== null) { // This is a newly added image (from DataTransfer)
+            const dt = (containerId === 'imagePreviewContainer') ? newProductImages : editProductNewFiles;
+            removeFileFromDataTransfer(fileIndex, dt);
+            imgDiv.remove(); // Remove from UI
+            console.log(`Removed new image at internal index ${fileIndex}.`);
+            // Re-render the correct DataTransfer files after removal
+            if (containerId === 'editImagePreviewContainer') {
+                 renderImagePreviews(document.getElementById(containerId), editProductNewFiles, currentProductData.images);
+            } else {
+                 renderImagePreviews(document.getElementById(containerId), newProductImages);
+            }
+        }
+    });
+
+    imgDiv.appendChild(img);
+    imgDiv.appendChild(removeBtn);
+    return imgDiv;
+}
+
+function removeFileFromDataTransfer(indexToRemove, dataTransferObject) {
+    const newDt = new DataTransfer();
+    for (let i = 0; i < dataTransferObject.files.length; i++) {
+        if (i !== indexToRemove) {
+            newDt.items.add(dataTransferObject.files[i]);
+        }
+    }
+    // Update the global DataTransfer object reference
+    if (dataTransferObject === newProductImages) {
+        newProductImages = newDt;
+    } else if (dataTransferObject === editProductNewFiles) {
+        editProductNewFiles = newDt;
+    }
+}
+
+function updateFileInput(inputId, dataTransferObject) {
+    const fileInput = document.getElementById(inputId);
+    if (fileInput) {
+        fileInput.files = dataTransferObject.files;
+    }
+}
+
+// New function to update the hidden input field for imagesToDelete
+function updateImagesToDeleteInput() {
+    const form = document.getElementById('editProductForm');
+    let hiddenInput = form.querySelector('input[name="imagesToDelete"]');
+    if (!hiddenInput) {
+        hiddenInput = document.createElement('input');
+        hiddenInput.type = 'hidden';
+        hiddenInput.name = 'imagesToDelete';
+        form.appendChild(hiddenInput);
+    }
+    hiddenInput.value = Array.from(existingImageIdsToDelete).join(',');
+}
+
+
+// --- Functions for Variation Management (Shared Logic) ---
+function addVariation(colorInputId, sizeInputId, quantityInputId, priceInputId, variationsArray, renderFunction) {
+    const colorInput = document.getElementById(colorInputId);
+    const sizeInput = document.getElementById(sizeInputId);
+    const quantityInput = document.getElementById(quantityInputId);
+    const priceInput = document.getElementById(priceInputId);
 
     const color = colorInput.value.trim();
     const size = sizeInput.value.trim();
     const quantity = parseInt(quantityInput.value, 10);
+    const price = parseFloat(priceInput.value);
 
-    if (!color || !size || isNaN(quantity) || quantity < 0) {
-        alert('Please enter valid color, size, and a non-negative quantity for the variation.');
+    if (!color || !size || isNaN(quantity) || quantity < 0 || isNaN(price) || price < 0) {
+        alert('Please enter valid color, size, a non-negative quantity, and a valid non-negative price for the variation.');
         return;
     }
 
-    // Check for duplicates
-    const isDuplicate = selectedVariations.some(v => v.color === color && v.size === size);
+    // Check for duplicates using consistent key names (color_name, size_name)
+    const isDuplicate = variationsArray.some(v => v.color_name === color && v.size_name === size);
     if (isDuplicate) {
         alert(`Variation "${color} - ${size}" already added.`);
         return;
     }
 
-    selectedVariations.push({ color, size, quantity });
-    console.log('Added variation:', { color, size, quantity }, 'All variations:', selectedVariations);
+    // Store with consistent key names (color_name, size_name)
+    variationsArray.push({ color_name: color, size_name: size, quantity, price });
+    console.log('Added variation:', { color_name: color, size_name: size, quantity, price }, 'All variations:', variationsArray);
 
     // Clear inputs
     colorInput.value = '';
     sizeInput.value = '';
     quantityInput.value = '0';
+    priceInput.value = '';
 
-    renderVariations();
-    if (noVariationsMessage) {
-        noVariationsMessage.style.display = 'none'; // Hide "No variations added yet." message
-    }
+    renderFunction();
 }
 
-// Function to render/re-render the variations in the container
-function renderVariations() {
-    const variationsContainer = document.getElementById('productVariationsContainer');
+function renderVariations(variationsArray, containerId, noVariationsMessageId) {
+    const variationsContainer = document.getElementById(containerId);
+    const noVariationsMessage = document.getElementById(noVariationsMessageId);
     variationsContainer.innerHTML = ''; // Clear previous render
 
-    if (selectedVariations.length === 0) {
-        variationsContainer.innerHTML = '<p class="text-muted text-center" id="noVariationsMessage">No variations added yet.</p>';
+    if (variationsArray.length === 0) {
+        if (noVariationsMessage) noVariationsMessage.style.display = 'block';
         return;
+    } else {
+        if (noVariationsMessage) noVariationsMessage.style.display = 'none';
     }
 
-    selectedVariations.forEach((variation, index) => {
+    variationsArray.forEach((variation, index) => {
         const variationDiv = document.createElement('div');
         variationDiv.classList.add('d-flex', 'align-items-center', 'justify-content-between', 'border-bottom', 'py-2');
         variationDiv.innerHTML = `
-            <span class="me-auto text-primary"><strong>${variation.color}</strong> - ${variation.size}</span>
+            <span class="me-auto text-primary">
+                <strong>${variation.color_name}</strong> - ${variation.size_name}
+                <span class="text-success ms-2">(₱${parseFloat(variation.price).toFixed(2)})</span>
+            </span>
             <span class="text-muted me-3">Qty: ${variation.quantity}</span>
-            <button type="button" class="btn btn-sm btn-outline-danger remove-variation-btn" data-index="${index}"><i class="bi bi-x-lg"></i></button>
-            <input type="hidden" name="variations[${index}][color]" value="${variation.color}">
-            <input type="hidden" name="variations[${index}][size]" value="${variation.size}">
+            <button type="button" class="btn btn-sm btn-outline-danger remove-variation-btn" data-index="${index}" data-container-id="${containerId}"><i class="bi bi-x-lg"></i></button>
+            <input type="hidden" name="variations[${index}][color]" value="${variation.color_name}">
+            <input type="hidden" name="variations[${index}][size]" value="${variation.size_name}">
             <input type="hidden" name="variations[${index}][quantity]" value="${variation.quantity}">
+            <input type="hidden" name="variations[${index}][price]" value="${variation.price}">
         `;
         variationsContainer.appendChild(variationDiv);
     });
 
-    // Add event listeners for new remove buttons
+    // Attach event listeners for new remove buttons
     variationsContainer.querySelectorAll('.remove-variation-btn').forEach(button => {
         button.addEventListener('click', (event) => {
             const indexToRemove = parseInt(event.target.closest('button').dataset.index, 10);
-            removeVariation(indexToRemove);
+            const targetContainerId = event.target.closest('button').dataset.containerId;
+            if (targetContainerId === 'productVariationsContainer') {
+                removeVariation(indexToRemove, newProductVariations, renderNewProductVariations);
+            } else if (targetContainerId === 'editProductVariationsContainer') {
+                removeVariation(indexToRemove, editProductCurrentVariations, renderEditProductVariations);
+            }
         });
     });
 }
 
-// Function to remove a variation
-function removeVariation(index) {
-    if (index > -1 && index < selectedVariations.length) {
-        selectedVariations.splice(index, 1);
-        console.log('Removed variation. All variations:', selectedVariations);
-        renderVariations(); // Re-render the list after removal
+function removeVariation(indexToRemove, variationsArray, renderFunction) {
+    variationsArray.splice(indexToRemove, 1);
+    renderFunction();
+}
+
+function handleAddVariationEnter(e, addFunction) {
+    if (e.key === 'Enter') {
+        e.preventDefault();
+        addFunction();
     }
 }
 
 
-// Global function to initialize product form logic
+// --- Functions for Add Product Modal ---
+function renderNewProductVariations() {
+    renderVariations(newProductVariations, 'productVariationsContainer', 'noVariationsMessage');
+}
+
+function addProductAddVariation() {
+    addVariation('newProductColorInput', 'newProductSizeInput', 'newProductQuantityInput', 'newProductVariationPriceInput', newProductVariations, renderNewProductVariations);
+}
+
+
+// --- Functions for Edit Product Modal ---
+let currentEditProductId = null; // Store the ID of the product currently being edited
+
+function renderEditProductVariations() {
+    renderVariations(editProductCurrentVariations, 'editProductVariationsContainer', 'editNoVariationsMessage');
+}
+
+function editProductAddVariation() {
+    addVariation('editProductColorInput', 'editProductSizeInput', 'editProductQuantityInput', 'editProductVariationPriceInput', editProductCurrentVariations, renderEditProductVariations);
+}
+
+async function fetchAndPopulateEditModal(productId) {
+    console.log(`[products.js] Fetching data for product ID: ${productId}`);
+    try {
+        const response = await fetch(`api/fetch_product_details.php?productId=${productId}`);
+        const result = await response.json();
+
+        if (result.success) {
+            const product = result.data;
+            currentProductData = product; // Store fetched product data globally
+            document.getElementById('editProductId').value = product.id;
+            document.getElementById('editProductName').value = product.name;
+            document.getElementById('editProductDescription').value = product.description;
+
+            // Populate Category and Subcategory
+            populateCategoryDropdown(document.getElementById('editProductCategory'), product.category_key);
+            // This will re-enable and populate subcategory
+            populateSubcategoryDropdown(document.getElementById('editProductSubcategory'), product.category_key, product.subcategory_key);
+
+            // Populate Variations
+            editProductCurrentVariations = product.variations || [];
+            renderEditProductVariations();
+
+            // Populate Images
+            // Reset DataTransfer for new files for this edit session
+            editProductNewFiles = new DataTransfer();
+            existingImageIdsToDelete = new Set(); // Reset deleted images tracking
+            // Render existing images AND an empty DataTransfer for new uploads
+            renderImagePreviews(document.getElementById('editImagePreviewContainer'), editProductNewFiles, product.images);
+
+            // Important: Ensure the file input reflects the empty DataTransfer initially
+            updateFileInput('editProductImages', editProductNewFiles);
+
+
+        } else {
+            alert('Error fetching product details: ' + result.message);
+            console.error('Error fetching product details:', result.message);
+        }
+    } catch (error) {
+        alert('Network or server error fetching product details.');
+        console.error('Fetch error:', error);
+    }
+}
+
+
+// --- Global Initialization ---
 window.initializeProductForm = function() {
     console.log('[products.js] Initializing product form logic.');
-    const addProductModal = document.getElementById('addProductModal');
-    if (!addProductModal) {
-        console.warn('[products.js] Products modal not found. Skipping product form JS initialization.');
-        return;
-    }
 
+    // Add Product Modal Elements
+    const addProductModal = document.getElementById('addProductModal');
     const newProductCategorySelect = document.getElementById('newProductCategory');
     const newProductSubcategorySelect = document.getElementById('newProductSubcategory');
     const newProductImagesInput = document.getElementById('newProductImages');
-    const addProductForm = document.getElementById('addProductForm'); // Get the form reference
-
-    // Variation input elements and button
     const addVariationBtn = document.getElementById('addVariationBtn');
     const newProductColorInput = document.getElementById('newProductColorInput');
     const newProductSizeInput = document.getElementById('newProductSizeInput');
     const newProductQuantityInput = document.getElementById('newProductQuantityInput');
+    const newProductVariationPriceInput = document.getElementById('newProductVariationPriceInput');
 
-    // Populate categories initially
-    populateCategories();
+    // Edit Product Modal Elements
+    const editProductModal = document.getElementById('editProductModal');
+    const editProductCategorySelect = document.getElementById('editProductCategory');
+    const editProductSubcategorySelect = document.getElementById('editProductSubcategory');
+    const editProductImagesInput = document.getElementById('editProductImages');
+    const editAddVariationBtn = document.getElementById('editAddVariationBtn');
+    const editProductColorInput = document.getElementById('editProductColorInput');
+    const editProductSizeInput = document.getElementById('editProductSizeInput');
+    const editProductQuantityInput = document.getElementById('editProductQuantityInput');
+    const editProductVariationPriceInput = document.getElementById('editProductVariationPriceInput');
 
-    // Attach change listener for category
-    if (newProductCategorySelect) {
-        newProductCategorySelect.removeEventListener('change', handleCategoryChange);
-        newProductCategorySelect.addEventListener('change', handleCategoryChange);
+
+    // --- Add Product Modal Listeners ---
+    if (addProductModal) {
+        // Populate categories initially for Add Product Modal
+        populateCategoryDropdown(newProductCategorySelect);
+
+        newProductCategorySelect.addEventListener('change', () => {
+            populateSubcategoryDropdown(newProductSubcategorySelect, newProductCategorySelect.value);
+        });
+
+        // Use handleNewImageUpload for the add product modal
+        newProductImagesInput.addEventListener('change', (e) => handleNewImageUpload(e, 'imagePreviewContainer', newProductImages));
+
+        addVariationBtn.addEventListener('click', addProductAddVariation);
+        newProductColorInput.addEventListener('keypress', (e) => handleAddVariationEnter(e, addProductAddVariation));
+        newProductSizeInput.addEventListener('keypress', (e) => handleAddVariationEnter(e, addProductAddVariation));
+        newProductQuantityInput.addEventListener('keypress', (e) => handleAddVariationEnter(e, addProductAddVariation));
+        newProductVariationPriceInput.addEventListener('keypress', (e) => handleAddVariationEnter(e, addProductAddVariation));
+
+        addProductModal.addEventListener('shown.bs.modal', function () {
+            console.log('[products.js] Add Product Modal shown. Resetting form elements.');
+            document.getElementById('addProductForm').reset();
+            document.getElementById('newProductSubcategory').innerHTML = '<option selected disabled value="">Select Subcategory</option>';
+            document.getElementById('newProductSubcategory').disabled = true;
+            document.getElementById('imagePreviewContainer').innerHTML = '';
+            newProductImages = new DataTransfer();
+            document.getElementById('newProductImages').files = newProductImages.files;
+            newProductVariations = [];
+            renderNewProductVariations();
+            document.getElementById('newProductQuantityInput').value = '0';
+            document.getElementById('newProductVariationPriceInput').value = '';
+            populateCategoryDropdown(newProductCategorySelect); // Repopulate categories
+        });
     }
 
-    // Attach change listener for image input
-    if (newProductImagesInput) {
-        newProductImagesInput.removeEventListener('change', handleImageUpload);
-        newProductImagesInput.addEventListener('change', handleImageUpload);
+    // --- Edit Product Modal Listeners ---
+    if (editProductModal) {
+        // Attach listener to all "Edit" buttons
+        document.querySelectorAll('.edit-product-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                currentEditProductId = this.dataset.productId;
+                console.log(`Edit button clicked for product ID: ${currentEditProductId}`);
+            });
+        });
+
+        editProductModal.addEventListener('shown.bs.modal', function () {
+            console.log('[products.js] Edit Product Modal shown. Fetching data...');
+            if (currentEditProductId) {
+                fetchAndPopulateEditModal(currentEditProductId);
+            } else {
+                console.error("No product ID found for edit modal.");
+                alert("Error: Could not determine product to edit.");
+                // Optionally close modal or disable form
+            }
+        });
+
+        editProductModal.addEventListener('hidden.bs.modal', function() {
+            console.log('[products.js] Edit Product Modal hidden. Cleaning up.');
+            document.getElementById('editProductForm').reset();
+            document.getElementById('editProductVariationsContainer').innerHTML = '';
+            document.getElementById('editImagePreviewContainer').innerHTML = '';
+            editProductCurrentVariations = [];
+            editProductNewFiles = new DataTransfer(); // Reset for next edit session
+            existingImageIdsToDelete = new Set(); // Reset for next edit session
+            document.getElementById('editProductImages').files = editProductNewFiles.files;
+            currentEditProductId = null; // Clear the stored product ID
+            // Clear the hidden imagesToDelete input
+            const imagesToDeleteInput = document.getElementById('editProductForm').querySelector('input[name="imagesToDelete"]');
+            if (imagesToDeleteInput) {
+                imagesToDeleteInput.value = '';
+            }
+        });
+
+
+        editProductCategorySelect.addEventListener('change', () => {
+            populateSubcategoryDropdown(editProductSubcategorySelect, editProductCategorySelect.value);
+        });
+
+        // Use handleNewImageUpload for the edit product modal as well
+        editProductImagesInput.addEventListener('change', (e) => handleNewImageUpload(e, 'editImagePreviewContainer', editProductNewFiles));
+
+        editAddVariationBtn.addEventListener('click', editProductAddVariation);
+        editProductColorInput.addEventListener('keypress', (e) => handleAddVariationEnter(e, editProductAddVariation));
+        editProductSizeInput.addEventListener('keypress', (e) => handleAddVariationEnter(e, editProductAddVariation));
+        editProductQuantityInput.addEventListener('keypress', (e) => handleAddVariationEnter(e, editProductAddVariation));
+        editProductVariationPriceInput.addEventListener('keypress', (e) => handleAddVariationEnter(e, editProductAddVariation));
     }
 
-    // Attach click listener for Add Variation button
-    if (addVariationBtn) {
-        addVariationBtn.removeEventListener('click', addVariation);
-        addVariationBtn.addEventListener('click', addVariation);
-
-        // Allow pressing Enter in any variation input to add variation
-        newProductColorInput.removeEventListener('keypress', handleAddVariationEnter);
-        newProductColorInput.addEventListener('keypress', handleAddVariationEnter);
-        newProductSizeInput.removeEventListener('keypress', handleAddVariationEnter);
-        newProductSizeInput.addEventListener('keypress', handleAddVariationEnter);
-        newProductQuantityInput.removeEventListener('keypress', handleAddVariationEnter);
-        newProductQuantityInput.addEventListener('keypress', handleAddVariationEnter);
-    }
-
-    // IMPORTANT: Remove previous submit listener as form action will handle it
-    if (addProductForm) {
-        // We are no longer using fetch, so we remove the submit listener
-        // The form will naturally submit to the action URL.
-        // If you had any client-side validation logic you wanted to run *before* submission,
-        // you would put it here and potentially call event.preventDefault() and then submit manually if validation passes.
-        // For now, we rely on browser's 'required' and PHP's server-side validation.
-        addProductForm.removeEventListener('submit', (e) => { /* old handler */ });
-    }
-
-
-    // Helper function for category change, scoped to allow removal
-    function handleCategoryChange() {
-        const selectedCategoryKey = this.value;
-        console.log(`[products.js] Category dropdown changed. Selected: ${selectedCategoryKey}`);
-        populateSubcategories(selectedCategoryKey);
-    }
-
-    // Helper function to add a variation on Enter key
-    function handleAddVariationEnter(e) {
-        if (e.key === 'Enter') {
-            e.preventDefault();
-            addVariation();
-        }
-    }
-
-
-    // Reset dynamic elements and arrays when modal is shown or initialized
-    addProductModal.addEventListener('shown.bs.modal', function () {
-        console.log('[products.js] Add Product Modal shown. Resetting form elements.');
-        // Reset dynamic elements here
-        document.getElementById('addProductForm').reset();
-        document.getElementById('newProductSubcategory').innerHTML = '<option selected disabled value="">Select Subcategory</option>';
-        document.getElementById('newProductSubcategory').disabled = true;
-        document.getElementById('imagePreviewContainer').innerHTML = '';
-        currentImages = new DataTransfer(); // Reset image DataTransfer
-        document.getElementById('newProductImages').files = currentImages.files; // Clear file input visually
-
-        selectedVariations = [];   // Reset variations array
-        renderVariations(); // Clear variations display
-        document.getElementById('noVariationsMessage').style.display = 'block'; // Show "No variations added yet." message
-    });
 
     console.log('[products.js] Product form logic initialized.');
 };
+
+// Ensure the initializeProductForm function is called when the DOM is ready
+document.addEventListener('DOMContentLoaded', () => {
+    // Check if any product modal (add or edit) exists before calling initializeProductForm
+    if (document.getElementById('addProductModal') || document.getElementById('editProductModal')) {
+        window.initializeProductForm();
+    } else {
+        console.warn('No product modals found. Skipping product form initialization.');
+    }
+});

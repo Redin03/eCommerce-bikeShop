@@ -1191,3 +1191,1276 @@ The Ghost SL AMR LC is the perfect choice for avid trail riders seeking an agile
 [25-May-2025 17:31:57 Europe/Berlin] Image uploaded and path saved: uploads/products/prod_683337edb08ba.jpg
 [25-May-2025 17:31:57 Europe/Berlin] All images processed for product ID: 14
 [25-May-2025 17:31:57 Europe/Berlin] User action logged: [2025-05-25 17:31:57] User added product: 'Teknows' (ID: 14), Category: 'BIK', Subcategory: 'MTB'.
+[26-May-2025 04:03:37 Europe/Berlin] [Login Success] [2025-05-26 04:03:37] Admin login successful for user: 'admin' (ID: 12).
+[26-May-2025 04:14:01 Europe/Berlin] [Login Success] [2025-05-26 04:14:01] Admin login successful for user: 'admin' (ID: 12).
+[26-May-2025 06:01:46 Europe/Berlin] Received POST data: Array
+(
+    [productName] => nice
+    [categoryKey] => BIK
+    [subcategoryKey] => MTB
+    [price] => 9000
+    [variations] => Array
+        (
+            [0] => Array
+                (
+                    [color] => nice one
+                    [size] => s
+                    [quantity] => 10
+                )
+
+        )
+
+    [description] => nice one boy
+    [redirect_url] => http://localhost/bongbicycleshop/administrator/index.php#products
+)
+
+[26-May-2025 06:01:46 Europe/Berlin] Received FILES data: Array
+(
+    [productImages] => Array
+        (
+            [name] => Array
+                (
+                    [0] => BMX Bikes 1.png
+                )
+
+            [full_path] => Array
+                (
+                    [0] => BMX Bikes 1.png
+                )
+
+            [type] => Array
+                (
+                    [0] => image/png
+                )
+
+            [tmp_name] => Array
+                (
+                    [0] => C:\xampp\tmp\php7DBA.tmp
+                )
+
+            [error] => Array
+                (
+                    [0] => 0
+                )
+
+            [size] => Array
+                (
+                    [0] => 630264
+                )
+
+        )
+
+)
+
+[26-May-2025 06:01:46 Europe/Berlin] Product inserted, ID: 15
+[26-May-2025 06:01:46 Europe/Berlin] Variations inserted/processed for product ID: 15
+[26-May-2025 06:01:46 Europe/Berlin] Image uploaded and path saved: uploads/products/prod_6833e7aac4a0e.png
+[26-May-2025 06:01:46 Europe/Berlin] All images processed for product ID: 15
+[26-May-2025 06:01:46 Europe/Berlin] User action logged: [2025-05-26 06:01:46] User added product: 'nice' (ID: 15), Category: 'BIK', Subcategory: 'MTB'.
+[26-May-2025 06:02:51 Europe/Berlin] Received POST data: Array
+(
+    [productName] => nice
+    [categoryKey] => APP
+    [subcategoryKey] => SHT
+    [price] => 7500
+    [variations] => Array
+        (
+            [0] => Array
+                (
+                    [color] => Red
+                    [size] => S
+                    [quantity] => 10
+                )
+
+        )
+
+    [description] => SADASDASDASD
+    [redirect_url] => http://localhost/ecommerce-bikeshop/administrator/index.php#products
+)
+
+[26-May-2025 06:02:51 Europe/Berlin] Received FILES data: Array
+(
+    [productImages] => Array
+        (
+            [name] => Array
+                (
+                    [0] => Gravel Bikes 4.png
+                )
+
+            [full_path] => Array
+                (
+                    [0] => Gravel Bikes 4.png
+                )
+
+            [type] => Array
+                (
+                    [0] => image/png
+                )
+
+            [tmp_name] => Array
+                (
+                    [0] => C:\xampp\tmp\php7B94.tmp
+                )
+
+            [error] => Array
+                (
+                    [0] => 0
+                )
+
+            [size] => Array
+                (
+                    [0] => 599248
+                )
+
+        )
+
+)
+
+[26-May-2025 06:02:51 Europe/Berlin] Product inserted, ID: 16
+[26-May-2025 06:02:51 Europe/Berlin] Variations inserted/processed for product ID: 16
+[26-May-2025 06:02:51 Europe/Berlin] Image uploaded and path saved: uploads/products/prod_6833e7ebbc1fe.png
+[26-May-2025 06:02:51 Europe/Berlin] All images processed for product ID: 16
+[26-May-2025 06:02:51 Europe/Berlin] User action logged: [2025-05-26 06:02:51] User added product: 'nice' (ID: 16), Category: 'APP', Subcategory: 'SHT'.
+[26-May-2025 06:04:13 Europe/Berlin] [Admin Add Log] [2025-05-26 06:04:13] User added a new admin account: 'admin_3' (ID: 14).
+[26-May-2025 06:04:47 Europe/Berlin] [Admin User Delete Debug] Received POST data: Array
+(
+    [user_id] => 12
+    [redirect_url] => http://localhost/ecommerce-bikeshop/administrator/index.php#settings_users
+)
+
+[26-May-2025 06:04:47 Europe/Berlin] [Admin Delete Log] [2025-05-26 06:04:47] User deleted admin account: 'admin' (ID: 12).
+[26-May-2025 06:04:47 Europe/Berlin] [Admin User Delete Success] Admin user with ID 12 deleted successfully.
+[26-May-2025 06:04:59 Europe/Berlin] [Admin Add Log] [2025-05-26 06:04:59] User added a new admin account: 'admin' (ID: 15).
+[26-May-2025 06:05:11 Europe/Berlin] [Admin Add Log] [2025-05-26 06:05:11] User added a new admin account: 'admin1' (ID: 16).
+[26-May-2025 06:05:29 Europe/Berlin] [Admin Add Log] [2025-05-26 06:05:29] User added a new admin account: 'admin2' (ID: 17).
+[26-May-2025 06:05:38 Europe/Berlin] [Admin User Delete Debug] Received POST data: Array
+(
+    [user_id] => 13
+    [redirect_url] => http://localhost/ecommerce-bikeshop/administrator/index.php#settings_users
+)
+
+[26-May-2025 06:05:38 Europe/Berlin] [Admin Delete Log] [2025-05-26 06:05:38] User deleted admin account: 'admin_2' (ID: 13).
+[26-May-2025 06:05:38 Europe/Berlin] [Admin User Delete Success] Admin user with ID 13 deleted successfully.
+[26-May-2025 06:05:41 Europe/Berlin] [Admin User Delete Debug] Received POST data: Array
+(
+    [user_id] => 14
+    [redirect_url] => http://localhost/ecommerce-bikeshop/administrator/index.php#settings_users
+)
+
+[26-May-2025 06:05:41 Europe/Berlin] [Admin Delete Log] [2025-05-26 06:05:41] User deleted admin account: 'admin_3' (ID: 14).
+[26-May-2025 06:05:41 Europe/Berlin] [Admin User Delete Success] Admin user with ID 14 deleted successfully.
+[26-May-2025 06:06:46 Europe/Berlin] [2025-05-26 06:06:46] Log history cleared by Admin: 'admin' (ID: 12).
+[26-May-2025 06:07:11 Europe/Berlin] [2025-05-26 06:07:11] Log history cleared by Admin: 'admin' (ID: 12).
+[26-May-2025 06:07:34 Europe/Berlin] [2025-05-26 06:07:34] Log history cleared by Admin: 'admin' (ID: 12).
+[26-May-2025 06:07:47 Europe/Berlin] [2025-05-26 06:07:47] Admin logout for user: 'admin' (ID: 12).
+[26-May-2025 06:07:53 Europe/Berlin] [Login Success] [2025-05-26 06:07:53] Admin login successful for user: 'admin' (ID: 15).
+[26-May-2025 06:43:58 Europe/Berlin] [2025-05-26 06:43:58] Admin logout for user: 'admin' (ID: 15).
+[26-May-2025 06:44:00 Europe/Berlin] [Login Success] [2025-05-26 06:44:00] Admin login successful for user: 'admin' (ID: 15).
+[26-May-2025 07:03:15 Europe/Berlin] [Admin Reset Error] Missing required fields for user ID: 
+[26-May-2025 07:03:28 Europe/Berlin] [Admin Reset Error] Missing required fields for user ID: 
+[26-May-2025 07:07:19 Europe/Berlin] [Admin Reset Log] [2025-05-26 07:07:19] Admin user 'admin1' (ID: 16) password has been reset.
+[26-May-2025 07:07:25 Europe/Berlin] [2025-05-26 07:07:25] Admin logout for user: 'admin' (ID: 15).
+[26-May-2025 07:07:32 Europe/Berlin] [Login Failed] Invalid password for user: 'admin1'.
+[26-May-2025 07:07:38 Europe/Berlin] [Login Failed] Invalid password for user: 'admin'.
+[26-May-2025 07:07:45 Europe/Berlin] [Login Success] [2025-05-26 07:07:45] Admin login successful for user: 'admin1' (ID: 16).
+[26-May-2025 07:08:05 Europe/Berlin] [Admin Reset Log] [2025-05-26 07:08:05] Admin user 'admin1' (ID: 16) password has been reset.
+[26-May-2025 07:12:52 Europe/Berlin] [2025-05-26 07:12:52] Admin logout for user: 'admin1' (ID: 16).
+[26-May-2025 07:14:56 Europe/Berlin] [Login Success] [2025-05-26 07:14:56] Admin login successful for user: 'admin' (ID: 15).
+[26-May-2025 07:15:04 Europe/Berlin] [2025-05-26 07:15:04] Admin logout for user: 'admin' (ID: 15).
+[26-May-2025 07:15:06 Europe/Berlin] [Login Success] [2025-05-26 07:15:06] Admin login successful for user: 'admin' (ID: 15).
+[26-May-2025 07:16:05 Europe/Berlin] [2025-05-26 07:16:05] Admin logout for user: 'admin' (ID: 15).
+[26-May-2025 07:16:28 Europe/Berlin] [Login Success] [2025-05-26 07:16:28] Admin login successful for user: 'admin' (ID: 15).
+[26-May-2025 07:24:45 Europe/Berlin] [2025-05-26 07:24:45] Admin logout for user: 'admin' (ID: 15).
+[26-May-2025 07:24:51 Europe/Berlin] [Login Success] [2025-05-26 07:24:51] Admin login successful for user: 'admin' (ID: 15).
+[26-May-2025 07:25:16 Europe/Berlin] [2025-05-26 07:25:16] Admin logout for user: 'admin' (ID: 15).
+[26-May-2025 07:25:18 Europe/Berlin] [Login Success] [2025-05-26 07:25:18] Admin login successful for user: 'admin' (ID: 15).
+[26-May-2025 11:14:30 Europe/Berlin] Product 'Tekno V1' added with ID: 1
+[26-May-2025 11:14:30 Europe/Berlin] Variations added for product ID: 1
+[26-May-2025 11:14:30 Europe/Berlin] All images processed for product ID: 1
+[26-May-2025 11:14:30 Europe/Berlin] User action logged: [2025-05-26 11:14:30] User added product: 'Tekno V1' (ID: 1), Category: 'BIK', Subcategory: 'MTB'.
+[26-May-2025 12:11:57 Europe/Berlin] Product 'Tekno V1' added with ID: 2
+[26-May-2025 12:11:57 Europe/Berlin] Variations added for product ID: 2
+[26-May-2025 12:11:57 Europe/Berlin] All images processed for product ID: 2
+[26-May-2025 12:11:57 Europe/Berlin] User action logged: [2025-05-26 12:11:57] User added product: 'Tekno V1' (ID: 2), Category: 'BIK', Subcategory: 'MTB'.
+[26-May-2025 12:15:05 Europe/Berlin] Received POST data for update: Array
+(
+    [productId] => 2
+    [productName] => Tekno V2
+    [categoryKey] => BIK
+    [subcategoryKey] => MTB
+    [variations] => Array
+        (
+            [0] => Array
+                (
+                    [color] => Red
+                    [size] => M
+                    [quantity] => 20
+                    [price] => 8700
+                )
+
+            [1] => Array
+                (
+                    [color] => Dark Blue
+                    [size] => L
+                    [quantity] => 20
+                    [price] => 9500
+                )
+
+        )
+
+    [description] => Mabilis pa sa sopas
+    [redirect_url] => http://localhost/ecommerce-bikeshop/administrator/index.php#products
+)
+
+[26-May-2025 12:15:05 Europe/Berlin] Received FILES data for update: Array
+(
+    [productImages] => Array
+        (
+            [name] => Array
+                (
+                    [0] => 
+                )
+
+            [full_path] => Array
+                (
+                    [0] => 
+                )
+
+            [type] => Array
+                (
+                    [0] => 
+                )
+
+            [tmp_name] => Array
+                (
+                    [0] => 
+                )
+
+            [error] => Array
+                (
+                    [0] => 4
+                )
+
+            [size] => Array
+                (
+                    [0] => 0
+                )
+
+        )
+
+)
+
+[26-May-2025 12:15:06 Europe/Berlin] Product (ID: 2) details updated.
+[26-May-2025 12:15:06 Europe/Berlin] Existing variations fetched for product ID: 2. Count: 2
+[26-May-2025 12:15:06 Europe/Berlin] All variations processed for product ID: 2
+[26-May-2025 12:15:06 Europe/Berlin] No new file uploaded for index 0.
+[26-May-2025 12:15:06 Europe/Berlin] All images processed for product ID: 2
+[26-May-2025 12:15:06 Europe/Berlin] User action logged: [2025-05-26 12:15:06] User updated product: 'Tekno V2' (ID: 2).
+[26-May-2025 13:26:09 Europe/Berlin] Received POST data for update: Array
+(
+    [productId] => 2
+    [productName] => Tekno V1
+    [categoryKey] => BIK
+    [subcategoryKey] => MTB
+    [variations] => Array
+        (
+            [0] => Array
+                (
+                    [color] => Red
+                    [size] => M
+                    [quantity] => 20
+                    [price] => 8700
+                )
+
+            [1] => Array
+                (
+                    [color] => Dark Blue
+                    [size] => L
+                    [quantity] => 20
+                    [price] => 9500
+                )
+
+        )
+
+    [description] => Mabilis pa sa sopas
+    [redirect_url] => http://localhost/ecommerce-bikeshop/administrator/index.php#products
+)
+
+[26-May-2025 13:26:09 Europe/Berlin] Received FILES data for update: Array
+(
+    [productImages] => Array
+        (
+            [name] => Array
+                (
+                    [0] => 
+                )
+
+            [full_path] => Array
+                (
+                    [0] => 
+                )
+
+            [type] => Array
+                (
+                    [0] => 
+                )
+
+            [tmp_name] => Array
+                (
+                    [0] => 
+                )
+
+            [error] => Array
+                (
+                    [0] => 4
+                )
+
+            [size] => Array
+                (
+                    [0] => 0
+                )
+
+        )
+
+)
+
+[26-May-2025 13:26:09 Europe/Berlin] Product (ID: 2) details updated.
+[26-May-2025 13:26:09 Europe/Berlin] Existing variations fetched for product ID: 2. Count: 2
+[26-May-2025 13:26:09 Europe/Berlin] All variations processed for product ID: 2
+[26-May-2025 13:26:09 Europe/Berlin] No new file uploaded for index 0.
+[26-May-2025 13:26:09 Europe/Berlin] All images processed for product ID: 2
+[26-May-2025 13:26:09 Europe/Berlin] User action logged: [2025-05-26 13:26:09] User updated product: 'Tekno V1' (ID: 2).
+[26-May-2025 13:54:31 Europe/Berlin] Validation failed: Missing or invalid product ID for deletion. ID: ''
+[26-May-2025 14:02:10 Europe/Berlin] Deleted variations for product ID: 2
+[26-May-2025 14:02:10 Europe/Berlin] Deleted physical image file: C:\xampp\htdocs\eCommerce-bikeShop\administrator\api/../../uploads/products/prod_68343e6d7af8d.jpg
+[26-May-2025 14:02:10 Europe/Berlin] Deleted image records for product ID: 2. Physical files deleted: 1
+[26-May-2025 14:02:10 Europe/Berlin] Successfully deleted product ID: 2
+[26-May-2025 14:11:08 Europe/Berlin] Product 'Tekno V1' added with ID: 3
+[26-May-2025 14:11:08 Europe/Berlin] Variations added for product ID: 3
+[26-May-2025 14:11:08 Europe/Berlin] All images processed for product ID: 3
+[26-May-2025 14:11:08 Europe/Berlin] User action logged: [2025-05-26 14:11:08] User added product: 'Tekno V1' (ID: 3), Category: 'BIK', Subcategory: 'MTB'.
+[26-May-2025 14:11:47 Europe/Berlin] Received POST data for update: Array
+(
+    [productId] => 3
+    [productName] => Tekno V2
+    [categoryKey] => BIK
+    [subcategoryKey] => MTB
+    [variations] => Array
+        (
+            [0] => Array
+                (
+                    [color] => Red
+                    [size] => M
+                    [quantity] => 10
+                    [price] => 8700
+                )
+
+            [1] => Array
+                (
+                    [color] => Dark Blue
+                    [size] => L
+                    [quantity] => 20
+                    [price] => 9500
+                )
+
+        )
+
+    [description] => Mabilis pa sa sopas
+    [redirect_url] => http://localhost/ecommerce-bikeshop/administrator/index.php#products
+)
+
+[26-May-2025 14:11:47 Europe/Berlin] Received FILES data for update: Array
+(
+    [productImages] => Array
+        (
+            [name] => Array
+                (
+                    [0] => 
+                )
+
+            [full_path] => Array
+                (
+                    [0] => 
+                )
+
+            [type] => Array
+                (
+                    [0] => 
+                )
+
+            [tmp_name] => Array
+                (
+                    [0] => 
+                )
+
+            [error] => Array
+                (
+                    [0] => 4
+                )
+
+            [size] => Array
+                (
+                    [0] => 0
+                )
+
+        )
+
+)
+
+[26-May-2025 14:11:47 Europe/Berlin] Product (ID: 3) details updated.
+[26-May-2025 14:11:47 Europe/Berlin] Existing variations fetched for product ID: 3. Count: 2
+[26-May-2025 14:11:47 Europe/Berlin] All variations processed for product ID: 3
+[26-May-2025 14:11:47 Europe/Berlin] No new file uploaded for index 0.
+[26-May-2025 14:11:47 Europe/Berlin] All images processed for product ID: 3
+[26-May-2025 14:11:47 Europe/Berlin] User action logged: [2025-05-26 14:11:47] User updated product: 'Tekno V2' (ID: 3).
+[26-May-2025 14:23:33 Europe/Berlin] PHP Fatal error:  Uncaught Error: Property access is not allowed yet in C:\xampp\htdocs\eCommerce-bikeShop\administrator\api\delete_product.php:76
+Stack trace:
+#0 {main}
+  thrown in C:\xampp\htdocs\eCommerce-bikeShop\administrator\api\delete_product.php on line 76
+[26-May-2025 14:30:14 Europe/Berlin] Invalid or missing productId for deletion: 
+[26-May-2025 14:33:54 Europe/Berlin] Invalid or missing productId for deletion: 
+[26-May-2025 14:46:57 Europe/Berlin] PHP Fatal error:  Uncaught Error: Property access is not allowed yet in C:\xampp\htdocs\eCommerce-bikeShop\administrator\api\delete_product.php:76
+Stack trace:
+#0 {main}
+  thrown in C:\xampp\htdocs\eCommerce-bikeShop\administrator\api\delete_product.php on line 76
+[26-May-2025 14:49:28 Europe/Berlin] [Product Delete Debug] Received POST data: Array
+(
+    [productId] => 3
+    [redirect_url] => http://localhost/ecommerce-bikeshop/administrator/index.php#products
+)
+
+[26-May-2025 14:49:28 Europe/Berlin] [Product Delete Log] [2025-05-26 14:49:28] Product deleted: 'Tekno V2' (ID: 3).
+[26-May-2025 14:49:28 Europe/Berlin] [Product Delete Success] Product with ID 3 deleted successfully.
+[26-May-2025 14:51:02 Europe/Berlin] Product 'Tekno V1' added with ID: 4
+[26-May-2025 14:51:02 Europe/Berlin] Variations added for product ID: 4
+[26-May-2025 14:51:02 Europe/Berlin] All images processed for product ID: 4
+[26-May-2025 14:51:02 Europe/Berlin] User action logged: [2025-05-26 14:51:02] User added product: 'Tekno V1' (ID: 4), Category: 'BIK', Subcategory: 'MTB'.
+[26-May-2025 15:58:57 Europe/Berlin] Received POST data for update: Array
+(
+    [productId] => 4
+    [productName] => Tekno V1
+    [categoryKey] => BIK
+    [subcategoryKey] => MTB
+    [variations] => Array
+        (
+            [0] => Array
+                (
+                    [color] => Red
+                    [size] => M
+                    [quantity] => 20
+                    [price] => 8700
+                )
+
+            [1] => Array
+                (
+                    [color] => Dark Blue
+                    [size] => L
+                    [quantity] => 20
+                    [price] => 9500
+                )
+
+        )
+
+    [description] => Mabilis pa sa sopas
+    [redirect_url] => http://localhost/ecommerce-bikeshop/administrator/index.php#products
+)
+
+[26-May-2025 15:58:57 Europe/Berlin] Received FILES data for update: Array
+(
+    [productImages] => Array
+        (
+            [name] => Array
+                (
+                    [0] => Gemini_Generated_Image_e92x02e92x02e92x.png
+                    [1] => 494822206_721704440544245_5770512363197518274_n.jpg
+                )
+
+            [full_path] => Array
+                (
+                    [0] => Gemini_Generated_Image_e92x02e92x02e92x.png
+                    [1] => 494822206_721704440544245_5770512363197518274_n.jpg
+                )
+
+            [type] => Array
+                (
+                    [0] => image/png
+                    [1] => image/jpeg
+                )
+
+            [tmp_name] => Array
+                (
+                    [0] => C:\xampp\tmp\php2D2B.tmp
+                    [1] => C:\xampp\tmp\php2D4B.tmp
+                )
+
+            [error] => Array
+                (
+                    [0] => 0
+                    [1] => 0
+                )
+
+            [size] => Array
+                (
+                    [0] => 924313
+                    [1] => 88842
+                )
+
+        )
+
+)
+
+[26-May-2025 15:58:57 Europe/Berlin] Product (ID: 4) details updated.
+[26-May-2025 15:58:57 Europe/Berlin] Existing variations fetched for product ID: 4. Count: 2
+[26-May-2025 15:58:57 Europe/Berlin] All variations processed for product ID: 4
+[26-May-2025 15:58:57 Europe/Berlin] New image uploaded and path saved: uploads/products/prod_683473a169bad.png
+[26-May-2025 15:58:57 Europe/Berlin] New image uploaded and path saved: uploads/products/prod_683473a16bf4c.jpg
+[26-May-2025 15:58:57 Europe/Berlin] All images processed for product ID: 4
+[26-May-2025 15:58:57 Europe/Berlin] User action logged: [2025-05-26 15:58:57] User updated product: 'Tekno V1' (ID: 4).
+[26-May-2025 15:59:25 Europe/Berlin] Received POST data for update: Array
+(
+    [productId] => 4
+    [productName] => Tekno V1
+    [categoryKey] => BIK
+    [subcategoryKey] => MTB
+    [variations] => Array
+        (
+            [0] => Array
+                (
+                    [color] => Red
+                    [size] => M
+                    [quantity] => 20
+                    [price] => 8700
+                )
+
+            [1] => Array
+                (
+                    [color] => Dark Blue
+                    [size] => L
+                    [quantity] => 20
+                    [price] => 9500
+                )
+
+        )
+
+    [description] => Mabilis pa sa sopas
+    [redirect_url] => http://localhost/ecommerce-bikeshop/administrator/index.php#products
+)
+
+[26-May-2025 15:59:25 Europe/Berlin] Received FILES data for update: Array
+(
+    [productImages] => Array
+        (
+            [name] => Array
+                (
+                    [0] => 494822206_721704440544245_5770512363197518274_n.jpg
+                )
+
+            [full_path] => Array
+                (
+                    [0] => 494822206_721704440544245_5770512363197518274_n.jpg
+                )
+
+            [type] => Array
+                (
+                    [0] => image/jpeg
+                )
+
+            [tmp_name] => Array
+                (
+                    [0] => C:\xampp\tmp\php9983.tmp
+                )
+
+            [error] => Array
+                (
+                    [0] => 0
+                )
+
+            [size] => Array
+                (
+                    [0] => 88842
+                )
+
+        )
+
+)
+
+[26-May-2025 15:59:25 Europe/Berlin] Product (ID: 4) details updated.
+[26-May-2025 15:59:25 Europe/Berlin] Existing variations fetched for product ID: 4. Count: 2
+[26-May-2025 15:59:25 Europe/Berlin] All variations processed for product ID: 4
+[26-May-2025 15:59:25 Europe/Berlin] New image uploaded and path saved: uploads/products/prod_683473bd23ad1.jpg
+[26-May-2025 15:59:25 Europe/Berlin] All images processed for product ID: 4
+[26-May-2025 15:59:25 Europe/Berlin] User action logged: [2025-05-26 15:59:25] User updated product: 'Tekno V1' (ID: 4).
+[26-May-2025 15:59:34 Europe/Berlin] Received POST data for update: Array
+(
+    [productId] => 4
+    [productName] => Tekno V1
+    [categoryKey] => BIK
+    [subcategoryKey] => MTB
+    [variations] => Array
+        (
+            [0] => Array
+                (
+                    [color] => Red
+                    [size] => M
+                    [quantity] => 20
+                    [price] => 8700
+                )
+
+            [1] => Array
+                (
+                    [color] => Dark Blue
+                    [size] => L
+                    [quantity] => 20
+                    [price] => 9500
+                )
+
+        )
+
+    [description] => Mabilis pa sa sopas
+    [redirect_url] => http://localhost/ecommerce-bikeshop/administrator/index.php#products
+)
+
+[26-May-2025 15:59:34 Europe/Berlin] Received FILES data for update: Array
+(
+    [productImages] => Array
+        (
+            [name] => Array
+                (
+                    [0] => 
+                )
+
+            [full_path] => Array
+                (
+                    [0] => 
+                )
+
+            [type] => Array
+                (
+                    [0] => 
+                )
+
+            [tmp_name] => Array
+                (
+                    [0] => 
+                )
+
+            [error] => Array
+                (
+                    [0] => 4
+                )
+
+            [size] => Array
+                (
+                    [0] => 0
+                )
+
+        )
+
+)
+
+[26-May-2025 15:59:34 Europe/Berlin] Product (ID: 4) details updated.
+[26-May-2025 15:59:34 Europe/Berlin] Existing variations fetched for product ID: 4. Count: 2
+[26-May-2025 15:59:34 Europe/Berlin] All variations processed for product ID: 4
+[26-May-2025 15:59:34 Europe/Berlin] No new file uploaded for index 0.
+[26-May-2025 15:59:34 Europe/Berlin] All images processed for product ID: 4
+[26-May-2025 15:59:34 Europe/Berlin] User action logged: [2025-05-26 15:59:34] User updated product: 'Tekno V1' (ID: 4).
+[26-May-2025 15:59:49 Europe/Berlin] Received POST data for update: Array
+(
+    [productId] => 4
+    [productName] => Tekno V1
+    [categoryKey] => BIK
+    [subcategoryKey] => MTB
+    [variations] => Array
+        (
+            [0] => Array
+                (
+                    [color] => Red
+                    [size] => M
+                    [quantity] => 20
+                    [price] => 8700
+                )
+
+            [1] => Array
+                (
+                    [color] => Dark Blue
+                    [size] => L
+                    [quantity] => 20
+                    [price] => 9500
+                )
+
+        )
+
+    [description] => Mabilis pa sa sopas
+    [redirect_url] => http://localhost/ecommerce-bikeshop/administrator/index.php#products
+)
+
+[26-May-2025 15:59:49 Europe/Berlin] Received FILES data for update: Array
+(
+    [productImages] => Array
+        (
+            [name] => Array
+                (
+                    [0] => A high-resolution, realistic photo of a friendly, modern cyclist in casual clothing — smiling and looking at the camera. Natural lighting, clean white background. The person should appear authentic and relatable, (1).jpg
+                )
+
+            [full_path] => Array
+                (
+                    [0] => A high-resolution, realistic photo of a friendly, modern cyclist in casual clothing — smiling and looking at the camera. Natural lighting, clean white background. The person should appear authentic and relatable, (1).jpg
+                )
+
+            [type] => Array
+                (
+                    [0] => image/jpeg
+                )
+
+            [tmp_name] => Array
+                (
+                    [0] => C:\xampp\tmp\phpF9B5.tmp
+                )
+
+            [error] => Array
+                (
+                    [0] => 0
+                )
+
+            [size] => Array
+                (
+                    [0] => 114478
+                )
+
+        )
+
+)
+
+[26-May-2025 15:59:49 Europe/Berlin] Product (ID: 4) details updated.
+[26-May-2025 15:59:49 Europe/Berlin] Existing variations fetched for product ID: 4. Count: 2
+[26-May-2025 15:59:49 Europe/Berlin] All variations processed for product ID: 4
+[26-May-2025 15:59:49 Europe/Berlin] New image uploaded and path saved: uploads/products/prod_683473d5b93f3.jpg
+[26-May-2025 15:59:49 Europe/Berlin] All images processed for product ID: 4
+[26-May-2025 15:59:49 Europe/Berlin] User action logged: [2025-05-26 15:59:49] User updated product: 'Tekno V1' (ID: 4).
+[26-May-2025 16:02:47 Europe/Berlin] Received POST data for update: Array
+(
+    [productId] => 4
+    [productName] => Tekno V1
+    [categoryKey] => BIK
+    [subcategoryKey] => MTB
+    [variations] => Array
+        (
+            [0] => Array
+                (
+                    [color] => Red
+                    [size] => M
+                    [quantity] => 20
+                    [price] => 8700
+                )
+
+            [1] => Array
+                (
+                    [color] => Dark Blue
+                    [size] => L
+                    [quantity] => 20
+                    [price] => 9500
+                )
+
+        )
+
+    [description] => Mabilis pa sa sopas
+    [redirect_url] => http://localhost/ecommerce-bikeshop/administrator/index.php#products
+)
+
+[26-May-2025 16:02:47 Europe/Berlin] Received FILES data for update: Array
+(
+    [productImages] => Array
+        (
+            [name] => Array
+                (
+                    [0] => _A detailed flat lay of premium bicycle components — including crankset, chain, cassette, derailleur, brakes, and tires — arranged neatly on a clean white background with soft shadows, styled for a modern online bike.jpg
+                )
+
+            [full_path] => Array
+                (
+                    [0] => _A detailed flat lay of premium bicycle components — including crankset, chain, cassette, derailleur, brakes, and tires — arranged neatly on a clean white background with soft shadows, styled for a modern online bike.jpg
+                )
+
+            [type] => Array
+                (
+                    [0] => image/jpeg
+                )
+
+            [tmp_name] => Array
+                (
+                    [0] => C:\xampp\tmp\phpAFAF.tmp
+                )
+
+            [error] => Array
+                (
+                    [0] => 0
+                )
+
+            [size] => Array
+                (
+                    [0] => 151038
+                )
+
+        )
+
+)
+
+[26-May-2025 16:02:47 Europe/Berlin] Product (ID: 4) details updated.
+[26-May-2025 16:02:47 Europe/Berlin] Existing variations fetched for product ID: 4. Count: 2
+[26-May-2025 16:02:47 Europe/Berlin] All variations processed for product ID: 4
+[26-May-2025 16:02:47 Europe/Berlin] New image uploaded and path saved: uploads/products/prod_6834748766d93.jpg
+[26-May-2025 16:02:47 Europe/Berlin] All images processed for product ID: 4
+[26-May-2025 16:02:47 Europe/Berlin] User action logged: [2025-05-26 16:02:47] User updated product: 'Tekno V1' (ID: 4).
+[26-May-2025 16:10:26 Europe/Berlin] Received POST data for update: Array
+(
+    [productId] => 4
+    [productName] => Tekno V1
+    [categoryKey] => BIK
+    [subcategoryKey] => MTB
+    [variations] => Array
+        (
+            [0] => Array
+                (
+                    [color] => Red
+                    [size] => M
+                    [quantity] => 20
+                    [price] => 8700
+                )
+
+            [1] => Array
+                (
+                    [color] => Dark Blue
+                    [size] => L
+                    [quantity] => 20
+                    [price] => 9500
+                )
+
+        )
+
+    [description] => Mabilis pa sa sopas
+    [redirect_url] => http://localhost/ecommerce-bikeshop/administrator/index.php#products
+)
+
+[26-May-2025 16:10:26 Europe/Berlin] Received FILES data for update: Array
+(
+    [productImages] => Array
+        (
+            [name] => Array
+                (
+                    [0] => Untitled design.png
+                )
+
+            [full_path] => Array
+                (
+                    [0] => Untitled design.png
+                )
+
+            [type] => Array
+                (
+                    [0] => image/png
+                )
+
+            [tmp_name] => Array
+                (
+                    [0] => C:\xampp\tmp\phpAFFC.tmp
+                )
+
+            [error] => Array
+                (
+                    [0] => 0
+                )
+
+            [size] => Array
+                (
+                    [0] => 190263
+                )
+
+        )
+
+)
+
+[26-May-2025 16:10:26 Europe/Berlin] Product (ID: 4) details updated.
+[26-May-2025 16:10:26 Europe/Berlin] Existing variations fetched for product ID: 4. Count: 2
+[26-May-2025 16:10:26 Europe/Berlin] All variations processed for product ID: 4
+[26-May-2025 16:10:26 Europe/Berlin] New image uploaded and path saved: uploads/products/prod_683476523ef20.png
+[26-May-2025 16:10:26 Europe/Berlin] All images processed for product ID: 4
+[26-May-2025 16:10:26 Europe/Berlin] User action logged: [2025-05-26 16:10:26] User updated product: 'Tekno V1' (ID: 4).
+[26-May-2025 16:12:22 Europe/Berlin] Received POST data for update: Array
+(
+    [productId] => 4
+    [productName] => Tekno V1
+    [categoryKey] => BIK
+    [subcategoryKey] => MTB
+    [variations] => Array
+        (
+            [0] => Array
+                (
+                    [color] => Red
+                    [size] => M
+                    [quantity] => 20
+                    [price] => 8700
+                )
+
+            [1] => Array
+                (
+                    [color] => Dark Blue
+                    [size] => L
+                    [quantity] => 20
+                    [price] => 9500
+                )
+
+        )
+
+    [description] => Mabilis pa sa sopas
+    [redirect_url] => http://localhost/ecommerce-bikeshop/administrator/index.php#products
+)
+
+[26-May-2025 16:12:22 Europe/Berlin] Received FILES data for update: Array
+(
+    [productImages] => Array
+        (
+            [name] => Array
+                (
+                    [0] => 
+                )
+
+            [full_path] => Array
+                (
+                    [0] => 
+                )
+
+            [type] => Array
+                (
+                    [0] => 
+                )
+
+            [tmp_name] => Array
+                (
+                    [0] => 
+                )
+
+            [error] => Array
+                (
+                    [0] => 4
+                )
+
+            [size] => Array
+                (
+                    [0] => 0
+                )
+
+        )
+
+)
+
+[26-May-2025 16:12:22 Europe/Berlin] Product (ID: 4) details updated.
+[26-May-2025 16:12:22 Europe/Berlin] Existing variations fetched for product ID: 4. Count: 2
+[26-May-2025 16:12:22 Europe/Berlin] All variations processed for product ID: 4
+[26-May-2025 16:12:22 Europe/Berlin] No new file uploaded for index 0.
+[26-May-2025 16:12:22 Europe/Berlin] All images processed for product ID: 4
+[26-May-2025 16:12:22 Europe/Berlin] User action logged: [2025-05-26 16:12:22] User updated product: 'Tekno V1' (ID: 4).
+[26-May-2025 16:20:47 Europe/Berlin] Received POST data for update: Array
+(
+    [productId] => 4
+    [productName] => Tekno V1
+    [categoryKey] => BIK
+    [subcategoryKey] => MTB
+    [variations] => Array
+        (
+            [0] => Array
+                (
+                    [color] => Red
+                    [size] => M
+                    [quantity] => 20
+                    [price] => 8700
+                )
+
+            [1] => Array
+                (
+                    [color] => Dark Blue
+                    [size] => L
+                    [quantity] => 20
+                    [price] => 9500
+                )
+
+        )
+
+    [description] => Mabilis pa sa sopas
+    [redirect_url] => http://localhost/ecommerce-bikeshop/administrator/index.php#products
+)
+
+[26-May-2025 16:20:47 Europe/Berlin] Received FILES data for update: Array
+(
+    [productImages] => Array
+        (
+            [name] => Array
+                (
+                    [0] => 
+                )
+
+            [full_path] => Array
+                (
+                    [0] => 
+                )
+
+            [type] => Array
+                (
+                    [0] => 
+                )
+
+            [tmp_name] => Array
+                (
+                    [0] => 
+                )
+
+            [error] => Array
+                (
+                    [0] => 4
+                )
+
+            [size] => Array
+                (
+                    [0] => 0
+                )
+
+        )
+
+)
+
+[26-May-2025 16:20:47 Europe/Berlin] Product (ID: 4) details updated.
+[26-May-2025 16:20:47 Europe/Berlin] Existing variations fetched for product ID: 4. Count: 2
+[26-May-2025 16:20:47 Europe/Berlin] All variations processed for product ID: 4
+[26-May-2025 16:20:47 Europe/Berlin] All images processed for product ID: 4
+[26-May-2025 16:20:47 Europe/Berlin] User action logged: [2025-05-26 16:20:47] User updated product: 'Tekno V1' (ID: 4).
+[26-May-2025 16:21:20 Europe/Berlin] Received POST data for update: Array
+(
+    [productId] => 4
+    [productName] => Tekno V1
+    [categoryKey] => BIK
+    [subcategoryKey] => MTB
+    [variations] => Array
+        (
+            [0] => Array
+                (
+                    [color] => Red
+                    [size] => M
+                    [quantity] => 20
+                    [price] => 8700
+                )
+
+            [1] => Array
+                (
+                    [color] => Dark Blue
+                    [size] => L
+                    [quantity] => 20
+                    [price] => 9500
+                )
+
+        )
+
+    [description] => Mabilis pa sa sopas
+    [redirect_url] => http://localhost/ecommerce-bikeshop/administrator/index.php#products
+    [imagesToDelete] => 10,9,8,7,6,5
+)
+
+[26-May-2025 16:21:20 Europe/Berlin] Received FILES data for update: Array
+(
+    [productImages] => Array
+        (
+            [name] => Array
+                (
+                    [0] => 
+                )
+
+            [full_path] => Array
+                (
+                    [0] => 
+                )
+
+            [type] => Array
+                (
+                    [0] => 
+                )
+
+            [tmp_name] => Array
+                (
+                    [0] => 
+                )
+
+            [error] => Array
+                (
+                    [0] => 4
+                )
+
+            [size] => Array
+                (
+                    [0] => 0
+                )
+
+        )
+
+)
+
+[26-May-2025 16:21:20 Europe/Berlin] Product (ID: 4) details updated.
+[26-May-2025 16:21:20 Europe/Berlin] Existing variations fetched for product ID: 4. Count: 2
+[26-May-2025 16:21:20 Europe/Berlin] All variations processed for product ID: 4
+[26-May-2025 16:21:20 Europe/Berlin] Deleted image records from DB: 10, 9, 8, 7, 6, 5
+[26-May-2025 16:21:20 Europe/Berlin] Deleted image file from disk: C:\xampp\htdocs\eCommerce-bikeShop\administrator\api/../../uploads/products/prod_683473a169bad.png
+[26-May-2025 16:21:20 Europe/Berlin] Deleted image file from disk: C:\xampp\htdocs\eCommerce-bikeShop\administrator\api/../../uploads/products/prod_683473a16bf4c.jpg
+[26-May-2025 16:21:20 Europe/Berlin] Deleted image file from disk: C:\xampp\htdocs\eCommerce-bikeShop\administrator\api/../../uploads/products/prod_683473bd23ad1.jpg
+[26-May-2025 16:21:20 Europe/Berlin] Deleted image file from disk: C:\xampp\htdocs\eCommerce-bikeShop\administrator\api/../../uploads/products/prod_683473d5b93f3.jpg
+[26-May-2025 16:21:20 Europe/Berlin] Deleted image file from disk: C:\xampp\htdocs\eCommerce-bikeShop\administrator\api/../../uploads/products/prod_6834748766d93.jpg
+[26-May-2025 16:21:20 Europe/Berlin] Deleted image file from disk: C:\xampp\htdocs\eCommerce-bikeShop\administrator\api/../../uploads/products/prod_683476523ef20.png
+[26-May-2025 16:21:20 Europe/Berlin] All images processed for product ID: 4
+[26-May-2025 16:21:20 Europe/Berlin] User action logged: [2025-05-26 16:21:20] User updated product: 'Tekno V1' (ID: 4).
+[26-May-2025 16:21:35 Europe/Berlin] Received POST data for update: Array
+(
+    [productId] => 4
+    [productName] => Tekno V2
+    [categoryKey] => BIK
+    [subcategoryKey] => MTB
+    [variations] => Array
+        (
+            [0] => Array
+                (
+                    [color] => Red
+                    [size] => M
+                    [quantity] => 20
+                    [price] => 8700
+                )
+
+            [1] => Array
+                (
+                    [color] => Dark Blue
+                    [size] => L
+                    [quantity] => 20
+                    [price] => 9500
+                )
+
+        )
+
+    [description] => Mabilis pa sa sopas
+    [redirect_url] => http://localhost/ecommerce-bikeshop/administrator/index.php#products
+    [imagesToDelete] => 4
+)
+
+[26-May-2025 16:21:35 Europe/Berlin] Received FILES data for update: Array
+(
+    [productImages] => Array
+        (
+            [name] => Array
+                (
+                    [0] => Gemini_Generated_Image_e92x02e92x02e92x.png
+                )
+
+            [full_path] => Array
+                (
+                    [0] => Gemini_Generated_Image_e92x02e92x02e92x.png
+                )
+
+            [type] => Array
+                (
+                    [0] => image/png
+                )
+
+            [tmp_name] => Array
+                (
+                    [0] => C:\xampp\tmp\phpE777.tmp
+                )
+
+            [error] => Array
+                (
+                    [0] => 0
+                )
+
+            [size] => Array
+                (
+                    [0] => 924313
+                )
+
+        )
+
+)
+
+[26-May-2025 16:21:35 Europe/Berlin] Product (ID: 4) details updated.
+[26-May-2025 16:21:35 Europe/Berlin] Existing variations fetched for product ID: 4. Count: 2
+[26-May-2025 16:21:35 Europe/Berlin] All variations processed for product ID: 4
+[26-May-2025 16:21:35 Europe/Berlin] Deleted image records from DB: 4
+[26-May-2025 16:21:35 Europe/Berlin] Deleted image file from disk: C:\xampp\htdocs\eCommerce-bikeShop\administrator\api/../../uploads/products/prod_683463b6d9e8e.jpg
+[26-May-2025 16:21:35 Europe/Berlin] New image uploaded and path saved: uploads/products/prod_683478efcbd57.png
+[26-May-2025 16:21:35 Europe/Berlin] All images processed for product ID: 4
+[26-May-2025 16:21:35 Europe/Berlin] User action logged: [2025-05-26 16:21:35] User updated product: 'Tekno V2' (ID: 4).
+[26-May-2025 16:21:45 Europe/Berlin] Received POST data for update: Array
+(
+    [productId] => 4
+    [productName] => Tekno V1
+    [categoryKey] => BIK
+    [subcategoryKey] => MTB
+    [variations] => Array
+        (
+            [0] => Array
+                (
+                    [color] => Red
+                    [size] => M
+                    [quantity] => 20
+                    [price] => 8700
+                )
+
+            [1] => Array
+                (
+                    [color] => Dark Blue
+                    [size] => L
+                    [quantity] => 20
+                    [price] => 9500
+                )
+
+        )
+
+    [description] => Mabilis pa sa sopas
+    [redirect_url] => http://localhost/ecommerce-bikeshop/administrator/index.php#products
+)
+
+[26-May-2025 16:21:45 Europe/Berlin] Received FILES data for update: Array
+(
+    [productImages] => Array
+        (
+            [name] => Array
+                (
+                    [0] => 
+                )
+
+            [full_path] => Array
+                (
+                    [0] => 
+                )
+
+            [type] => Array
+                (
+                    [0] => 
+                )
+
+            [tmp_name] => Array
+                (
+                    [0] => 
+                )
+
+            [error] => Array
+                (
+                    [0] => 4
+                )
+
+            [size] => Array
+                (
+                    [0] => 0
+                )
+
+        )
+
+)
+
+[26-May-2025 16:21:45 Europe/Berlin] Product (ID: 4) details updated.
+[26-May-2025 16:21:45 Europe/Berlin] Existing variations fetched for product ID: 4. Count: 2
+[26-May-2025 16:21:45 Europe/Berlin] All variations processed for product ID: 4
+[26-May-2025 16:21:45 Europe/Berlin] All images processed for product ID: 4
+[26-May-2025 16:21:45 Europe/Berlin] User action logged: [2025-05-26 16:21:45] User updated product: 'Tekno V1' (ID: 4).

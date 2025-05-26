@@ -102,6 +102,13 @@ try {
                                     ?>
                                 </td>
                                 <td>
+                                    <button class="btn btn-sm btn-accent reset-password-btn me-2"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#resetPasswordModal"
+                                            data-user-id="<?php echo htmlspecialchars($user['id']); ?>"
+                                            data-username="<?php echo htmlspecialchars($user['username']); ?>">
+                                        <i class="bi bi-key-fill"></i> Reset Password
+                                    </button>
                                     <button class="btn btn-sm btn-danger delete-user-btn"
                                             data-bs-toggle="modal"
                                             data-bs-target="#deleteUserModal"
@@ -144,7 +151,7 @@ try {
                         <input type="password" class="form-control" id="confirm_password" name="confirm_password" required>
                     </div>
                 </div>
-                <input type="hidden" name="redirect_url" value="http://localhost/bongbicycleshop/administrator/index.php#settings_users">
+                <input type="hidden" name="redirect_url" value="http://localhost/ecommerce-bikeshop/administrator/index.php#settings_users">
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                     <button type="submit" class="btn btn-accent">Create Account</button>
@@ -157,7 +164,7 @@ try {
 <div class="modal fade" id="deleteUserModal" tabindex="-1" aria-labelledby="deleteUserModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
-            <div class="modal-header bg-danger text-light">
+            <div class="modal-header bg-primary text-light">
                 <h5 class="modal-title" id="deleteUserModalLabel">Confirm Deletion</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
@@ -169,7 +176,7 @@ try {
                     <p class="text-danger"><small>This action cannot be undone.</small></p>
                     <input type="hidden" name="user_id" id="deleteUserId">
                 </div>
-                <input type="hidden" name="redirect_url" value="http://localhost/bongbicycleshop/administrator/index.php#settings_users">
+                <input type="hidden" name="redirect_url" value="http://localhost/ecommerce-bikeshop/administrator/index.php#settings_users">
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                     <button type="submit" class="btn btn-danger"><i class="bi bi-trash"></i> Delete Account</button>
@@ -178,6 +185,64 @@ try {
         </div>
     </div>
 </div>
+
+<div class="modal fade" id="resetPasswordModal" tabindex="-1" aria-labelledby="resetPasswordModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-dark">
+                <h5 class="modal-title" id="resetPasswordModalLabel">Reset Admin Password</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="resetPasswordForm" action="api/reset_admin_password.php" method="POST">
+                <div class="modal-body">
+                    <p>You are about to reset the password for:</p>
+                    <p><strong>Username: </strong><span id="resetModalUsername"></span></p>
+                    <p><strong>ID: </strong><span id="resetModalUserId"></span></p>
+
+                    <div class="mb-3 mt-3">
+                        <label for="new_password" class="form-label">New Password</label>
+                        <input type="password" class="form-control" id="new_password" name="new_password" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="confirm_new_password" class="form-label">Confirm New Password</label>
+                        <input type="password" class="form-control" id="confirm_new_password" name="confirm_new_password" required>
+                    </div>
+                </div>
+                <input type="hidden" name="user_id" id="resetUserId">
+                <input type="hidden" name="redirect_url" value="http://localhost/ecommerce-bikeshop/administrator/index.php#settings_users">
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-accent"><i class="bi bi-key"></i> Reset Password</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // ... (existing JavaScript for delete user modal) ...
+
+        var resetPasswordModal = document.getElementById('resetPasswordModal');
+        resetPasswordModal.addEventListener('show.bs.modal', function (event) {
+            var button = event.relatedTarget;
+            var userId = button.getAttribute('data-user-id');
+            var username = button.getAttribute('data-username');
+
+            var modalUserIdSpan = resetPasswordModal.querySelector('#resetModalUserId');
+            var modalUsernameSpan = resetPasswordModal.querySelector('#resetModalUsername');
+            var hiddenUserIdInput = resetPasswordModal.querySelector('#resetUserId');
+
+            modalUserIdSpan.textContent = userId;
+            modalUsernameSpan.textContent = username;
+            hiddenUserIdInput.value = userId;
+
+            // Clear password fields when modal opens
+            resetPasswordModal.querySelector('#new_password').value = '';
+            resetPasswordModal.querySelector('#confirm_new_password').value = '';
+        });
+    });
+</script>
 
 <style>
     /*
@@ -225,8 +290,16 @@ try {
         color: var(--text-light);
     }
 
+    .modal-header.bg-warning { /* For the new reset password modal header */
+        background-color: #ffc107 !important; /* Bootstrap's default warning color */
+        color: var(--text-dark); /* Dark text for warning background */
+    }
+
     .modal-header .btn-close {
         filter: invert(1); /* Invert the color of the close button icon to make it white */
+    }
+    .modal-header.bg-warning .btn-close {
+        filter: none; /* Keep close button dark for warning background */
     }
 
     /* Styles for modal footer buttons */

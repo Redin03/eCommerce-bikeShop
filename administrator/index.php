@@ -65,7 +65,7 @@ if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== tru
           <i class="bi bi-star-fill"></i>
           <span>Reviews</span>
         </a>
-          <a href="submenu/log_history.php" class="list-group-item list-group-item-action" data-content-id="log_history">
+        <a href="submenu/log_history.php" class="list-group-item list-group-item-action"      data-content-id="log_history">
           <i class="bi bi-clock-history"></i>
           <span>Log History</span>
         </a>
