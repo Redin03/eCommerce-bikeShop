@@ -1,0 +1,12 @@
+sorting by lowest price
+sorting by highest price
+sorting by sold
+sorting by ratings
+
+
+
+filter by category
+
+for example bike -      mountain
+			road bike
+			hybrid bike

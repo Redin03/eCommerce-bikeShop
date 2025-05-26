@@ -1,0 +1,33 @@
+Instructions:
+
+Hero Section Content
+Headline: Write a catchy, benefit-driven headline. This text should ideally be Text Light (#FFFFFF) if placed over a dark background or a vibrant image, or Text Dark (#1E1E1E) if over a lighter one.
+Examples: "Your Adventure Starts Here," "Premium Bikes for Every Rider."
+Sub-headline: Provide a concise supporting statement that expands on the headline or highlights a key offer. Use Text Light (#FFFFFF) or Text Dark (#1E1E1E) as appropriate for readability.
+Call to Action (CTA): Create a prominent, action-oriented button text. The button itself should use Primary (#006A4E) for its background, with Text Light (#FFFFFF) for the text. Describe the hover state using Secondary (#FFB703).
+Examples: "Shop All Bikes," "Explore New Arrivals," "Find Your Perfect Ride."
+Visual Description: Describe the ideal high-quality image or video for this section. Consider how it complements the overlaying text colors.
+Examples: "Dynamic shot of a mountain biker on a scenic trail," "Lifestyle video showcasing urban commuting on an e-bike."
+Navigation & Search
+List the primary navigation categories (e.g., Mountain Bikes, Road Bikes, Electric Bikes, Accessories, Apparel, Services, Brands). The text for active tabs should be Primary (#006A4E), while inactive tabs should use Text Dark (#1E1E1E).
+Confirm the presence of a search bar, shopping cart icon (using Secondary (#FFB703) for the icon itself), and account/login links.
+Featured Content Sections
+Product Showcases: Suggest 3-5 categories for featured products (e.g., "Best Sellers," "New Arrivals," "Seasonal Collection: Summer Cycling Essentials"). Titles for these sections should use Primary (#006A4E). Product titles and prices should use Text Dark (#1E1E1E).
+Value Proposition/USPs: List 3-4 unique selling points of the bike shop. The main text should be Text Dark (#1E1E1E). Icons or small highlights for these USPs could use Secondary (#FFB703) or Accent (#00BFA6).
+Examples: "Expert Advice," "Free Shipping," "Financing Options," "Local Service & Repair."
+Brand Story/About Us: Draft a brief (1-2 sentence) engaging snippet about the shop's passion for cycling or mission. Use Text Dark (#1E1E1E).
+Customer Testimonials/Social Proof: Describe how customer reviews or ratings will be integrated. The star ratings or icons should use Secondary (#FFB703). Review text should be Text Dark (#1E1E1E).
+Blog/Resource Highlight: Suggest a topic for a recent blog post or resource to be featured. The section title should be Primary (#006A4E), and article titles should use Accent (#00BFA6) for links, with main text in Text Dark (#1E1E1E).
+Examples: "5 Essential Tips for Bike Maintenance," "Your Guide to Choosing the Right Road Bike."
+Footer Content
+The footer background should be Background Dark (#003D33). All text within the footer should be Text Light (#FFFFFF).
+Customer Service Links: List essential links (e.g., Contact Us, FAQs, Shipping & Returns, Warranty, Privacy Policy, Terms & Conditions).
+Company Information: List additional links (e.g., About Us, Blog, Careers).
+Social Media: List the social media platforms to link to (e.g., Facebook, Instagram, YouTube). Social media icons should use Text Light (#FFFFFF).
+Newsletter Signup: Provide a short, inviting call to action for email subscription. The button for signup should follow the Primary (#006A4E) and Text Light (#FFFFFF) scheme for buttons.
+Trust Signals: Describe what security badges or payment method logos should be displayed. These should be clearly visible against the Background Dark (#003D33).
+Physical Location (Optional): If applicable, include a brief note about a store locator or map link.
+Design & Functionality Notes
+List 3-4 crucial design and functionality considerations. Emphasize how color consistency will be maintained.
+Examples: "Responsive design across all devices, ensuring readability with chosen text colors," "Fast loading speed for optimal user experience," "High-quality photography that complements the brand's vibrant palette," "Clear and prominent CTAs using Primary (#006A4E) with Text Light (#FFFFFF)."
+Note that the main background for the page should be Background Light (#F4F4F4), while dividers and card borders should use Border/Gray (#D9D9D9

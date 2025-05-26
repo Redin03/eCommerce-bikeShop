@@ -1,0 +1,1193 @@
+[24-May-2025 04:58:25 Europe/Berlin] Received POST data: Array
+(
+    [productName] => Redin
+    [categoryKey] => BIK
+    [subcategoryKey] => MTB
+    [price] => 10000
+    [stock] => 10
+    [colors] => ["Red","Blue"]
+    [sizes] => ["S","M"]
+    [description] => hahahahahaha
+)
+
+[24-May-2025 04:58:25 Europe/Berlin] Received FILES data: Array
+(
+    [productImages] => Array
+        (
+            [name] => Array
+                (
+                    [0] => 494822206_721704440544245_5770512363197518274_n.jpg
+                    [1] => A high-resolution, realistic photo of a friendly, modern cyclist in casual clothing — smiling and looking at the camera. Natural lighting, clean white background. The person should appear authentic and relatable, (1).jpg
+                )
+
+            [full_path] => Array
+                (
+                    [0] => 494822206_721704440544245_5770512363197518274_n.jpg
+                    [1] => A high-resolution, realistic photo of a friendly, modern cyclist in casual clothing — smiling and looking at the camera. Natural lighting, clean white background. The person should appear authentic and relatable, (1).jpg
+                )
+
+            [type] => Array
+                (
+                    [0] => image/jpeg
+                    [1] => image/jpeg
+                )
+
+            [tmp_name] => Array
+                (
+                    [0] => C:\xampp\tmp\phpE24A.tmp
+                    [1] => C:\xampp\tmp\phpE25A.tmp
+                )
+
+            [error] => Array
+                (
+                    [0] => 0
+                    [1] => 0
+                )
+
+            [size] => Array
+                (
+                    [0] => 88842
+                    [1] => 114478
+                )
+
+        )
+
+)
+
+[24-May-2025 04:58:25 Europe/Berlin] Product inserted, ID: 1
+[24-May-2025 04:58:25 Europe/Berlin] Colors inserted/processed for product ID: 1
+[24-May-2025 04:58:25 Europe/Berlin] Sizes inserted/processed for product ID: 1
+[24-May-2025 04:58:25 Europe/Berlin] Image uploaded and path saved: uploads/products/prod_683135d1d96b4.jpg
+[24-May-2025 04:58:25 Europe/Berlin] Image uploaded and path saved: uploads/products/prod_683135d1db360.jpg
+[24-May-2025 04:58:25 Europe/Berlin] All images processed for product ID: 1
+[24-May-2025 05:54:07 Europe/Berlin] Received POST data: Array
+(
+    [productName] => Redin
+    [categoryKey] => BIK
+    [subcategoryKey] => MTB
+    [price] => 10000
+    [variations] => Array
+        (
+            [0] => Array
+                (
+                    [color] => Red
+                    [size] => S
+                    [quantity] => 10
+                )
+
+            [1] => Array
+                (
+                    [color] => Blue
+                    [size] => S
+                    [quantity] => 5
+                )
+
+        )
+
+    [description] => Redin ang pogi mo sobra
+)
+
+[24-May-2025 05:54:07 Europe/Berlin] Received FILES data: Array
+(
+    [productImages] => Array
+        (
+            [name] => Array
+                (
+                    [0] => 494822206_721704440544245_5770512363197518274_n.jpg
+                )
+
+            [full_path] => Array
+                (
+                    [0] => 494822206_721704440544245_5770512363197518274_n.jpg
+                )
+
+            [type] => Array
+                (
+                    [0] => image/jpeg
+                )
+
+            [tmp_name] => Array
+                (
+                    [0] => C:\xampp\tmp\phpE11B.tmp
+                )
+
+            [error] => Array
+                (
+                    [0] => 0
+                )
+
+            [size] => Array
+                (
+                    [0] => 88842
+                )
+
+        )
+
+)
+
+[24-May-2025 05:54:07 Europe/Berlin] Product inserted, ID: 1
+[24-May-2025 05:54:07 Europe/Berlin] Variations inserted/processed for product ID: 1
+[24-May-2025 05:54:07 Europe/Berlin] Image uploaded and path saved: uploads/products/prod_683142dfc294d.jpg
+[24-May-2025 05:54:07 Europe/Berlin] All images processed for product ID: 1
+[24-May-2025 06:25:20 Europe/Berlin] Received POST data: Array
+(
+    [redirect_url] => /bongbicycleshop/administrator/submenu/products.php
+    [productName] => Redin
+    [categoryKey] => APP
+    [subcategoryKey] => JRS
+    [price] => 213
+    [variations] => Array
+        (
+            [0] => Array
+                (
+                    [color] => rd
+                    [size] => s
+                    [quantity] => 5
+                )
+
+            [1] => Array
+                (
+                    [color] => blue
+                    [size] => m
+                    [quantity] => 5
+                )
+
+        )
+
+    [description] => hahahaha
+)
+
+[24-May-2025 06:25:20 Europe/Berlin] Received FILES data: Array
+(
+    [productImages] => Array
+        (
+            [name] => Array
+                (
+                    [0] => _A clean and modern bike shop display with a variety of high-end bicycles — including road bikes, mountain bikes, and city bikes — arranged in a stylish, minimalist showroom with natural lighting and a white backgrou.jpg
+                )
+
+            [full_path] => Array
+                (
+                    [0] => _A clean and modern bike shop display with a variety of high-end bicycles — including road bikes, mountain bikes, and city bikes — arranged in a stylish, minimalist showroom with natural lighting and a white backgrou.jpg
+                )
+
+            [type] => Array
+                (
+                    [0] => image/jpeg
+                )
+
+            [tmp_name] => Array
+                (
+                    [0] => C:\xampp\tmp\php73BF.tmp
+                )
+
+            [error] => Array
+                (
+                    [0] => 0
+                )
+
+            [size] => Array
+                (
+                    [0] => 141863
+                )
+
+        )
+
+)
+
+[24-May-2025 06:25:20 Europe/Berlin] Product inserted, ID: 2
+[24-May-2025 06:25:20 Europe/Berlin] Variations inserted/processed for product ID: 2
+[24-May-2025 06:25:20 Europe/Berlin] Image uploaded and path saved: uploads/products/prod_68314a3053a92.jpg
+[24-May-2025 06:25:20 Europe/Berlin] All images processed for product ID: 2
+[24-May-2025 07:00:28 Europe/Berlin] Received POST data: Array
+(
+    [productName] => DenRedin
+    [categoryKey] => PAR
+    [subcategoryKey] => HDS
+    [price] => 10000
+    [variations] => Array
+        (
+            [0] => Array
+                (
+                    [color] => Red
+                    [size] => S
+                    [quantity] => 10
+                )
+
+            [1] => Array
+                (
+                    [color] => Green
+                    [size] => M
+                    [quantity] => 5
+                )
+
+        )
+
+    [description] => HAHAHAHAHA
+    [redirect_url] => /bongbicycleshop/administrator/submenu/products.php
+)
+
+[24-May-2025 07:00:28 Europe/Berlin] Received FILES data: Array
+(
+    [productImages] => Array
+        (
+            [name] => Array
+                (
+                    [0] => pexels-mabelamber-128202.jpg
+                )
+
+            [full_path] => Array
+                (
+                    [0] => pexels-mabelamber-128202.jpg
+                )
+
+            [type] => Array
+                (
+                    [0] => image/jpeg
+                )
+
+            [tmp_name] => Array
+                (
+                    [0] => C:\xampp\tmp\php9D93.tmp
+                )
+
+            [error] => Array
+                (
+                    [0] => 0
+                )
+
+            [size] => Array
+                (
+                    [0] => 2250941
+                )
+
+        )
+
+)
+
+[24-May-2025 07:00:28 Europe/Berlin] Product inserted, ID: 3
+[24-May-2025 07:00:28 Europe/Berlin] Variations inserted/processed for product ID: 3
+[24-May-2025 07:00:28 Europe/Berlin] Image uploaded and path saved: uploads/products/prod_6831526c4e5c7.jpg
+[24-May-2025 07:00:28 Europe/Berlin] All images processed for product ID: 3
+[24-May-2025 07:02:31 Europe/Berlin] Received POST data: Array
+(
+    [productName] => DenRedin
+    [categoryKey] => APP
+    [subcategoryKey] => JRS
+    [price] => 8
+    [variations] => Array
+        (
+            [0] => Array
+                (
+                    [color] => red
+                    [size] => s
+                    [quantity] => 5
+                )
+
+        )
+
+    [description] => k
+    [redirect_url] => http://localhost/bongbicycleshop/administrator/index.php#products
+)
+
+[24-May-2025 07:02:31 Europe/Berlin] Received FILES data: Array
+(
+    [productImages] => Array
+        (
+            [name] => Array
+                (
+                    [0] => 494822206_721704440544245_5770512363197518274_n.jpg
+                )
+
+            [full_path] => Array
+                (
+                    [0] => 494822206_721704440544245_5770512363197518274_n.jpg
+                )
+
+            [type] => Array
+                (
+                    [0] => image/jpeg
+                )
+
+            [tmp_name] => Array
+                (
+                    [0] => C:\xampp\tmp\php7E99.tmp
+                )
+
+            [error] => Array
+                (
+                    [0] => 0
+                )
+
+            [size] => Array
+                (
+                    [0] => 88842
+                )
+
+        )
+
+)
+
+[24-May-2025 07:02:31 Europe/Berlin] Product inserted, ID: 4
+[24-May-2025 07:02:31 Europe/Berlin] Variations inserted/processed for product ID: 4
+[24-May-2025 07:02:31 Europe/Berlin] Image uploaded and path saved: uploads/products/prod_683152e75ba3c.jpg
+[24-May-2025 07:02:31 Europe/Berlin] All images processed for product ID: 4
+[24-May-2025 07:09:26 Europe/Berlin] Received POST data: Array
+(
+    [productName] => DenRedin
+    [categoryKey] => APP
+    [subcategoryKey] => GLV
+    [price] => 1312313
+    [variations] => Array
+        (
+            [0] => Array
+                (
+                    [color] => Red
+                    [size] => S
+                    [quantity] => 10
+                )
+
+        )
+
+    [description] => ASDLASDLSA
+    [redirect_url] => http://localhost/bongbicycleshop/administrator/index.php#products
+)
+
+[24-May-2025 07:09:26 Europe/Berlin] Received FILES data: Array
+(
+    [productImages] => Array
+        (
+            [name] => Array
+                (
+                    [0] => 494822206_721704440544245_5770512363197518274_n.jpg
+                )
+
+            [full_path] => Array
+                (
+                    [0] => 494822206_721704440544245_5770512363197518274_n.jpg
+                )
+
+            [type] => Array
+                (
+                    [0] => image/jpeg
+                )
+
+            [tmp_name] => Array
+                (
+                    [0] => C:\xampp\tmp\phpD364.tmp
+                )
+
+            [error] => Array
+                (
+                    [0] => 0
+                )
+
+            [size] => Array
+                (
+                    [0] => 88842
+                )
+
+        )
+
+)
+
+[24-May-2025 07:09:26 Europe/Berlin] Product inserted, ID: 5
+[24-May-2025 07:09:26 Europe/Berlin] Variations inserted/processed for product ID: 5
+[24-May-2025 07:09:26 Europe/Berlin] Image uploaded and path saved: uploads/products/prod_68315486407b3.jpg
+[24-May-2025 07:09:26 Europe/Berlin] All images processed for product ID: 5
+[24-May-2025 07:16:57 Europe/Berlin] Received POST data: Array
+(
+    [productName] => DenRedinDen
+    [categoryKey] => APP
+    [subcategoryKey] => JRS
+    [price] => 9888
+    [variations] => Array
+        (
+            [0] => Array
+                (
+                    [color] => Red
+                    [size] => L
+                    [quantity] => 5
+                )
+
+        )
+
+    [description] => hehehehe
+    [redirect_url] => http://localhost/bongbicycleshop/administrator/index.php#products
+)
+
+[24-May-2025 07:16:57 Europe/Berlin] Received FILES data: Array
+(
+    [productImages] => Array
+        (
+            [name] => Array
+                (
+                    [0] => 494822206_721704440544245_5770512363197518274_n.jpg
+                )
+
+            [full_path] => Array
+                (
+                    [0] => 494822206_721704440544245_5770512363197518274_n.jpg
+                )
+
+            [type] => Array
+                (
+                    [0] => image/jpeg
+                )
+
+            [tmp_name] => Array
+                (
+                    [0] => C:\xampp\tmp\phpB730.tmp
+                )
+
+            [error] => Array
+                (
+                    [0] => 0
+                )
+
+            [size] => Array
+                (
+                    [0] => 88842
+                )
+
+        )
+
+)
+
+[24-May-2025 07:16:57 Europe/Berlin] Product inserted, ID: 6
+[24-May-2025 07:16:57 Europe/Berlin] Variations inserted/processed for product ID: 6
+[24-May-2025 07:16:57 Europe/Berlin] Image uploaded and path saved: uploads/products/prod_68315649c54e1.jpg
+[24-May-2025 07:16:57 Europe/Berlin] All images processed for product ID: 6
+[24-May-2025 07:18:36 Europe/Berlin] Received POST data: Array
+(
+    [productName] => Redin
+    [categoryKey] => BIK
+    [subcategoryKey] => MTB
+    [price] => 880000
+    [variations] => Array
+        (
+            [0] => Array
+                (
+                    [color] => HSHA
+                    [size] => M
+                    [quantity] => 10
+                )
+
+        )
+
+    [description] => SDADASD
+    [redirect_url] => http://localhost/bongbicycleshop/administrator/index.php#products
+)
+
+[24-May-2025 07:18:36 Europe/Berlin] Received FILES data: Array
+(
+    [productImages] => Array
+        (
+            [name] => Array
+                (
+                    [0] => 494822206_721704440544245_5770512363197518274_n.jpg
+                )
+
+            [full_path] => Array
+                (
+                    [0] => 494822206_721704440544245_5770512363197518274_n.jpg
+                )
+
+            [type] => Array
+                (
+                    [0] => image/jpeg
+                )
+
+            [tmp_name] => Array
+                (
+                    [0] => C:\xampp\tmp\php39F9.tmp
+                )
+
+            [error] => Array
+                (
+                    [0] => 0
+                )
+
+            [size] => Array
+                (
+                    [0] => 88842
+                )
+
+        )
+
+)
+
+[24-May-2025 07:18:36 Europe/Berlin] Product inserted, ID: 7
+[24-May-2025 07:18:36 Europe/Berlin] Variations inserted/processed for product ID: 7
+[24-May-2025 07:18:36 Europe/Berlin] Image uploaded and path saved: uploads/products/prod_683156acc29de.jpg
+[24-May-2025 07:18:36 Europe/Berlin] All images processed for product ID: 7
+[24-May-2025 07:30:27 Europe/Berlin] Received POST data: Array
+(
+    [productName] => Den
+    [categoryKey] => APP
+    [subcategoryKey] => GLV
+    [price] => 888
+    [variations] => Array
+        (
+            [0] => Array
+                (
+                    [color] => blue
+                    [size] => s
+                    [quantity] => 7
+                )
+
+        )
+
+    [description] => asdadsad
+    [redirect_url] => http://localhost/bongbicycleshop/administrator/index.php#products
+)
+
+[24-May-2025 07:30:27 Europe/Berlin] Received FILES data: Array
+(
+    [productImages] => Array
+        (
+            [name] => Array
+                (
+                    [0] => 494822206_721704440544245_5770512363197518274_n.jpg
+                )
+
+            [full_path] => Array
+                (
+                    [0] => 494822206_721704440544245_5770512363197518274_n.jpg
+                )
+
+            [type] => Array
+                (
+                    [0] => image/jpeg
+                )
+
+            [tmp_name] => Array
+                (
+                    [0] => C:\xampp\tmp\php1267.tmp
+                )
+
+            [error] => Array
+                (
+                    [0] => 0
+                )
+
+            [size] => Array
+                (
+                    [0] => 88842
+                )
+
+        )
+
+)
+
+[24-May-2025 07:30:27 Europe/Berlin] Product inserted, ID: 8
+[24-May-2025 07:30:27 Europe/Berlin] Variations inserted/processed for product ID: 8
+[24-May-2025 07:30:27 Europe/Berlin] Image uploaded and path saved: uploads/products/prod_68315973a9038.jpg
+[24-May-2025 07:30:27 Europe/Berlin] All images processed for product ID: 8
+[24-May-2025 07:38:23 Europe/Berlin] Received POST data: Array
+(
+    [productName] => Tekno
+    [categoryKey] => BIK
+    [subcategoryKey] => MTB
+    [price] => 9500
+    [variations] => Array
+        (
+            [0] => Array
+                (
+                    [color] => Red
+                    [size] => M
+                    [quantity] => 100
+                )
+
+        )
+
+    [description] => mabilis ya
+    [redirect_url] => http://localhost/bongbicycleshop/administrator/index.php#products
+)
+
+[24-May-2025 07:38:23 Europe/Berlin] Received FILES data: Array
+(
+    [productImages] => Array
+        (
+            [name] => Array
+                (
+                    [0] => create me a logo for my bikeshop called Redin Cycle Co I want is the logo is a letter the theme of my website is _Theme Color Pallete_Purpose_                        Color Name__Hex Code__Description_Primary         .jpg
+                )
+
+            [full_path] => Array
+                (
+                    [0] => create me a logo for my bikeshop called Redin Cycle Co I want is the logo is a letter the theme of my website is _Theme Color Pallete_Purpose_                        Color Name__Hex Code__Description_Primary         .jpg
+                )
+
+            [type] => Array
+                (
+                    [0] => image/jpeg
+                )
+
+            [tmp_name] => Array
+                (
+                    [0] => C:\xampp\tmp\php53E4.tmp
+                )
+
+            [error] => Array
+                (
+                    [0] => 0
+                )
+
+            [size] => Array
+                (
+                    [0] => 39279
+                )
+
+        )
+
+)
+
+[24-May-2025 07:38:23 Europe/Berlin] Product inserted, ID: 9
+[24-May-2025 07:38:23 Europe/Berlin] Variations inserted/processed for product ID: 9
+[24-May-2025 07:38:23 Europe/Berlin] Image uploaded and path saved: uploads/products/prod_68315b4f2dc6c.jpg
+[24-May-2025 07:38:23 Europe/Berlin] All images processed for product ID: 9
+[24-May-2025 07:41:18 Europe/Berlin] Received POST data: Array
+(
+    [productName] => Redin
+    [categoryKey] => BIK
+    [subcategoryKey] => MTB
+    [price] => 123123123
+    [description] => 
+    [redirect_url] => http://localhost/bongbicycleshop/administrator/index.php#products
+)
+
+[24-May-2025 07:41:18 Europe/Berlin] Received FILES data: Array
+(
+    [productImages] => Array
+        (
+            [name] => Array
+                (
+                    [0] => 
+                )
+
+            [full_path] => Array
+                (
+                    [0] => 
+                )
+
+            [type] => Array
+                (
+                    [0] => 
+                )
+
+            [tmp_name] => Array
+                (
+                    [0] => 
+                )
+
+            [error] => Array
+                (
+                    [0] => 4
+                )
+
+            [size] => Array
+                (
+                    [0] => 0
+                )
+
+        )
+
+)
+
+[24-May-2025 07:41:18 Europe/Berlin] Validation failed: No product variations provided.
+[24-May-2025 10:28:40 Europe/Berlin] Received POST data: Array
+(
+    [productName] => Teknow
+    [categoryKey] => PAR
+    [subcategoryKey] => HDS
+    [price] => 9000
+    [variations] => Array
+        (
+            [0] => Array
+                (
+                    [color] => Green
+                    [size] => 29er
+                    [quantity] => 10
+                )
+
+        )
+
+    [description] => wow
+    [redirect_url] => http://localhost/bongbicycleshop/administrator/index.php#products
+)
+
+[24-May-2025 10:28:40 Europe/Berlin] Received FILES data: Array
+(
+    [productImages] => Array
+        (
+            [name] => Array
+                (
+                    [0] => A high-resolution, realistic photo of a friendly, modern cyclist in casual clothing — smiling and looking at the camera. Natural lighting, clean white background. The person should appear authentic and relatable, as .jpg
+                    [1] => A high-resolution, realistic photo of a friendly, modern cyclist in casual clothing — smiling and looking at the camera. Natural lighting, clean white background. The person should appear authentic and relatable, (2).jpg
+                )
+
+            [full_path] => Array
+                (
+                    [0] => A high-resolution, realistic photo of a friendly, modern cyclist in casual clothing — smiling and looking at the camera. Natural lighting, clean white background. The person should appear authentic and relatable, as .jpg
+                    [1] => A high-resolution, realistic photo of a friendly, modern cyclist in casual clothing — smiling and looking at the camera. Natural lighting, clean white background. The person should appear authentic and relatable, (2).jpg
+                )
+
+            [type] => Array
+                (
+                    [0] => image/jpeg
+                    [1] => image/jpeg
+                )
+
+            [tmp_name] => Array
+                (
+                    [0] => C:\xampp\tmp\php3AE8.tmp
+                    [1] => C:\xampp\tmp\php3AE9.tmp
+                )
+
+            [error] => Array
+                (
+                    [0] => 0
+                    [1] => 0
+                )
+
+            [size] => Array
+                (
+                    [0] => 86350
+                    [1] => 78883
+                )
+
+        )
+
+)
+
+[24-May-2025 10:28:40 Europe/Berlin] Product inserted, ID: 10
+[24-May-2025 10:28:40 Europe/Berlin] Variations inserted/processed for product ID: 10
+[24-May-2025 10:28:40 Europe/Berlin] Image uploaded and path saved: uploads/products/prod_683183384e6d6.jpg
+[24-May-2025 10:28:40 Europe/Berlin] Image uploaded and path saved: uploads/products/prod_6831833852bba.jpg
+[24-May-2025 10:28:40 Europe/Berlin] All images processed for product ID: 10
+[24-May-2025 11:16:44 Europe/Berlin] Received POST data: Array
+(
+    [productName] => Tekno V5
+    [categoryKey] => BIK
+    [subcategoryKey] => MTB
+    [price] => 9500
+    [variations] => Array
+        (
+            [0] => Array
+                (
+                    [color] => Red
+                    [size] => S
+                    [quantity] => 10
+                )
+
+        )
+
+    [description] => Wow
+    [redirect_url] => http://localhost/bongbicycleshop/administrator/index.php#products
+)
+
+[24-May-2025 11:16:44 Europe/Berlin] Received FILES data: Array
+(
+    [productImages] => Array
+        (
+            [name] => Array
+                (
+                    [0] => MTB Bikes 5.png
+                )
+
+            [full_path] => Array
+                (
+                    [0] => MTB Bikes 5.png
+                )
+
+            [type] => Array
+                (
+                    [0] => image/png
+                )
+
+            [tmp_name] => Array
+                (
+                    [0] => C:\xampp\tmp\php3CA9.tmp
+                )
+
+            [error] => Array
+                (
+                    [0] => 0
+                )
+
+            [size] => Array
+                (
+                    [0] => 978691
+                )
+
+        )
+
+)
+
+[24-May-2025 11:16:44 Europe/Berlin] Product inserted, ID: 11
+[24-May-2025 11:16:44 Europe/Berlin] Variations inserted/processed for product ID: 11
+[24-May-2025 11:16:44 Europe/Berlin] Image uploaded and path saved: uploads/products/prod_68318e7ca087a.png
+[24-May-2025 11:16:44 Europe/Berlin] All images processed for product ID: 11
+[25-May-2025 13:33:06 Europe/Berlin] Received POST data: Array
+(
+    [productName] => Ghost SL AMR LC
+    [categoryKey] => BIK
+    [subcategoryKey] => MTB
+    [price] => 266800
+    [variations] => Array
+        (
+            [0] => Array
+                (
+                    [color] => Gray
+                    [size] => L
+                    [quantity] => 20
+                )
+
+        )
+
+    [description] => Conquer any trail with the Ghost SL AMR LC, a high-performance full-suspension mountain bike designed for versatile and aggressive trail riding. Its sleek grey frame houses an advanced suspension system, delivering plush travel for exceptional control and comfort on diverse terrain.
+
+Equipped with a precise 1x drivetrain for seamless gear changes and powerful disc brakes for confident stopping, this bike is built for responsiveness. Aggressive knobby tires ensure superior grip and stability, allowing you to push your limits.
+
+The Ghost SL AMR LC is the perfect choice for avid trail riders seeking an agile, capable, and incredibly fun machine to elevate their off-road adventures.
+    [redirect_url] => http://localhost/bongbicycleshop/administrator/index.php#products
+)
+
+[25-May-2025 13:33:06 Europe/Berlin] Received FILES data: Array
+(
+    [productImages] => Array
+        (
+            [name] => Array
+                (
+                    [0] => Kid_s Bike 7.png
+                    [1] => MTB Bikes 1.png
+                )
+
+            [full_path] => Array
+                (
+                    [0] => Kid_s Bike 7.png
+                    [1] => MTB Bikes 1.png
+                )
+
+            [type] => Array
+                (
+                    [0] => image/png
+                    [1] => image/png
+                )
+
+            [tmp_name] => Array
+                (
+                    [0] => C:\xampp\tmp\php72F2.tmp
+                    [1] => C:\xampp\tmp\php7312.tmp
+                )
+
+            [error] => Array
+                (
+                    [0] => 0
+                    [1] => 0
+                )
+
+            [size] => Array
+                (
+                    [0] => 838146
+                    [1] => 734713
+                )
+
+        )
+
+)
+
+[25-May-2025 13:33:06 Europe/Berlin] Product inserted, ID: 12
+[25-May-2025 13:33:06 Europe/Berlin] Variations inserted/processed for product ID: 12
+[25-May-2025 13:33:06 Europe/Berlin] Image uploaded and path saved: uploads/products/prod_6832fff2d5d6f.png
+[25-May-2025 13:33:06 Europe/Berlin] Image uploaded and path saved: uploads/products/prod_6832fff2d8b9e.png
+[25-May-2025 13:33:06 Europe/Berlin] All images processed for product ID: 12
+[25-May-2025 13:33:06 Europe/Berlin] User action logged: [2025-05-25 13:33:06] User added product: 'Ghost SL AMR LC' (ID: 12), Category: 'BIK', Subcategory: 'MTB'.
+[25-May-2025 15:01:51 Europe/Berlin] [Admin User Success] New admin user created: admin
+[25-May-2025 15:04:15 Europe/Berlin] [Admin User Success] New admin user created: admin1
+[25-May-2025 15:06:18 Europe/Berlin] [Admin User Success] New admin user created: admin123
+[25-May-2025 15:14:44 Europe/Berlin] [Admin User Delete Error] User ID not provided for deletion.
+[25-May-2025 15:15:18 Europe/Berlin] [Admin User Delete Error] User ID not provided for deletion.
+[25-May-2025 15:16:56 Europe/Berlin] [Admin User Delete Error] User ID not provided for deletion.
+[25-May-2025 15:22:23 Europe/Berlin] [Admin User Delete Error] User ID not provided for deletion.
+[25-May-2025 15:24:36 Europe/Berlin] [Admin User Success] New admin user created: admin12345
+[25-May-2025 15:32:57 Europe/Berlin] [Admin User Delete Error] User ID not provided or invalid: ''
+[25-May-2025 15:36:04 Europe/Berlin] [Admin User Error] Password too short for username: 'adminadmin'.
+[25-May-2025 15:36:57 Europe/Berlin] [Admin User Error] Password too short for username: 'adminadmin'.
+[25-May-2025 15:37:13 Europe/Berlin] [Admin User Success] New admin user created: adminadmin
+[25-May-2025 15:41:59 Europe/Berlin] [Admin User Delete Error] User ID not provided for deletion.
+[25-May-2025 15:42:24 Europe/Berlin] [Admin User Delete Error] User ID not provided for deletion.
+[25-May-2025 15:47:32 Europe/Berlin] [Admin User Delete Error] User ID not provided for deletion.
+[25-May-2025 15:50:33 Europe/Berlin] [Admin User Delete Debug] Received POST data: Array
+(
+    [user_id] => 
+    [redirect_url] => http://localhost/bongbicycleshop/administrator/index.php#settings_users
+)
+
+[25-May-2025 15:50:33 Europe/Berlin] [Admin User Delete Error] User ID not provided for deletion.
+[25-May-2025 15:54:42 Europe/Berlin] [Admin User Delete Debug] Received POST data: Array
+(
+    [user_id] => 1
+    [redirect_url] => http://localhost/bongbicycleshop/administrator/index.php#settings_users
+)
+
+[25-May-2025 15:54:42 Europe/Berlin] [Admin User Delete Success] Admin user with ID 1 deleted successfully.
+[25-May-2025 15:55:07 Europe/Berlin] [Admin User Error] Password too short for username: 'pogi'.
+[25-May-2025 15:55:21 Europe/Berlin] [Admin User Error] Password too short for username: 'pogi'.
+[25-May-2025 15:55:36 Europe/Berlin] [Admin User Success] New admin user created: pogi
+[25-May-2025 15:56:12 Europe/Berlin] Received POST data: Array
+(
+    [productName] => Redin Pogi
+    [categoryKey] => APP
+    [subcategoryKey] => SHT
+    [price] => 10000
+    [variations] => Array
+        (
+            [0] => Array
+                (
+                    [color] => Red
+                    [size] => S
+                    [quantity] => 10
+                )
+
+        )
+
+    [description] => DDADASD
+    [redirect_url] => http://localhost/bongbicycleshop/administrator/index.php#products
+)
+
+[25-May-2025 15:56:12 Europe/Berlin] Received FILES data: Array
+(
+    [productImages] => Array
+        (
+            [name] => Array
+                (
+                    [0] => Gemini_Generated_Image_e92x02e92x02e92x.png
+                )
+
+            [full_path] => Array
+                (
+                    [0] => Gemini_Generated_Image_e92x02e92x02e92x.png
+                )
+
+            [type] => Array
+                (
+                    [0] => image/png
+                )
+
+            [tmp_name] => Array
+                (
+                    [0] => C:\xampp\tmp\php743E.tmp
+                )
+
+            [error] => Array
+                (
+                    [0] => 0
+                )
+
+            [size] => Array
+                (
+                    [0] => 924313
+                )
+
+        )
+
+)
+
+[25-May-2025 15:56:12 Europe/Berlin] Product inserted, ID: 13
+[25-May-2025 15:56:12 Europe/Berlin] Variations inserted/processed for product ID: 13
+[25-May-2025 15:56:12 Europe/Berlin] Image uploaded and path saved: uploads/products/prod_6833217c4a7be.png
+[25-May-2025 15:56:12 Europe/Berlin] All images processed for product ID: 13
+[25-May-2025 15:56:12 Europe/Berlin] User action logged: [2025-05-25 15:56:12] User added product: 'Redin Pogi' (ID: 13), Category: 'APP', Subcategory: 'SHT'.
+[25-May-2025 16:02:56 Europe/Berlin] [Admin Add Log] [2025-05-25 16:02:56] User added a new admin account: 'admin28' (ID: 7).
+[25-May-2025 16:03:21 Europe/Berlin] [Admin User Delete Debug] Received POST data: Array
+(
+    [user_id] => 7
+    [redirect_url] => http://localhost/bongbicycleshop/administrator/index.php#settings_users
+)
+
+[25-May-2025 16:03:21 Europe/Berlin] [Admin Delete Log] [2025-05-25 16:03:21] User deleted admin account: 'admin28' (ID: 7).
+[25-May-2025 16:03:21 Europe/Berlin] [Admin User Delete Success] Admin user with ID 7 deleted successfully.
+[25-May-2025 16:20:15 Europe/Berlin] [Login Failed] Username 'admin' not found.
+[25-May-2025 16:20:41 Europe/Berlin] [Admin Add Log] [2025-05-25 16:20:41] User added a new admin account: 'admin' (ID: 8).
+[25-May-2025 16:20:58 Europe/Berlin] [Login Success] [2025-05-25 16:20:58] Admin login successful for user: 'admin' (ID: 8).
+[25-May-2025 16:29:07 Europe/Berlin] [2025-05-25 16:29:07] Admin logout for user: 'admin' (ID: 8).
+[25-May-2025 16:29:55 Europe/Berlin] [Login Success] [2025-05-25 16:29:55] Admin login successful for user: 'admin' (ID: 8).
+[25-May-2025 16:30:11 Europe/Berlin] [2025-05-25 16:30:11] Admin logout for user: 'admin' (ID: 8).
+[25-May-2025 16:30:24 Europe/Berlin] [Login Success] [2025-05-25 16:30:24] Admin login successful for user: 'admin' (ID: 8).
+[25-May-2025 16:37:51 Europe/Berlin] [Log Clear Error] Failed to clear log file contents.
+[25-May-2025 16:38:00 Europe/Berlin] [2025-05-25 16:38:00] Admin logout for user: 'admin' (ID: 8).
+[25-May-2025 16:38:07 Europe/Berlin] [Login Success] [2025-05-25 16:38:07] Admin login successful for user: 'admin' (ID: 8).
+[25-May-2025 16:41:07 Europe/Berlin] [Log Clear Error] Failed to clear log file contents.
+[25-May-2025 16:43:42 Europe/Berlin] [2025-05-25 16:43:42] Admin logout for user: 'admin' (ID: 8).
+[25-May-2025 16:43:55 Europe/Berlin] [Login Success] [2025-05-25 16:43:55] Admin login successful for user: 'admin' (ID: 8).
+[25-May-2025 16:44:01 Europe/Berlin] [Log Clear Error] Failed to clear log file contents.
+[25-May-2025 16:48:01 Europe/Berlin] [2025-05-25 16:48:01] Admin logout for user: 'admin' (ID: 8).
+[25-May-2025 16:48:08 Europe/Berlin] [Login Success] [2025-05-25 16:48:08] Admin login successful for user: 'admin' (ID: 8).
+[25-May-2025 16:48:13 Europe/Berlin] [Log Clear Error] Failed to clear log file contents.
+[25-May-2025 16:49:45 Europe/Berlin] [Log Clear Error] Failed to clear log file contents.
+[25-May-2025 16:49:58 Europe/Berlin] [2025-05-25 16:49:58] Admin logout for user: 'admin' (ID: 8).
+[25-May-2025 16:50:06 Europe/Berlin] [Login Success] [2025-05-25 16:50:06] Admin login successful for user: 'admin' (ID: 8).
+[25-May-2025 16:51:44 Europe/Berlin] DEBUG: Current PHP working directory: C:\xampp\htdocs\BongBicycleShop\administrator\api
+[25-May-2025 16:51:44 Europe/Berlin] DEBUG: Attempting to clear log file at absolute path: C:\xampp\htdocs\BongBicycleShop\administrator\api/../../logs/user_actions.log
+[25-May-2025 16:51:44 Europe/Berlin] DEBUG: Does log directory exist? Yes
+[25-May-2025 16:51:44 Europe/Berlin] DEBUG: Is log directory writable? Yes
+[25-May-2025 16:51:44 Europe/Berlin] DEBUG: Does log file exist? Yes
+[25-May-2025 16:51:44 Europe/Berlin] DEBUG: Is log file writable? Yes
+[25-May-2025 16:51:44 Europe/Berlin] [Log Clear Error] Failed to clear log file contents. (file_put_contents failed)
+[25-May-2025 16:52:15 Europe/Berlin] [2025-05-25 16:52:15] Admin logout for user: 'admin' (ID: 8).
+[25-May-2025 16:52:24 Europe/Berlin] [Login Success] [2025-05-25 16:52:24] Admin login successful for user: 'admin' (ID: 8).
+[25-May-2025 16:52:29 Europe/Berlin] [2025-05-25 16:52:29] Log history cleared by Admin: 'admin' (ID: 8).
+[25-May-2025 16:52:42 Europe/Berlin] [Admin User Delete Debug] Received POST data: Array
+(
+    [user_id] => 2
+    [redirect_url] => http://localhost/bongbicycleshop/administrator/index.php#settings_users
+)
+
+[25-May-2025 16:52:42 Europe/Berlin] [Admin Delete Log] [2025-05-25 16:52:42] User deleted admin account: 'admin1' (ID: 2).
+[25-May-2025 16:52:42 Europe/Berlin] [Admin User Delete Success] Admin user with ID 2 deleted successfully.
+[25-May-2025 16:52:44 Europe/Berlin] [Admin User Delete Debug] Received POST data: Array
+(
+    [user_id] => 8
+    [redirect_url] => http://localhost/bongbicycleshop/administrator/index.php#settings_users
+)
+
+[25-May-2025 16:52:44 Europe/Berlin] [Admin Delete Log] [2025-05-25 16:52:44] User deleted admin account: 'admin' (ID: 8).
+[25-May-2025 16:52:44 Europe/Berlin] [Admin User Delete Success] Admin user with ID 8 deleted successfully.
+[25-May-2025 16:52:46 Europe/Berlin] [Admin User Delete Debug] Received POST data: Array
+(
+    [user_id] => 6
+    [redirect_url] => http://localhost/bongbicycleshop/administrator/index.php#settings_users
+)
+
+[25-May-2025 16:52:46 Europe/Berlin] [Admin Delete Log] [2025-05-25 16:52:46] User deleted admin account: 'pogi' (ID: 6).
+[25-May-2025 16:52:46 Europe/Berlin] [Admin User Delete Success] Admin user with ID 6 deleted successfully.
+[25-May-2025 16:52:48 Europe/Berlin] [Admin User Delete Debug] Received POST data: Array
+(
+    [user_id] => 5
+    [redirect_url] => http://localhost/bongbicycleshop/administrator/index.php#settings_users
+)
+
+[25-May-2025 16:52:48 Europe/Berlin] [Admin Delete Log] [2025-05-25 16:52:48] User deleted admin account: 'adminadmin' (ID: 5).
+[25-May-2025 16:52:48 Europe/Berlin] [Admin User Delete Success] Admin user with ID 5 deleted successfully.
+[25-May-2025 16:52:50 Europe/Berlin] [Admin User Delete Debug] Received POST data: Array
+(
+    [user_id] => 4
+    [redirect_url] => http://localhost/bongbicycleshop/administrator/index.php#settings_users
+)
+
+[25-May-2025 16:52:50 Europe/Berlin] [Admin Delete Log] [2025-05-25 16:52:50] User deleted admin account: 'admin12345' (ID: 4).
+[25-May-2025 16:52:50 Europe/Berlin] [Admin User Delete Success] Admin user with ID 4 deleted successfully.
+[25-May-2025 16:52:52 Europe/Berlin] [Admin User Delete Debug] Received POST data: Array
+(
+    [user_id] => 3
+    [redirect_url] => http://localhost/bongbicycleshop/administrator/index.php#settings_users
+)
+
+[25-May-2025 16:52:52 Europe/Berlin] [Admin Delete Log] [2025-05-25 16:52:52] User deleted admin account: 'admin123' (ID: 3).
+[25-May-2025 16:52:52 Europe/Berlin] [Admin User Delete Success] Admin user with ID 3 deleted successfully.
+[25-May-2025 16:52:58 Europe/Berlin] [2025-05-25 16:52:58] Log history cleared by Admin: 'admin' (ID: 8).
+[25-May-2025 16:55:01 Europe/Berlin] [Admin Add Log] [2025-05-25 16:55:01] User added a new admin account: 'admin' (ID: 9).
+[25-May-2025 16:55:53 Europe/Berlin] [Admin Add Log] [2025-05-25 16:55:53] User added a new admin account: 'admin2' (ID: 10).
+[25-May-2025 16:59:37 Europe/Berlin] [Admin Add Log] [2025-05-25 16:59:37] User added a new admin account: 'admin3' (ID: 11).
+[25-May-2025 16:59:51 Europe/Berlin] [Admin User Delete Debug] Received POST data: Array
+(
+    [user_id] => 9
+    [redirect_url] => http://localhost/bongbicycleshop/administrator/index.php#settings_users
+)
+
+[25-May-2025 16:59:51 Europe/Berlin] [Admin Delete Log] [2025-05-25 16:59:51] User deleted admin account: 'admin' (ID: 9).
+[25-May-2025 16:59:51 Europe/Berlin] [Admin User Delete Success] Admin user with ID 9 deleted successfully.
+[25-May-2025 17:00:03 Europe/Berlin] [Admin Add Log] [2025-05-25 17:00:03] User added a new admin account: 'admin' (ID: 12).
+[25-May-2025 17:00:10 Europe/Berlin] [2025-05-25 17:00:10] Admin logout for user: 'admin' (ID: 8).
+[25-May-2025 17:00:20 Europe/Berlin] [Login Success] [2025-05-25 17:00:20] Admin login successful for user: 'admin' (ID: 12).
+[25-May-2025 17:00:26 Europe/Berlin] [2025-05-25 17:00:26] Admin logout for user: 'admin' (ID: 12).
+[25-May-2025 17:00:36 Europe/Berlin] [Login Success] [2025-05-25 17:00:36] Admin login successful for user: 'admin2' (ID: 10).
+[25-May-2025 17:00:40 Europe/Berlin] [2025-05-25 17:00:40] Admin logout for user: 'admin2' (ID: 10).
+[25-May-2025 17:00:48 Europe/Berlin] [Login Success] [2025-05-25 17:00:48] Admin login successful for user: 'admin3' (ID: 11).
+[25-May-2025 17:00:51 Europe/Berlin] [2025-05-25 17:00:51] Admin logout for user: 'admin3' (ID: 11).
+[25-May-2025 17:00:58 Europe/Berlin] [Login Failed] Invalid password for user: 'admin2'.
+[25-May-2025 17:01:05 Europe/Berlin] [Login Success] [2025-05-25 17:01:05] Admin login successful for user: 'admin' (ID: 12).
+[25-May-2025 17:30:14 Europe/Berlin] [2025-05-25 17:30:14] Log history cleared by Admin: 'admin' (ID: 12).
+[25-May-2025 17:30:38 Europe/Berlin] [Admin User Delete Debug] Received POST data: Array
+(
+    [user_id] => 10
+    [redirect_url] => http://localhost/bongbicycleshop/administrator/index.php#settings_users
+)
+
+[25-May-2025 17:30:38 Europe/Berlin] [Admin Delete Log] [2025-05-25 17:30:38] User deleted admin account: 'admin2' (ID: 10).
+[25-May-2025 17:30:38 Europe/Berlin] [Admin User Delete Success] Admin user with ID 10 deleted successfully.
+[25-May-2025 17:30:44 Europe/Berlin] [Admin User Delete Debug] Received POST data: Array
+(
+    [user_id] => 11
+    [redirect_url] => http://localhost/bongbicycleshop/administrator/index.php#settings_users
+)
+
+[25-May-2025 17:30:44 Europe/Berlin] [Admin Delete Log] [2025-05-25 17:30:44] User deleted admin account: 'admin3' (ID: 11).
+[25-May-2025 17:30:44 Europe/Berlin] [Admin User Delete Success] Admin user with ID 11 deleted successfully.
+[25-May-2025 17:31:17 Europe/Berlin] [Admin Add Log] [2025-05-25 17:31:17] User added a new admin account: 'admin_2' (ID: 13).
+[25-May-2025 17:31:57 Europe/Berlin] Received POST data: Array
+(
+    [productName] => Teknows
+    [categoryKey] => BIK
+    [subcategoryKey] => MTB
+    [price] => 90
+    [variations] => Array
+        (
+            [0] => Array
+                (
+                    [color] => Blue
+                    [size] => M
+                    [quantity] => 10
+                )
+
+        )
+
+    [description] => WEWS
+    [redirect_url] => http://localhost/bongbicycleshop/administrator/index.php#products
+)
+
+[25-May-2025 17:31:57 Europe/Berlin] Received FILES data: Array
+(
+    [productImages] => Array
+        (
+            [name] => Array
+                (
+                    [0] => A curated collection of modern cycling apparel — including jerseys, shorts, jackets, gloves, and eyewear — neatly arranged on a clean white background with soft shadows and balanced lighting, perfect for a premium e-.jpg
+                )
+
+            [full_path] => Array
+                (
+                    [0] => A curated collection of modern cycling apparel — including jerseys, shorts, jackets, gloves, and eyewear — neatly arranged on a clean white background with soft shadows and balanced lighting, perfect for a premium e-.jpg
+                )
+
+            [type] => Array
+                (
+                    [0] => image/jpeg
+                )
+
+            [tmp_name] => Array
+                (
+                    [0] => C:\xampp\tmp\php1EFF.tmp
+                )
+
+            [error] => Array
+                (
+                    [0] => 0
+                )
+
+            [size] => Array
+                (
+                    [0] => 113119
+                )
+
+        )
+
+)
+
+[25-May-2025 17:31:57 Europe/Berlin] Product inserted, ID: 14
+[25-May-2025 17:31:57 Europe/Berlin] Variations inserted/processed for product ID: 14
+[25-May-2025 17:31:57 Europe/Berlin] Image uploaded and path saved: uploads/products/prod_683337edb08ba.jpg
+[25-May-2025 17:31:57 Europe/Berlin] All images processed for product ID: 14
+[25-May-2025 17:31:57 Europe/Berlin] User action logged: [2025-05-25 17:31:57] User added product: 'Teknows' (ID: 14), Category: 'BIK', Subcategory: 'MTB'.

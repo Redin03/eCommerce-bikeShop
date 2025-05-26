@@ -1,0 +1,88 @@
+[
+  {
+    "name": "Bikes",
+    "key": "BIK",
+    "subcategories": [
+      {"name": "Mountain Bikes", "key": "MTB"},
+      {"name": "Road Bikes", "key": "RDB"},
+      {"name": "Hybrid/Commuter Bikes", "key": "HYB"},
+      {"name": "Electric Bikes (E-Bikes)", "key": "EBI"},
+      {"name": "Gravel Bikes", "key": "GRV"},
+      {"name": "Cyclocross Bikes", "key": "CYC"},
+      {"name": "Folding Bikes", "key": "FLD"},
+      {"name": "Kids' Bikes", "key": "KID"},
+      {"name": "BMX Bikes", "key": "BMX"},
+      {"name": "Cruiser Bikes", "key": "CRS"},
+      {"name": "Fat Bikes", "key": "FAT"},
+      {"name": "Triathlon/Time Trial Bikes", "key": "TRI"},
+      {"name": "Track Bikes", "key": "TRK"},
+      {"name": "Touring Bikes", "key": "TNG"},
+      {"name": "Recumbent Bikes", "key": "RCB"}
+    ]
+  },
+  {
+    "name": "Apparel",
+    "key": "APP",
+    "subcategories": [
+      {"name": "Jerseys", "key": "JRS"},
+      {"name": "Cycling Shorts & Bibs", "key": "SHT"},
+      {"name": "Jackets & Vests", "key": "JAC"},
+      {"name": "Gloves", "key": "GLV"},
+      {"name": "Socks", "key": "SCK"},
+      {"name": "Helmets", "key": "HLM"},
+      {"name": "Cycling Shoes", "key": "SHS"},
+      {"name": "Base Layers", "key": "BSE"},
+      {"name": "Arm/Leg Warmers", "key": "WRM"},
+      {"name": "Headwear & Bandanas", "key": "HDW"},
+      {"name": "Eyewear (Glasses/Goggles)", "key": "EYE"},
+      {"name": "Casual Cycling Apparel", "key": "CSP"},
+      {"name": "Protective Gear (Pads, Guards)", "key": "PRT"},
+      {"name": "Rain Gear", "key": "RNG"}
+    ]
+  },
+  {
+    "name": "Accessories",
+    "key": "ACC",
+    "subcategories": [
+      {"name": "Lights (Front & Rear)", "key": "LGT"},
+      {"name": "Locks", "key": "LCK"},
+      {"name": "Pumps (Floor & Frame)", "key": "PMP"},
+      {"name": "Bags & Panniers (Frame, Seat, Handlebar)", "key": "BAG"},
+      {"name": "Water Bottles & Cages", "key": "WTR"},
+      {"name": "Bike Computers & GPS", "key": "CMP"},
+      {"name": "Fenders", "key": "FND"},
+      {"name": "Racks (Front & Rear)", "key": "RCK"},
+      {"name": "Trainers & Rollers", "key": "TRN"},
+      {"name": "Stands & Storage", "key": "STD"},
+      {"name": "Tools & Maintenance Kits", "key": "TOL"},
+      {"name": "Repair Kits & Patches", "key": "RPK"},
+      {"name": "Bike Covers", "key": "CVR"},
+      {"name": "Bells & Horns", "key": "BLL"},
+      {"name": "Mirrors", "key": "MRR"},
+      {"name": "Child Seats", "key": "CHD"},
+      {"name": "Trailers", "key": "TRL"},
+      {"name": "Action Cameras & Mounts", "key": "CAM"}
+    ]
+  },
+  {
+    "name": "Parts & Components",
+    "key": "PAR",
+    "subcategories": [
+      {"name": "Drivetrain (Chains, Cassettes, Derailleurs, Cranks)", "key": "DRV"},
+      {"name": "Brakes (Calipers, Levers, Rotors, Pads)", "key": "BRK"},
+      {"name": "Wheels & Tires (Rims, Hubs, Spokes, Tubes, Tubeless)", "key": "WHL"},
+      {"name": "Handlebars & Stems", "key": "HND"},
+      {"name": "Saddles & Seatposts", "key": "SAD"},
+      {"name": "Pedals (Flat, Clipless, Toe Clip)", "key": "PED"},
+      {"name": "Forks & Shocks", "key": "FOR"},
+      {"name": "Frames", "key": "FRM"},
+      {"name": "Headsets", "key": "HDS"},
+      {"name": "Bottom Brackets", "key": "BBK"},
+      {"name": "Grips & Bar Tape", "key": "GRP"},
+      {"name": "Cables & Housing", "key": "CBL"},
+      {"name": "Bearings", "key": "BRG"},
+      {"name": "Small Parts & Hardware", "key": "SMP"},
+      {"name": "Electronic Shifting Components", "key": "ELS"}
+    ]
+  }
+]

@@ -1,0 +1,13 @@
+
+
+Theme Color Palette for my website
+| Element          | Color Code | Use For                        |
+| ---------------- | ---------- | ------------------------------ |
+| Primary          | #006A4E    | Buttons, headers, active tabs  |
+| Secondary        | #FFB703    | Hover states, icons, badges    |
+| Accent           | #00BFA6    | Links, call-to-action elements |
+| Background Light | #F4F4F4    | Main background                |
+| Background Dark  | #003D33    | Footer, dark sections          |
+| Text Dark        | #1E1E1E    | Primary text on light bg       |
+| Text Light       | #FFFFFF    | Text on dark bg or buttons     |
+| Border/Gray      | #D9D9D9    | Dividers, card borders         |
