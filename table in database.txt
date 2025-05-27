@@ -1,0 +1,91 @@
+CREATE DATABASE IF NOT EXISTS bong_bike_shop;
+USE bong_bike_shop;
+
+
+-- Table for Users
+CREATE TABLE IF NOT EXISTS users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    gender ENUM('Male','Female','Prefer not to say') DEFAULT 'Prefer not to say',
+    contact_number VARCHAR(20),
+    profile_image VARCHAR(255) DEFAULT NULL,
+    email VARCHAR(150) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL,
+    is_verified TINYINT(1) DEFAULT 0,
+    verification_code VARCHAR(64),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+
+-- Table for Products
+CREATE TABLE products (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    category VARCHAR(100) NOT NULL,
+    subcategory VARCHAR(100) NOT NULL,
+    description TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+-- Table for Product Variations
+CREATE TABLE product_variations (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    product_id INT NOT NULL,
+    size VARCHAR(100),
+    color VARCHAR(100),
+    stock INT NOT NULL DEFAULT 0,
+    price DECIMAL(10, 2) NOT NULL,
+    FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
+);
+
+-- Table for Product Images
+CREATE TABLE product_images (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    product_id INT NOT NULL,
+    image_path VARCHAR(255) NOT NULL,
+    is_main BOOLEAN DEFAULT FALSE, -- Optional: To designate a main image for display
+    upload_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
+);
+
+-- Table for Admin Users
+CREATE TABLE IF NOT EXISTS admin_users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(50) NOT NULL UNIQUE, -- Admin username
+    password VARCHAR(255) NOT NULL,       -- Hashed password
+    role VARCHAR(50) DEFAULT 'Admin',     -- e.g., 'Admin', 'SuperAdmin', 'Editor'
+    last_login DATETIME DEFAULT NULL,     -- To track last login time
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+
+-- Table for Activity Logs
+CREATE TABLE IF NOT EXISTS activity_logs (
+    log_id INT AUTO_INCREMENT PRIMARY KEY,
+    admin_id INT NOT NULL,                 -- ID of the admin who performed the action
+    action_type VARCHAR(100) NOT NULL,     -- e.g., 'ADD_USER', 'ADD_PRODUCT', 'DELETE_ORDER'
+    description TEXT,                      -- Detailed description of the action
+    ip_address VARCHAR(45),                -- IP address of the admin
+    log_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- When the action occurred
+    FOREIGN KEY (admin_id) REFERENCES admin_users(id) ON DELETE CASCADE
+);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

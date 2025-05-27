@@ -1,471 +1,419 @@
-<style>
-        /*
-        NOTE: In a real application, these CSS rules would ideally reside in your main stylesheet (e.g., style.css)
-        that is loaded once in index.php, not directly in products.php.
-        This prevents redundant style declarations when products.php is loaded dynamically.
-        */
-
-        :root {
-            --primary: #006A4E;
-            --secondary: #FFB703;
-            --accent: #00BFA6;
-            --bg-light: #F4F4F4;
-            --bg-dark: #003D33;
-            --text-dark: #1E1E1E;
-            --text-light: #FFFFFF;
-            --border-gray: #D9D9D9;
-            --header-height: 66px;
-            --sidebar-width: 250px;
-            --sidebar-collapsed-width: 70px;
-            --toggle-button-size: 40px;
-        }
-
-        /* Styles for the "Add New Product" button */
-        .fixed-add-button {
-            background-color: var(--accent); /* Use accent color for the button background */
-            color: var(--text-light);      /* Light text color */
-            border: none;                   /* Remove default border */
-            transition: background-color 0.2s ease, color 0.2s ease; /* Smooth transition on hover */
-        }
-
-        .fixed-add-button:hover {
-            background-color: var(--secondary); /* Secondary color on hover */
-            color: var(--text-dark);       /* Darker text on hover for contrast */
-        }
-
-        /* Styles for the modal header */
-        .modal-header.bg-primary {
-            background-color: var(--primary) !important; /* Override Bootstrap's bg-primary with your variable */
-            color: var(--text-light);                 /* Light text color for header */
-        }
-
-        .modal-header .btn-close {
-            filter: invert(1); /* Invert the color of the close button icon to make it white */
-        }
-        /* Styles for the delete modal header */
-        .modal-header.bg-danger {
-            background-color: #dc3545 !important; /* Bootstrap danger color */
-            color: var(--text-light);
-        }
-
-        .modal-header.bg-danger .btn-close {
-            filter: invert(1); /* White close button for danger modal */
-        }
-
-        /* Styles for modal footer buttons */
-        .modal-footer .btn-primary {
-            background-color: var(--primary); /* Primary color for the submit button */
-            border-color: var(--primary);     /* Ensure border matches */
-            color: var(--text-light);         /* Light text */
-        }
-
-        .modal-footer .btn-primary:hover {
-            background-color: var(--secondary); /* Secondary color on hover */
-            border-color: var(--secondary);     /* Border matches hover */
-            color: var(--text-dark);          /* Darker text on hover */
-        }
-         /* Styles for delete button in modal footer */
-        .modal-footer .btn-danger {
-            background-color: #dc3545; /* Bootstrap danger color */
-            border-color: #dc3545;
-            color: var(--text-light);
-        }
-
-        .modal-footer .btn-danger:hover {
-            background-color: #c82333; /* Darker danger on hover */
-            border-color: #bd2130;
-        }
-
-        .modal-footer .btn-secondary {
-            background-color: var(--border-gray); /* Use a neutral color for secondary button */
-            border-color: var(--border-gray);
-            color: var(--text-dark);
-        }
-
-        .modal-footer .btn-secondary:hover {
-            background-color: #c0c0c0; /* Slightly darker gray on hover */
-            border-color: #c0c0c0;
-        }
-
-        /* Additional styles for the page content, if not already in main stylesheet */
-        .card {
-            border: none;
-            border-radius: 0.5rem;
-        }
-        .table-responsive {
-            margin-top: 15px;
-        }
-        .product-image-thumbnail {
-            width: 50px;
-            height: 50px;
-            object-fit: cover;
-            margin-right: 5px;
-            border-radius: 5px;
-            border: 1px solid #ddd;
-        }
-        .variation-table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 0.85em;
-            margin-top: 5px; /* Add some space above the table */
-        }
-        .variation-table th, .variation-table td {
-            border: 1px solid #eee; /* Light border for inner table cells */
-            padding: 4px 8px;
-            text-align: left;
-        }
-        .variation-table th {
-            background-color: #f8f8f8; /* Light background for inner table header */
-            font-weight: bold;
-        }
-        .variation-table tr:nth-child(even) {
-            background-color: #fdfdfd; /* Slightly different background for even rows */
-        }
-    </style>
-
 <?php
-// filepath: c:\xampp\htdocs\BongBicycleShop\administrator\submenu\products.php
-$message = '';
-$message_type = 'info';
-
-if (isset($_SESSION['toast_message'])) {
-    $message = $_SESSION['toast_message'];
-    $message_type = ($_SESSION['toast_type'] === 'success') ? 'success' : 'danger';
-    unset($_SESSION['toast_message'], $_SESSION['toast_type']);
+session_start();
+// Check if the admin is logged in
+if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true) {
+    $_SESSION['login_message'] = [
+        'text' => 'Please log in to access this page.',
+        'type' => 'info'
+    ];
+    header('Location: ../login.php');
+    exit;
 }
 
-// Include database connection
-require_once __DIR__ . '/../../config/db.php'; // Adjust path as necessary
+require_once '../../config/db.php'; // Adjust path if necessary
+require_once '../includes/logger.php'; // Adjust path if necessary
+
+// --- Date Filtering Logic ---
+$filter_start_date = $_GET['start_date'] ?? '';
+$filter_end_date = $_GET['end_date'] ?? '';
+// --- Category Filtering Logic (NEW) ---
+$filter_category = $_GET['category'] ?? '';
+
+
+// Fetch products from the database
+$sql = "
+    SELECT
+        p.id AS product_id,
+        p.name AS product_name,
+        p.category,
+        p.subcategory,
+        p.description,
+        p.created_at,
+        GROUP_CONCAT(DISTINCT CONCAT(pv.id, ':', pv.size, ':', pv.color, ':', pv.stock, ':', pv.price) ORDER BY pv.id ASC SEPARATOR '||') AS variations_data,
+        GROUP_CONCAT(DISTINCT CONCAT(pi.id, ':', pi.image_path) ORDER BY pi.is_main DESC, pi.id ASC SEPARATOR '||') AS images_data
+    FROM
+        products p
+    LEFT JOIN
+        product_variations pv ON p.id = pv.product_id
+    LEFT JOIN
+        product_images pi ON p.id = pi.product_id
+";
+
+$conditions = [];
+$params = [];
+$types = '';
+
+if (!empty($filter_start_date)) {
+    $conditions[] = "p.created_at >= ?";
+    $params[] = $filter_start_date . " 00:00:00"; // Start of the day
+    $types .= 's';
+}
+
+if (!empty($filter_end_date)) {
+    $conditions[] = "p.created_at <= ?";
+    $params[] = $filter_end_date . " 23:59:59"; // End of the day
+    $types .= 's';
+}
+
+// Add category filter condition (NEW)
+if (!empty($filter_category)) {
+    $conditions[] = "p.category = ?";
+    $params[] = $filter_category;
+    $types .= 's';
+}
+
+
+if (!empty($conditions)) {
+    $sql .= " WHERE " . implode(" AND ", $conditions);
+}
+
+$sql .= " GROUP BY p.id ORDER BY p.created_at DESC"; // Order by most recent first
 
 $products = [];
-try {
-    if (!isset($conn) || $conn->connect_error) {
-        throw new Exception("Database connection not established or failed: " . ($conn->connect_error ?? 'Unknown error'));
-    }
+$stmt = $conn->prepare($sql);
 
-    // Prepare SQL statement to fetch products along with their variations and images
-    // Using LEFT JOIN to ensure products without variations or images are still listed
-    $sql = "
-        SELECT
-            p.id,
-            p.name,
-            p.category_key,
-            p.subcategory_key,
-            GROUP_CONCAT(DISTINCT CONCAT(pv.color_name, '|', pv.size_name, '|', pv.quantity, '|', pv.price) SEPARATOR ';') AS variations,
-            GROUP_CONCAT(DISTINCT pi.image_path ORDER BY pi.display_order ASC SEPARATOR ';') AS images
-        FROM
-            products p
-        LEFT JOIN
-            product_variations pv ON p.id = pv.product_id
-        LEFT JOIN
-            product_images pi ON p.id = pi.product_id
-        GROUP BY
-            p.id
-        ORDER BY
-            p.id DESC;
-    ";
-
-    $stmt = $conn->prepare($sql);
-    if (!$stmt) {
-        throw new Exception("Prepare statement failed: " . $conn->error);
+if ($stmt) {
+    if (!empty($params)) {
+        $stmt->bind_param($types, ...$params);
     }
     $stmt->execute();
     $result = $stmt->get_result();
-    while ($row = $result->fetch_assoc()) {
-        // Process variations and images
-        $row['parsed_variations'] = [];
-        if (!empty($row['variations'])) {
-            $variation_strings = explode(';', $row['variations']);
-            foreach ($variation_strings as $v_str) {
-                list($color, $size, $qty, $price) = explode('|', $v_str);
-                $row['parsed_variations'][] = [
-                    'color_name' => $color,
-                    'size_name' => $size,
-                    'quantity' => $qty,
-                    'price' => $price
-                ];
-            }
-        }
-        $row['parsed_images'] = !empty($row['images']) ? explode(';', $row['images']) : [];
-        $products[] = $row;
-    }
-    $stmt->close();
 
-} catch (Exception $e) {
-    error_log("Error fetching products: " . $e->getMessage());
-    $message = "Error loading products: " . $e->getMessage();
-    $message_type = "danger";
-} finally {
-    if (isset($conn) && $conn instanceof mysqli && !$conn->connect_error) {
-        $conn->close();
+    if ($result && $result->num_rows > 0) {
+        while ($row = $result->fetch_assoc()) {
+            $product = [
+                'id' => $row['product_id'],
+                'name' => htmlspecialchars($row['product_name']),
+                'category' => htmlspecialchars($row['category']),
+                'subcategory' => htmlspecialchars($row['subcategory']),
+                'description' => htmlspecialchars($row['description']),
+                'created_at' => htmlspecialchars($row['created_at']),
+                'variations' => [],
+                'images' => []
+            ];
+
+            // Parse variations data
+            if (!empty($row['variations_data'])) {
+                $variation_strings = explode('||', $row['variations_data']);
+                foreach ($variation_strings as $v_str) {
+                    list($id, $size, $color, $stock, $price) = explode(':', $v_str);
+                    $product['variations'][] = [
+                        'id' => htmlspecialchars($id),
+                        'size' => htmlspecialchars($size),
+                        'color' => htmlspecialchars($color),
+                        'stock' => htmlspecialchars($stock),
+                        'price' => htmlspecialchars(number_format($price, 2))
+                    ];
+                }
+            }
+
+            // Parse images data
+            if (!empty($row['images_data'])) {
+                $image_paths = explode('||', $row['images_data']);
+                foreach ($image_paths as $img_str) {
+                    list($id, $path) = explode(':', $img_str);
+                    $product['images'][] = [
+                        'id' => htmlspecialchars($id),
+                        'path' => htmlspecialchars($path)
+                    ];
+                }
+            }
+
+            $products[] = $product;
+        }
     }
+    $result->free();
+    $stmt->close();
+} else {
+    // Log database error
+    error_log("Error preparing products fetch query: " . $conn->error);
 }
+
+$conn->close();
+
 ?>
 
 <h2 class="mb-4">Product Management</h2>
- <?php if ($message): ?>
-        <div class="alert alert-<?php echo $message_type; ?> alert-dismissible fade show" role="alert">
-            <?php echo htmlspecialchars($message); ?>
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    <?php endif; ?>
+<div class="alert alert-info" role="alert">
+    Manage bicycle inventory, add new products, update details, and more.
+</div>
 
-    <div class="alert alert-info" role="alert">
-        This is the content for the **Products** page. Here you can manage bicycle inventory, add new products, update details, and more.
+<div class="card shadow-sm mb-4">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <span>Filter Products</span>
     </div>
+    <div class="card-body">
+        <form id="productsFilterForm" class="row g-3 align-items-end">
+            <div class="col-md-4">
+                <label for="productStartDate" class="form-label">From Date (Added On):</label>
+                <input type="date" class="form-control" id="productStartDate" name="start_date" value="<?php echo htmlspecialchars($filter_start_date); ?>">
+            </div>
+            <div class="col-md-4">
+                <label for="productEndDate" class="form-label">To Date (Added On):</label>
+                <input type="date" class="form-control" id="productEndDate" name="end_date" value="<?php echo htmlspecialchars($filter_end_date); ?>">
+            </div>
+            <div class="col-md-4">
+                <label for="productCategoryFilter" class="form-label">Category:</label>
+                <select class="form-select" id="productCategoryFilter" name="category">
+                    <option value="">All Categories</option>
+                    <option value="Bikes" <?php echo ($filter_category === 'Bikes') ? 'selected' : ''; ?>>Bikes</option>
+                    <option value="Accessories" <?php echo ($filter_category === 'Accessories') ? 'selected' : ''; ?>>Accessories</option>
+                    <option value="Parts & Components" <?php echo ($filter_category === 'Parts & Components') ? 'selected' : ''; ?>>Parts & Components</option>
+                    <option value="Apparel" <?php echo ($filter_category === 'Apparel') ? 'selected' : ''; ?>>Apparel</option>
+                </select>
+            </div>
+            <div class="col-md-auto">
+                <button type="submit" class="btn btn-accent"><i class="bi bi-funnel me-2"></i>Apply Filter</button>
+                <button type="button" class="btn btn-secondary ms-2" id="resetProductsFilterBtn"><i class="bi bi-arrow-counterclockwise me-2"></i>Reset Filter</button>
+            </div>
+        </form>
+    </div>
+</div>
 
-<button class="btn mb-3 fixed-add-button" data-bs-toggle="modal" data-bs-target="#addProductModal">
-  <i class="bi bi-plus-circle me-2"></i> Add New Product
-</button>
-
-<div class="card shadow-sm p-4">
-  <h5>Existing Products</h5>
-  <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
-    <table class="table table-striped table-hover">
-      <thead>
-        <tr>
-          <th>Product ID</th>
-          <th>Name</th>
-          <th>Category</th>
-          <th>Variations</th> <th>Images</th>     <th>Actions</th>
-          </tr>
-      </thead>
-      <tbody>
-        <?php if (empty($products)): ?>
-            <tr>
-                <td colspan="6" class="text-center text-muted">No products found. Add a new product to see it here.</td>
-            </tr>
-        <?php else: ?>
-            <?php foreach ($products as $product): ?>
-                <tr>
-                    <td><?php echo htmlspecialchars($product['id']); ?></td>
-                    <td><?php echo htmlspecialchars($product['name']); ?></td>
-                    <td><?php echo htmlspecialchars($product['category_key']); ?> / <?php echo htmlspecialchars($product['subcategory_key']); ?></td>
-                    <td>
-                        <?php if (!empty($product['parsed_variations'])): ?>
-                            <table class="variation-table">
-                                <thead>
-                                    <tr>
-                                        <th>Color</th>
-                                        <th>Size</th>
-                                        <th>Qty</th>
-                                        <th>Price</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <?php foreach ($product['parsed_variations'] as $variation): ?>
-                                        <tr>
-                                            <td><?php echo htmlspecialchars($variation['color_name']); ?></td>
-                                            <td><?php echo htmlspecialchars($variation['size_name']); ?></td>
-                                            <td><?php echo htmlspecialchars($variation['quantity']); ?></td>
-                                            <td><?php echo htmlspecialchars(number_format($variation['price'], 2)); ?></td>
-                                        </tr>
-                                    <?php endforeach; ?>
-                                </tbody>
-                            </table>
-                        <?php else: ?>
-                            *No variations*
-                        <?php endif; ?>
-                    </td>
-                    <td>
-                        <?php if (!empty($product['parsed_images'])): ?>
-                            <?php foreach ($product['parsed_images'] as $image_path): ?>
-                                <img src="/ecommerce-bikeshop/<?php echo htmlspecialchars($image_path); ?>" alt="Product Image" class="product-image-thumbnail">
-                            <?php endforeach; ?>
-                        <?php else: ?>
-                            *No images*
-                        <?php endif; ?>
-                    </td>
-                    <td>
-                        <button class="btn btn-sm btn-warning me-1 edit-product-btn" title="Edit"
-                                data-bs-toggle="modal" data-bs-target="#editProductModal"
-                                data-product-id="<?php echo htmlspecialchars($product['id']); ?>">
-                            <i class="bi bi-pencil"></i>
-                        </button>
-                       <button class="btn btn-sm btn-danger delete-product-btn" title="Delete"
-                              data-bs-toggle="modal" data-bs-target="#deleteProductModal"
-                              data-product-id="<?php echo htmlspecialchars($product['id']); ?>"
-                              data-product-name="<?php echo htmlspecialchars($product['name']); ?>">
-                          <i class="bi bi-trash"></i>
-                      </button>
-                    </td>
-                </tr>
-            <?php endforeach; ?>
-        <?php endif; ?>
-      </tbody>
-    </table>
-  </div>
+<div class="card shadow-sm mb-4">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <span>Products Overview</span>
+        <button class="btn btn-accent" data-bs-toggle="modal" data-bs-target="#addProductModal">
+            <i class="bi bi-plus-circle me-2"></i>Add New Product
+        </button>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-striped table-hover">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Image</th>
+                        <th>Product Name</th>
+                        <th>Category</th>
+                        <th>Sub-Category</th>
+                        <th>Variations</th>
+                        <th>Added On</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php if (!empty($products)): ?>
+                        <?php foreach ($products as $product): ?>
+                            <tr>
+                                <td><?= $product['id'] ?></td>
+                                <td>
+                                    <?php if (!empty($product['images'])): ?>
+                                        <img src="../<?= $product['images'][0]['path'] ?>" alt="<?= $product['name'] ?>" class="img-thumbnail" style="width: 50px; height: 50px; object-fit: cover;">
+                                        <?php if (count($product['images']) > 1): ?>
+                                            <span class="badge bg-secondary">+<?= count($product['images']) - 1 ?></span>
+                                        <?php endif; ?>
+                                    <?php else: ?>
+                                        No Image
+                                    <?php endif; ?>
+                                </td>
+                                <td><?= $product['name'] ?></td>
+                                <td><?= $product['category'] ?></td>
+                                <td><?= $product['subcategory'] ?></td>
+                                <td>
+                                    <?php if (!empty($product['variations'])): ?>
+                                        <ul class="list-unstyled mb-0 small">
+                                            <?php foreach ($product['variations'] as $index => $variation): ?>
+                                                <li>
+                                                    <strong><?= $variation['size'] ?></strong> / <?= $variation['color'] ?>: (Stock: <?= $variation['stock'] ?>, Price: ₱<?= $variation['price'] ?>)
+                                                </li>
+                                            <?php endforeach; ?>
+                                        </ul>
+                                    <?php else: ?>
+                                        No Variations
+                                    <?php endif; ?>
+                                </td>
+                                <td><?= date('Y-m-d', strtotime($product['created_at'])) ?></td>
+                                <td>
+                                    <button class="btn btn-sm btn-warning me-2 edit-product-btn mb-2" data-bs-toggle="modal" data-bs-target="#editProductModal" data-product-id="<?= $product['id'] ?>">
+                                        <i class="bi bi-pencil"></i> Edit
+                                    </button>
+                                    <button class="btn btn-sm btn-danger delete-product-btn" data-bs-toggle="modal" data-bs-target="#deleteProductModal" data-product-id="<?= $product['id'] ?>">
+                                        <i class="bi bi-trash"></i> Delete
+                                    </button>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    <?php else: ?>
+                        <tr>
+                            <td colspan="8" class="text-center">No products found for the selected filter criteria.</td>
+                        </tr>
+                    <?php endif; ?>
+                </tbody>
+            </table>
+        </div>
+    </div>
 </div>
 
 <div class="modal fade" id="addProductModal" tabindex="-1" aria-labelledby="addProductModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered modal-xl">
-    <div class="modal-content">
-      <div class="modal-header bg-primary text-light">
-        <h5 class="modal-title" id="addProductModalLabel"><i class="bi bi-plus-circle me-2"></i> Add New Product</h5>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        <form id="addProductForm" action="api/add_product.php" method="POST" enctype="multipart/form-data">
-          <div class="row mb-3">
-            <div class="col-12">
-              <label for="newProductName" class="form-label">Product Name</label>
-              <input type="text" class="form-control" id="newProductName" name="productName" required>
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addProductModalLabel">Add New Product</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-          </div>
+            <form data-api-endpoint="api/add_product.php" enctype="multipart/form-data">
+                <div class="modal-body">
+                    <h6 class="mb-3">Product Details</h6>
+                    <div class="mb-3">
+                        <label for="productNameInput" class="form-label">Product Name</label>
+                        <input type="text" class="form-control" id="productNameInput" name="name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="productCategory" class="form-label">Category</label>
+                        <select class="form-select" id="productCategory" name="category" required>
+                            <option value="">Select Category</option>
+                            <option value="Bikes">Bikes</option>
+                            <option value="Accessories">Accessories</option>
+                            <option value="Parts & Components">Parts & Components</option>
+                            <option value="Apparel">Apparel</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="productSubCategory" class="form-label">Sub-Category</label>
+                        <select class="form-select" id="productSubCategory" name="subcategory" required disabled>
+                            <option value="">Select Sub-Category</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="productDescriptionInput" class="form-label">Description</label>
+                        <textarea class="form-control" id="productDescriptionInput" name="description" rows="3" required></textarea>
+                    </div>
 
-          <div class="row mb-3">
-            <div class="col-md-6">
-              <label for="newProductCategory" class="form-label">Category</label>
-              <select class="form-select" id="newProductCategory" name="categoryKey" required>
-                <option selected disabled value="">Select Category</option>
-              </select>
-            </div>
-            <div class="col-md-6">
-              <label for="newProductSubcategory" class="form-label">Subcategory</label>
-              <select class="form-select" id="newProductSubcategory" name="subcategoryKey" required disabled>
-                <option selected disabled value="">Select Subcategory</option>
-              </select>
-            </div>
-          </div>
+                    <h6 class="mt-4 mb-3">Product Variations</h6>
+                    <div id="productVariationsContainer">
+                        <div class="card mb-2 product-variation-card">
+                            <div class="card-body">
+                                <h7 class="card-title text-muted">Variation #1</h7>
+                                <button type="button" class="btn-close float-end remove-variation-btn" aria-label="Remove variation"></button>
+                                <div class="row g-2">
+                                    <div class="col-md-3">
+                                        <label for="variationSize_0" class="form-label">Size</label>
+                                        <input type="text" class="form-control" id="variationSize_0" name="variations[0][size]" placeholder="e.g., Small, 27.5in" required>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label for="variationColor_0" class="form-label">Color</label>
+                                        <input type="text" class="form-control" id="variationColor_0" name="variations[0][color]" placeholder="e.g., Red, Blue" required>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label for="variationStock_0" class="form-label">Stock</label>
+                                        <input type="number" class="form-control" id="variationStock_0" name="variations[0][stock]" min="0" required>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label for="variationPrice_0" class="form-label">Price</label>
+                                        <input type="number" class="form-control" id="variationPrice_0" name="variations[0][price]" step="0.01" min="0" required>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
-          <div class="row mb-3">
-            <div class="col-12">
-              <label class="form-label d-block">Product Variations (Colors, Sizes, Quantity, and Price)</label>
-              <div class="input-group mb-2">
-                <input type="text" class="form-control" id="newProductColorInput" placeholder="e.g., Red, Blue">
-                <input type="text" class="form-control" id="newProductSizeInput" placeholder="e.g., S, M, 29er">
-                <input type="number" class="form-control" id="newProductQuantityInput" min="0" value="0" placeholder="Quantity">
-                <input type="number" class="form-control" id="newProductVariationPriceInput" step="0.01" min="0" placeholder="Price (e.g., 9000.00)">
-                <button class="btn btn-outline-secondary" type="button" id="addVariationBtn"><i class="bi bi-plus-lg"></i> Add Variation</button>
-              </div>
-              <div id="productVariationsContainer" class="mt-2 border p-2 rounded bg-light">
-                <p class="text-muted text-center" id="noVariationsMessage">No variations added yet.</p>
-              </div>
-            </div>
-          </div>
+                    <button type="button" id="addVariationBtn" class="btn btn-sm btn-outline-secondary mt-3">
+                        <i class="bi bi-plus-circle me-2"></i>Add Another Variation
+                    </button>
 
-          <div class="row mb-3">
-            <div class="col-12">
-              <label for="newProductDescription" class="form-label">Description</label>
-              <textarea class="form-control" id="newProductDescription" name="description" rows="3"></textarea>
-            </div>
-          </div>
+                    <h6 class="mt-4 mb-3">Product Images</h6>
+                    <div class="mb-3">
+                        <label for="productImagesInput" class="form-label">Upload Images (Max 5)</label>
+                        <input type="file" class="form-control" id="productImagesInput" name="product_images[]" accept="image/*" multiple>
+                        <small class="text-muted">You can select multiple image files (JPG, PNG, GIF).</small>
+                    </div>
 
-          <div class="row mb-3">
-            <div class="col-12">
-              <label for="newProductImages" class="form-label">Product Images</label>
-              <input class="form-control" type="file" id="newProductImages" name="productImages[]" multiple accept="image/*">
-              <div id="imagePreviewContainer" class="d-flex flex-wrap mt-2">
+                    <div data-form-message class="mt-3"></div>
                 </div>
-            </div>
-          </div>
-
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-            <button type="submit" class="btn btn-accent">Save Product</button>
-          </div>
-
-          <input type="hidden" name="redirect_url" value="http://localhost/ecommerce-bikeshop/administrator/index.php#products">
-        </form>
-      </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-accent">Add Product</button>
+                </div>
+            </form>
+        </div>
     </div>
-  </div>
 </div>
 
 <div class="modal fade" id="editProductModal" tabindex="-1" aria-labelledby="editProductModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered modal-xl">
-    <div class="modal-content">
-      <div class="modal-header bg-warning text-dark"> <h5 class="modal-title" id="editProductModalLabel"><i class="bi bi-pencil-square me-2"></i> Edit Product</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        <form id="editProductForm" action="api/update_product.php" method="POST" enctype="multipart/form-data">
-          <input type="hidden" id="editProductId" name="productId">
-
-          <div class="row mb-3">
-            <div class="col-12">
-              <label for="editProductName" class="form-label">Product Name</label>
-              <input type="text" class="form-control" id="editProductName" name="productName" required>
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editProductModalLabel">Edit Product</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-          </div>
+            <form data-api-endpoint="api/update_product.php" enctype="multipart/form-data">
+                <div class="modal-body">
+                    <input type="hidden" id="editProductId" name="product_id">
 
-          <div class="row mb-3">
-            <div class="col-md-6">
-              <label for="editProductCategory" class="form-label">Category</label>
-              <select class="form-select" id="editProductCategory" name="categoryKey" required>
-                <option selected disabled value="">Select Category</option>
-              </select>
-            </div>
-            <div class="col-md-6">
-              <label for="editProductSubcategory" class="form-label">Subcategory</label>
-              <select class="form-select" id="editProductSubcategory" name="subcategoryKey" required disabled>
-                <option selected disabled value="">Select Subcategory</option>
-              </select>
-            </div>
-          </div>
+                    <h6 class="mb-3">Product Details</h6>
+                    <div class="mb-3">
+                        <label for="editProductNameInput" class="form-label">Product Name</label>
+                        <input type="text" class="form-control" id="editProductNameInput" name="name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="editProductCategory" class="form-label">Category</label>
+                        <select class="form-select" id="editProductCategory" name="category" required>
+                            <option value="">Select Category</option>
+                            <option value="Bikes">Bikes</option>
+                            <option value="Accessories">Accessories</option>
+                            <option value="Parts & Components">Parts & Components</option>
+                            <option value="Apparel">Apparel</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="editProductSubCategory" class="form-label">Sub-Category</label>
+                        <select class="form-select" id="editProductSubCategory" name="subcategory" required disabled>
+                            <option value="">Select Sub-Category</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="editProductDescriptionInput" class="form-label">Description</label>
+                        <textarea class="form-control" id="editProductDescriptionInput" name="description" rows="3" required></textarea>
+                    </div>
 
-          <div class="row mb-3">
-            <div class="col-12">
-              <label class="form-label d-block">Product Variations (Colors, Sizes, Quantity, and Price)</label>
-              <div class="input-group mb-2">
-                <input type="text" class="form-control" id="editProductColorInput" placeholder="e.g., Red, Blue">
-                <input type="text" class="form-control" id="editProductSizeInput" placeholder="e.g., S, M, 29er">
-                <input type="number" class="form-control" id="editProductQuantityInput" min="0" value="0" placeholder="Quantity">
-                <input type="number" class="form-control" id="editProductVariationPriceInput" step="0.01" min="0" placeholder="Price (e.g., 9000.00)">
-                <button class="btn btn-outline-secondary" type="button" id="editAddVariationBtn"><i class="bi bi-plus-lg"></i> Add Variation</button>
-              </div>
-              <div id="editProductVariationsContainer" class="mt-2 border p-2 rounded bg-light">
-                <p class="text-muted text-center" id="editNoVariationsMessage">No variations added yet.</p>
-              </div>
-            </div>
-          </div>
+                    <h6 class="mt-4 mb-3">Product Variations</h6>
+                    <div id="editProductVariationsContainer">
+                        </div>
+                    <button type="button" id="editAddVariationBtn" class="btn btn-sm btn-outline-secondary mt-3">
+                        <i class="bi bi-plus-circle me-2"></i>Add Another Variation
+                    </button>
 
-          <div class="row mb-3">
-            <div class="col-12">
-              <label for="editProductDescription" class="form-label">Description</label>
-              <textarea class="form-control" id="editProductDescription" name="description" rows="3"></textarea>
-            </div>
-          </div>
 
-          <div class="row mb-3">
-            <div class="col-12">
-              <label for="editProductImages" class="form-label">Product Images</label>
-              <input class="form-control" type="file" id="editProductImages" name="productImages[]" multiple accept="image/*">
-              <div id="editImagePreviewContainer" class="d-flex flex-wrap mt-2">
+                    <h6 class="mt-4 mb-3">Product Images</h6>
+                    <div id="editProductImagesDisplay" class="d-flex flex-wrap gap-2 mb-3">
+                        </div>
+                    <div class="mb-3">
+                        <label for="editProductImagesInput" class="form-label">Upload New Images (Max 5 total)</label>
+                        <input type="file" class="form-control" id="editProductImagesInput" name="new_product_images[]" accept="image/*" multiple>
+                        <small class="text-muted">Select new image files to upload. Existing images can be removed above.</small>
+                    </div>
+
+                    <div data-form-message class="mt-3"></div>
                 </div>
-            </div>
-          </div>
-
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-            <button type="submit" class="btn btn-warning">Update Product</button>
-          </div>
-
-          <input type="hidden" name="redirect_url" value="http://localhost/ecommerce-bikeshop/administrator/index.php#products">
-        </form>
-      </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-accent">Save Changes</button>
+                </div>
+            </form>
+        </div>
     </div>
-  </div>
 </div>
 
 <div class="modal fade" id="deleteProductModal" tabindex="-1" aria-labelledby="deleteProductModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content">
-      <div class="modal-header bg-danger text-light">
-        <h5 class="modal-title" id="deleteProductModalLabel"><i class="bi bi-exclamation-triangle me-2"></i> Confirm Deletion</h5>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        Are you sure you want to delete product ID <strong id="modalProductId"></strong> (<strong id="modalProductName"></strong>)? This action cannot be undone.
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-        <form id="deleteProductForm" action="api/delete_product.php" method="POST">
-          <input type="hidden" name="productId" id="deleteProductId">
-          <input type="hidden" name="redirect_url" value="http://localhost/ecommerce-bikeshop/administrator/index.php#products">
-          <button type="submit" class="btn btn-danger">Delete Product</button>
-        </form>
-      </div>
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteProductModalLabel">Confirm Product Deletion</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form data-api-endpoint="api/delete_product.php">
+                <div class="modal-body">
+                    <input type="hidden" id="deleteProductId" name="product_id">
+                    <p class="lead">Are you sure you want to delete product ID: <strong id="deleteProductName"></strong>?</p>
+                    <p class="text-danger">This action will permanently remove the product, all its variations, and images. This cannot be undone.</p>
+                    <div data-form-message class="mt-3"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-danger">Delete Product</button>
+                </div>
+            </form>
+        </div>
     </div>
-  </div>
 </div>

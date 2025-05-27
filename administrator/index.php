@@ -1,16 +1,23 @@
 <?php
-session_start(); // ALWAYS start the session at the very top of any page that uses sessions
+session_start(); // Start the session at the very top
 
-// Check if the user is NOT logged in as admin
+// Check if the admin is logged in
 if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true) {
-    // If not logged in, set a toast message and redirect to the login page
-    $_SESSION['toast_message'] = 'You must be logged in to access the admin area.';
-    $_SESSION['toast_type'] = 'danger';
-    header('Location: login.php'); // Redirect to your admin login page
-    exit(); // Stop further script execution
+    // If not logged in, redirect to the login page
+    $_SESSION['login_message'] = [
+        'text' => 'Please log in to access the administrator dashboard.',
+        'type' => 'info' // Or 'warning'
+    ];
+    header('Location: login.php');
+    exit;
 }
 
-// If the user IS logged in, the script continues to render the page below
+// Optionally, include the logger here if you want to log general admin page access,
+// but usually, logging specific actions is more relevant.
+// require_once 'includes/logger.php';
+
+// Fetch the logged-in admin's username to display in the header
+$loggedInAdminUsername = $_SESSION['admin_username'] ?? 'Admin User';
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -20,19 +27,32 @@ if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== tru
   <title>Bong Bicycle Shop Admin</title>
 
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
-
   <link rel="icon" type="image/png" href="../assets/images/favicon/favicon.svg">
-
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css"
         rel="stylesheet"
         integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC"
         crossorigin="anonymous">
+  <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
 
-    <?php include '../components/admin-header.php'; ?>
+  <header id="header">
+    <a class="navbar-brand" href="#">
+      <i class="bi bi-gear-fill me-2"></i>Admin Dashboard
+    </a>
+    <div class="dropdown">
+      <button class="btn btn-accent dropdown-toggle" type="button" id="adminDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+        <i class="bi bi-person-circle me-2"></i><?php echo htmlspecialchars($loggedInAdminUsername); ?>
+      </button>
+      <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="adminDropdown">
+        <li><a class="dropdown-item" href="#"><i class="bi bi-person me-2"></i>Profile</a></li>
+        <li><a class="dropdown-item" href="#"><i class="bi bi-key me-2"></i>Change Password</a></li>
+        <li><hr class="dropdown-divider bg-light"></li>
+        <li><a class="dropdown-item" href="logout.php"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
+      </ul>
+    </div>
+  </header>
 
   <div id="wrapper">
     <div id="sidebar-wrapper">
@@ -65,11 +85,10 @@ if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== tru
           <i class="bi bi-star-fill"></i>
           <span>Reviews</span>
         </a>
-        <a href="submenu/log_history.php" class="list-group-item list-group-item-action"      data-content-id="log_history">
-          <i class="bi bi-clock-history"></i>
-          <span>Log History</span>
+        <a href="submenu/log_history.php" class="list-group-item list-group-item-action" data-content-id="log_history">
+            <i class="bi bi-clock-history"></i>
+            <span>Log History</span>
         </a>
-
         <a href="#settingsSubmenu" data-bs-toggle="collapse" class="list-group-item list-group-item-action dropdown-toggle">
           <i class="bi bi-gear-fill"></i>
           <span>Settings</span>
@@ -109,9 +128,10 @@ if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== tru
     </div>
     </div>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
-            integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
-            crossorigin="anonymous"></script>
+          integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+          crossorigin="anonymous"></script>
 
   <script src="js/script.js"></script>
+  <script src="js/product_logic.js"></script> 
 </body>
 </html>

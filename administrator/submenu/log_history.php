@@ -1,158 +1,171 @@
 <?php
-// submenu/log_history.php
 session_start();
-
-// Define the path to the log file
-$logFile = __DIR__ . '/../../logs/user_actions.log';
-
-$logEntries = [];
-$displayLogEntries = [];
-
-// Get filter dates from GET request (when form is submitted)
-$startDate = isset($_GET['start_date']) ? $_GET['start_date'] : '';
-$endDate = isset($_GET['end_date']) ? $_GET['end_date'] : '';
-
-$filterStartTimestamp = !empty($startDate) ? strtotime($startDate . ' 00:00:00') : null;
-$filterEndTimestamp = !empty($endDate) ? strtotime($endDate . ' 23:59:59') : null;
-
-if (file_exists($logFile)) {
-    $fileContent = file_get_contents($logFile);
-    if ($fileContent !== false) {
-        $rawLogEntries = explode(PHP_EOL, $fileContent);
-        $rawLogEntries = array_filter($rawLogEntries);
-
-        $processedLogEntries = [];
-        foreach ($rawLogEntries as $entry) {
-            if (preg_match('/^\[(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})\](.*)$/', $entry, $matches)) {
-                $entryTimestamp = strtotime($matches[1]);
-                if ($entryTimestamp !== false) {
-                    $processedLogEntries[] = [
-                        'timestamp' => $entryTimestamp,
-                        'formatted_timestamp' => $matches[1],
-                        'details' => trim($matches[2])
-                    ];
-                } else {
-                    $processedLogEntries[] = [
-                        'timestamp' => time(),
-                        'formatted_timestamp' => 'N/A - ' . date('Y-m-d H:i:s'),
-                        'details' => htmlspecialchars($entry)
-                    ];
-                }
-            } else {
-                 $processedLogEntries[] = [
-                    'timestamp' => time(),
-                    'formatted_timestamp' => 'N/A - ' . date('Y-m-d H:i:s'),
-                    'details' => htmlspecialchars($entry)
-                 ];
-            }
-        }
-
-        usort($processedLogEntries, function($a, $b) {
-            return $b['timestamp'] <=> $a['timestamp'];
-        });
-
-        $sixtyDaysAgo = strtotime('-60 days');
-        foreach ($processedLogEntries as $entry) {
-            if ($entry['timestamp'] >= $sixtyDaysAgo) {
-                $passFilter = true;
-                if ($filterStartTimestamp !== null && $entry['timestamp'] < $filterStartTimestamp) {
-                    $passFilter = false;
-                }
-                if ($filterEndTimestamp !== null && $entry['timestamp'] > $filterEndTimestamp) {
-                    $passFilter = false;
-                }
-
-                if ($passFilter) {
-                    $displayLogEntries[] = $entry;
-                }
-            }
-        }
-    }
+// Check if the admin is logged in (Crucial for all admin pages)
+if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true) {
+    $_SESSION['login_message'] = [
+        'text' => 'Please log in to access this page.',
+        'type' => 'info'
+    ];
+    header('Location: ../login.php');
+    exit;
 }
 
-$message = '';
-$message_type = 'info';
-if (isset($_SESSION['log_clear_message'])) {
-    $message = $_SESSION['log_clear_message'];
-    $message_type = $_SESSION['log_clear_type'];
-    unset($_SESSION['log_clear_message'], $_SESSION['log_clear_type']);
+require_once '../../config/db.php'; // Include your database connection
+require_once '../includes/logger.php'; // Include the logger function
+
+// --- Automatic Log Deletion Logic (Older than 60 days) ---
+$days_to_keep = 60;
+$cutoff_date = date('Y-m-d H:i:s', strtotime("-{$days_to_keep} days"));
+
+$delete_stmt = $conn->prepare("DELETE FROM activity_logs WHERE log_time < ?");
+if ($delete_stmt) {
+    $delete_stmt->bind_param("s", $cutoff_date);
+    $delete_stmt->execute();
+    $rows_deleted = $delete_stmt->affected_rows;
+    $delete_stmt->close();
+
+    // Optionally log this automatic cleanup action (consider if it's too frequent)
+    // For now, let's skip logging the cleanup itself to avoid an infinite loop of logs.
+} else {
+    // Log error if deletion fails
+    error_log("Error preparing automatic log deletion: " . $conn->error);
 }
+// --- END Automatic Log Deletion Logic ---
+
+// --- Date Filtering Logic ---
+$filter_start_date = $_GET['start_date'] ?? '';
+$filter_end_date = $_GET['end_date'] ?? '';
+
+// Build the SQL query with optional date filters
+$sql = "SELECT au.username, al.description, al.log_time
+        FROM activity_logs al
+        JOIN admin_users au ON al.admin_id = au.id";
+
+$conditions = [];
+$params = [];
+$types = '';
+
+if (!empty($filter_start_date)) {
+    $conditions[] = "al.log_time >= ?";
+    $params[] = $filter_start_date . " 00:00:00"; // Start of the day
+    $types .= 's';
+}
+
+if (!empty($filter_end_date)) {
+    $conditions[] = "al.log_time <= ?";
+    $params[] = $filter_end_date . " 23:59:59"; // End of the day
+    $types .= 's';
+}
+
+if (!empty($conditions)) {
+    $sql .= " WHERE " . implode(" AND ", $conditions);
+}
+
+$sql .= " ORDER BY al.log_time DESC"; // Order by most recent first
+
 ?>
 
-<h2 class="mb-4">User Action Log History</h2>
-
-<?php if ($message): ?>
-    <div class="alert alert-<?php echo $message_type; ?> alert-dismissible fade show" role="alert">
-        <?php echo htmlspecialchars($message); ?>
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
-<?php endif; ?>
-
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <h4>Recent Actions</h4>
-    <form action="http://localhost/ecommerce-bikeshop/administrator/index.php#log_history" method="GET" class="d-flex align-items-center me-3">
-        <label for="start_date" class="form-label me-2 mb-0">From:</label>
-        <input type="date" class="form-control form-control-sm me-2" id="start_date" name="start_date" value="<?php echo htmlspecialchars($startDate); ?>">
-
-        <label for="end_date" class="form-label me-2 mb-0">To:</label>
-        <input type="date" class="form-control form-control-sm me-2" id="end_date" name="end_date" value="<?php echo htmlspecialchars($endDate); ?>">
-
-        <button type="submit" class="btn btn-accent btn-sm me-2">Filter</button>
-        <button type="submit" class="btn btn-secondary btn-sm" name="reset_filter" value="1">Reset</button>
-    </form>
-
-    <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#clearLogConfirmModal">
-        <i class="bi bi-trash me-2"></i>Clear All History
-    </button>
+<h2 class="mb-4">Activity Log History</h2>
+<div class="alert alert-info" role="alert">
+    View a chronological record of administrative actions. Logs older than <?php echo htmlspecialchars($days_to_keep); ?> days are automatically deleted.
 </div>
 
-<?php if (empty($displayLogEntries)): ?>
-    <div class="alert alert-info" role="alert">
-        <?php echo (!empty($startDate) || !empty($endDate)) ? 'No log entries found for the selected date range.' : 'No user actions logged yet or all old entries have been cleared.'; ?>
+<div class="card shadow-sm mb-4">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <span>Filter Activity Log</span>
     </div>
-<?php else: ?>
-    <div class="card shadow-sm p-4">
-        <div class="table-responsive" style="max-height: 500px; overflow-y: auto;">
+    <div class="card-body">
+        <form id="logFilterForm" class="row g-3 align-items-end">
+            <div class="col-md-4">
+                <label for="startDate" class="form-label">From Date:</label>
+                <input type="date" class="form-control" id="startDate" name="start_date" value="<?php echo htmlspecialchars($filter_start_date); ?>">
+            </div>
+            <div class="col-md-4">
+                <label for="endDate" class="form-label">To Date:</label>
+                <input type="date" class="form-control" id="endDate" name="end_date" value="<?php echo htmlspecialchars($filter_end_date); ?>">
+            </div>
+            <div class="col-md-auto">
+                <button type="submit" class="btn btn-accent"><i class="bi bi-funnel me-2"></i>Apply Filter</button>
+                <button type="button" class="btn btn-secondary ms-2" id="resetFilterBtn"><i class="bi bi-arrow-counterclockwise me-2"></i>Reset Filter</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <span>Admin Activity Log</span>
+        <button class="btn btn-sm btn-danger"
+                data-bs-toggle="modal" data-bs-target="#clearAllLogsModal">
+            <i class="bi bi-trash-fill me-2"></i>Clear All History
+        </button>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
             <table class="table table-striped table-hover">
                 <thead>
                     <tr>
+                        <th>Admin Username</th>
+                        <th>Description</th>
                         <th>Timestamp</th>
-                        <th>Action Details</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <?php foreach ($displayLogEntries as $entry): ?>
-                        <tr>
-                            <td><?php echo htmlspecialchars($entry['formatted_timestamp']); ?></td>
-                            <td><?php echo htmlspecialchars($entry['details']); ?></td>
-                        </tr>
-                    <?php endforeach; ?>
+                    <?php
+                    // Use prepared statement for fetching logs to prevent SQL injection
+                    $stmt = $conn->prepare($sql);
+                    if ($stmt) {
+                        if (!empty($params)) {
+                            $stmt->bind_param($types, ...$params);
+                        }
+                        $stmt->execute();
+                        $result = $stmt->get_result();
+
+                        if ($result->num_rows > 0) {
+                            while ($row = $result->fetch_assoc()) {
+                                echo '<tr>';
+                                echo '<td>' . htmlspecialchars($row['username']) . '</td>';
+                                echo '<td>' . htmlspecialchars($row['description']) . '</td>';
+                                echo '<td>' . htmlspecialchars(date('Y-m-d H:i:s', strtotime($row['log_time']))) . '</td>';
+                                echo '</tr>';
+                            }
+                        } else {
+                            echo '<tr><td colspan="3" class="text-center">No activity logs found for the selected date range.</td></tr>';
+                        }
+                        $result->free();
+                        $stmt->close();
+                    } else {
+                        echo '<tr><td colspan="3" class="text-center text-danger">Error preparing log fetch query: ' . $conn->error . '</td></tr>';
+                    }
+                    ?>
                 </tbody>
             </table>
         </div>
     </div>
-<?php endif; ?>
+</div>
 
-<div class="modal fade" id="clearLogConfirmModal" tabindex="-1" aria-labelledby="clearLogConfirmModalLabel" aria-hidden="true">
+<div class="modal fade" id="clearAllLogsModal" tabindex="-1" aria-labelledby="clearAllLogsModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
-            <div class="modal-header bg-danger text-light">
-                <h5 class="modal-title" id="clearLogConfirmModalLabel">Confirm Clear History</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            <div class="modal-header">
+                <h5 class="modal-title" id="clearAllLogsModalLabel">Confirm Clear All Activity History</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="modal-body">
-                <p>Are you sure you want to **clear ALL log history**?</p>
-                <p class="text-danger"><small>This action cannot be undone.</small></p>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <form id="clearLogForm" action="api/clear_logs_action.php" method="POST">
-                    <input type="hidden" name="redirect_url" value="http://localhost/ecommerce-bikeshop/administrator/index.php#products">
-                    <button type="submit" name="action" value="clear" class="btn btn-danger">
-                        <i class="bi bi-trash me-2"></i>Clear History
-                    </button>
-                </form>
-            </div>
+            <form data-api-endpoint="api/clear_all_logs.php">
+                <div class="modal-body">
+                    <p class="lead">Are you absolutely sure you want to delete <strong class="text-danger">ALL</strong> activity log history?</p>
+                    <p class="text-danger">This action cannot be undone.</p>
+                    <div data-form-message class="mt-3"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-danger">Clear All Logs</button>
+                </div>
+            </form>
         </div>
     </div>
 </div>
+
+<?php
+$conn->close();
+?>

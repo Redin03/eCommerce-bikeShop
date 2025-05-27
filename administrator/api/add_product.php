@@ -1,160 +1,207 @@
 <?php
 session_start();
+header('Content-Type: application/json');
 
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
+// Disable error display to prevent HTML output breaking JSON response
+ini_set('display_errors', 0);
 error_reporting(E_ALL);
 
-$logFile = __DIR__ . '/../../logs/php_errors.log';
-if (!is_dir(dirname($logFile))) {
-    mkdir(dirname($logFile), 0775, true);
-}
-ini_set('error_log', $logFile);
+require_once '../../config/db.php'; // Adjust path to your database connection
+require_once '../includes/logger.php'; // Adjust path to your logger function
 
-require_once __DIR__ . '/../../config/db.php';
+$response = ['success' => false, 'message' => ''];
 
-$redirectUrl = $_POST['redirect_url'] ?? '../submenu/products.php';
-
-function set_toast_and_redirect($message, $type, $url, $conn) {
-    $_SESSION['toast_message'] = $message;
-    $_SESSION['toast_type'] = $type;
-    if ($conn && !$conn->connect_error) {
-        $conn->close();
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // Check if admin is logged in
+    if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true) {
+        $response['message'] = 'Unauthorized access.';
+        echo json_encode($response);
+        exit;
     }
-    header('Location: ' . $url);
-    exit();
-}
 
-if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    error_log("Invalid request method detected: " . $_SERVER['REQUEST_METHOD']);
-    set_toast_and_redirect('Invalid request method.', 'danger', $redirectUrl, $conn);
-}
+    $admin_id = $_SESSION['admin_id'] ?? 0; // Get the logged-in admin's ID
 
-$productName = $_POST['productName'] ?? '';
-$categoryKey = $_POST['categoryKey'] ?? '';
-$subcategoryKey = $_POST['subcategoryKey'] ?? '';
-// REMOVED: $price = $_POST['price'] ?? 0.00; // Price is now per variation
-$description = $_POST['description'] ?? '';
-$variations = $_POST['variations'] ?? [];
+    // 1. Sanitize and Validate Product General Details
+    $name = trim($_POST['name'] ?? '');
+    $category = trim($_POST['category'] ?? '');
+    $subcategory = trim($_POST['subcategory'] ?? '');
+    $description = trim($_POST['description'] ?? '');
 
-// Basic validation
-if (empty($productName) || empty($categoryKey) || empty($subcategoryKey)) {
-    set_toast_and_redirect('Product name, category, and subcategory are required.', 'danger', $redirectUrl, $conn);
-}
-
-// Validate if variations are provided if needed, or if a base price is expected
-if (empty($variations)) {
-    // You might want to enforce that at least one variation is added, or have a fallback base price
-    set_toast_and_redirect('At least one product variation (with color, size, quantity, and price) is required.', 'danger', $redirectUrl, $conn);
-}
-
-$conn->begin_transaction();
-
-try {
-    // 1. Insert into products table
-    // The 'price' column has been removed from the 'products' table.
-    $stmtProduct = $conn->prepare("INSERT INTO products (name, category_key, subcategory_key, description) VALUES (?, ?, ?, ?)");
-    if (!$stmtProduct) {
-        throw new Exception("Prepare statement failed (products): " . $conn->error);
+    if (empty($name) || empty($category) || empty($subcategory) || empty($description)) {
+        $response['message'] = 'Product name, category, sub-category, and description are required.';
+        echo json_encode($response);
+        exit;
     }
-    $stmtProduct->bind_param("ssss", $productName, $categoryKey, $subcategoryKey, $description);
-    if (!$stmtProduct->execute()) {
-        throw new Exception('Failed to add product: ' . $stmtProduct->error);
-    }
-    $productId = $conn->insert_id;
-    $stmtProduct->close();
-    error_log("Product '$productName' added with ID: $productId");
 
-    // 2. Insert into product_variations table
-    if (!empty($variations)) {
-        $stmtVariations = $conn->prepare("INSERT INTO product_variations (product_id, color_name, size_name, quantity, price) VALUES (?, ?, ?, ?, ?)"); // NEW: Added price column
-        if (!$stmtVariations) {
-            throw new Exception("Prepare statement failed (variations): " . $conn->error);
+    // 2. Validate Variations
+    $variations = $_POST['variations'] ?? [];
+    if (empty($variations) || !is_array($variations)) {
+        $response['message'] = 'At least one product variation is required.';
+        echo json_encode($response);
+        exit;
+    }
+
+    foreach ($variations as $index => $variation) {
+        $size = trim($variation['size'] ?? '');
+        $color = trim($variation['color'] ?? '');
+        $stock = filter_var($variation['stock'] ?? '', FILTER_VALIDATE_INT);
+        $price = filter_var($variation['price'] ?? '', FILTER_VALIDATE_FLOAT);
+
+        if (empty($size) || empty($color) || $stock === false || $stock < 0 || $price === false || $price < 0) {
+            $response['message'] = "Invalid or missing data for variation #" . ($index + 1) . ". Ensure size, color, valid stock (non-negative integer), and valid price (non-negative number) are provided.";
+            echo json_encode($response);
+            exit;
+        }
+    }
+
+    // 3. Handle File Uploads
+    $uploaded_images = $_FILES['product_images'] ?? [];
+    $image_paths = [];
+    $upload_dir = '../../uploads/product_images/'; // Relative path from api/add_product.php
+
+    // Create upload directory if it doesn't exist
+    if (!is_dir($upload_dir)) {
+        mkdir($upload_dir, 0777, true); // 0777 permissions, recursive
+    }
+
+    // Process uploaded files if any
+    if (isset($uploaded_images['name']) && is_array($uploaded_images['name']) && count($uploaded_images['name']) > 0) {
+        $total_files = count($uploaded_images['name']);
+        if ($total_files > 5) { // Limit to 5 images
+            $response['message'] = 'You can upload a maximum of 5 images per product.';
+            echo json_encode($response);
+            exit;
+        }
+
+        for ($i = 0; $i < $total_files; $i++) {
+            if ($uploaded_images['error'][$i] === UPLOAD_ERR_OK) {
+                $file_name = $uploaded_images['name'][$i];
+                $file_tmp_name = $uploaded_images['tmp_name'][$i];
+                $file_size = $uploaded_images['size'][$i];
+                $file_type = $uploaded_images['type'][$i];
+                $file_ext = strtolower(pathinfo($file_name, PATHINFO_EXTENSION));
+
+                // Basic file validation
+                $allowed_extensions = ['jpg', 'jpeg', 'png', 'gif'];
+                if (!in_array($file_ext, $allowed_extensions)) {
+                    $response['message'] = "Invalid file type for " . htmlspecialchars($file_name) . ". Only JPG, JPEG, PNG, GIF are allowed.";
+                    echo json_encode($response);
+                    exit;
+                }
+
+                if ($file_size > 5 * 1024 * 1024) { // Max 5MB
+                    $response['message'] = "File " . htmlspecialchars($file_name) . " is too large. Maximum size is 5MB.";
+                    echo json_encode($response);
+                    exit;
+                }
+
+                // Generate unique file name
+                $new_file_name = uniqid('img_', true) . '.' . $file_ext;
+                $target_file_path = $upload_dir . $new_file_name;
+
+                if (move_uploaded_file($file_tmp_name, $target_file_path)) {
+                    $image_paths[] = $target_file_path;
+                } else {
+                    $response['message'] = "Failed to upload image: " . htmlspecialchars($file_name);
+                    echo json_encode($response);
+                    exit;
+                }
+            } else if ($uploaded_images['error'][$i] !== UPLOAD_ERR_NO_FILE) {
+                // Handle other upload errors besides no file being selected
+                $response['message'] = "File upload error for " . htmlspecialchars($uploaded_images['name'][$i]) . ": Code " . $uploaded_images['error'][$i];
+                echo json_encode($response);
+                exit;
+            }
+        }
+    }
+
+
+    // Start database transaction
+    $conn->begin_transaction();
+
+    try {
+        // 4. Insert into products table
+        $stmt_product = $conn->prepare("INSERT INTO products (name, category, subcategory, description) VALUES (?, ?, ?, ?)");
+        if (!$stmt_product) {
+            throw new Exception("Product statement preparation failed: " . $conn->error);
+        }
+        $stmt_product->bind_param("ssss", $name, $category, $subcategory, $description);
+        if (!$stmt_product->execute()) {
+            throw new Exception("Product insertion failed: " . $stmt_product->error);
+        }
+        $product_id = $conn->insert_id;
+        $stmt_product->close();
+
+        // 5. Insert into product_variations table
+        $stmt_variation = $conn->prepare("INSERT INTO product_variations (product_id, size, color, stock, price) VALUES (?, ?, ?, ?, ?)");
+        if (!$stmt_variation) {
+            throw new Exception("Variation statement preparation failed: " . $conn->error);
         }
         foreach ($variations as $variation) {
-            $color = trim($variation['color'] ?? '');
-            $size = trim($variation['size'] ?? '');
-            $quantity = intval($variation['quantity'] ?? 0);
-            $variationPrice = floatval($variation['price'] ?? 0.00); // NEW: Get variation price
+            $size = trim($variation['size']);
+            $color = trim($variation['color']);
+            $stock = filter_var($variation['stock'], FILTER_VALIDATE_INT);
+            $price = filter_var($variation['price'], FILTER_VALIDATE_FLOAT);
 
-            if (empty($color) || empty($size) || $quantity < 0 || $variationPrice < 0) { // Added price validation
-                // Skip invalid variations or log a warning
-                error_log("Skipping invalid variation for product $productId: Color='$color', Size='$size', Quantity='$quantity', Price='$variationPrice'");
-                continue;
-            }
-
-            $stmtVariations->bind_param("issid", $productId, $color, $size, $quantity, $variationPrice); // NEW: 'd' for double/float price
-            if (!$stmtVariations->execute()) {
-                throw new Exception("Failed to add variation for product $productId: " . $stmtVariations->error);
+            $stmt_variation->bind_param("issid", $product_id, $size, $color, $stock, $price);
+            if (!$stmt_variation->execute()) {
+                throw new Exception("Variation insertion failed: " . $stmt_variation->error);
             }
         }
-        $stmtVariations->close();
-        error_log("Variations added for product ID: $productId");
-    } else {
-        error_log("No variations provided for product ID: $productId. This might be an error if variations are mandatory.");
-    }
+        $stmt_variation->close();
 
-    // 3. Handle product images
-    if (isset($_FILES['productImages']) && is_array($_FILES['productImages']['name'])) {
-        $uploadDir = __DIR__ . '/../../uploads/products/';
-        if (!is_dir($uploadDir)) {
-            mkdir($uploadDir, 0775, true);
-        }
-
-        $stmtImages = $conn->prepare("INSERT INTO product_images (product_id, image_path) VALUES (?, ?)");
-        if (!$stmtImages) {
-            throw new Exception("Prepare statement failed (images): " . $conn->error);
-        }
-
-        for ($i = 0; $i < count($_FILES['productImages']['name']); $i++) {
-            if ($_FILES['productImages']['error'][$i] === UPLOAD_ERR_OK) {
-                $fileTmpPath = $_FILES['productImages']['tmp_name'][$i];
-                $fileName = basename($_FILES['productImages']['name'][$i]);
-                $fileExt = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
-                $newFileName = uniqid('prod_') . '.' . $fileExt;
-                $destPath = $uploadDir . $newFileName;
-                $relativePath = 'uploads/products/' . $newFileName; // Path to store in DB
-
-                if (move_uploaded_file($fileTmpPath, $destPath)) {
-                    $stmtImages->bind_param("is", $productId, $relativePath);
-                    if (!$stmtImages->execute()) {
-                        error_log("Failed to insert image path into DB for product $productId: " . $stmtImages->error);
-                    }
-                } else {
-                    error_log("Failed to move uploaded file from $fileTmpPath to $destPath.");
+        // 6. Insert into product_images table
+        if (!empty($image_paths)) {
+            $stmt_image = $conn->prepare("INSERT INTO product_images (product_id, image_path, is_main) VALUES (?, ?, ?)");
+            if (!$stmt_image) {
+                throw new Exception("Image statement preparation failed: " . $conn->error);
+            }
+            foreach ($image_paths as $index => $path) {
+                // Set the first image as main, others as not main (optional logic)
+                $is_main = ($index === 0) ? 1 : 0;
+                // Store relative path (e.g., uploads/product_images/img_uniqueid.jpg)
+                $relative_path = str_replace('../../', '', $path);
+                $stmt_image->bind_param("isi", $product_id, $relative_path, $is_main);
+                if (!$stmt_image->execute()) {
+                    throw new Exception("Image insertion failed: " . $stmt_image->error);
                 }
-            } else if ($_FILES['productImages']['error'][$i] !== UPLOAD_ERR_NO_FILE) {
-                // Log other upload errors, but ignore UPLOAD_ERR_NO_FILE (no file selected)
-                error_log("File upload error for index $i (filename: " . $_FILES['productImages']['name'][$i] . "). PHP error code: " . $_FILES['productImages']['error'][$i] . ". Check php.ini upload limits.");
-            } else {
-                error_log("No file uploaded for index $i."); // This can be removed if UPLOAD_ERR_NO_FILE is common
+            }
+            $stmt_image->close();
+        }
+
+        // If all operations succeed, commit the transaction
+        $conn->commit();
+
+        $response['success'] = true;
+        $response['message'] = 'Product "' . htmlspecialchars($name) . '" added successfully!';
+
+        // Log the activity
+        logAdminActivity(
+            $conn,
+            $admin_id,
+            'ADD_PRODUCT',
+            "Added new product: '{$name}' (ID: {$product_id})"
+        );
+
+    } catch (Exception $e) {
+        // Rollback transaction on error
+        $conn->rollback();
+        // Delete any partially uploaded files if rollback occurs
+        foreach ($image_paths as $path) {
+            if (file_exists($path)) {
+                unlink($path);
             }
         }
-        $stmtImages->close();
-    }
-    error_log("All images processed for product ID: " . $productId);
-
-    // Log the successful product addition
-    $logFile = __DIR__ . '/../../logs/user_actions.log';
-    $logMessage = "[" . date('Y-m-d H:i:s') . "] User added product: '$productName' (ID: $productId), Category: '$categoryKey', Subcategory: '$subcategoryKey'.";
-
-    // Ensure the logs directory exists
-    if (!is_dir(dirname($logFile))) {
-        mkdir(dirname($logFile), 0775, true);
-    }
-    file_put_contents($logFile, $logMessage . PHP_EOL, FILE_APPEND);
-    error_log("User action logged: " . $logMessage);
-
-    $conn->commit();
-    set_toast_and_redirect('Product added successfully!', 'success', $redirectUrl, $conn);
-
-} catch (Exception $e) {
-    $conn->rollback();
-    error_log("Transaction rolled back. Error: " . $e->getMessage());
-    set_toast_and_redirect('Error adding product: ' . $e->getMessage(), 'danger', $redirectUrl, $conn);
-} finally {
-    if (isset($conn) && $conn instanceof mysqli && !$conn->connect_error) {
+        $response['message'] = 'Error adding product: ' . $e->getMessage();
+        // Log the error internally for debugging
+        error_log("Error adding product: " . $e->getMessage());
+    } finally {
         $conn->close();
     }
+
+} else {
+    $response['message'] = 'Invalid request method.';
 }
+
+echo json_encode($response);
 ?>

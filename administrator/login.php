@@ -1,21 +1,21 @@
 <?php
-session_start();
+session_start(); // Start the session at the very top of the page
 
-// Check if a toast message exists from a failed login attempt or logout
+// Initialize message variables
 $message = '';
-$message_type = 'info';
+$message_type = '';
 
-if (isset($_SESSION['toast_message'])) {
-    $message = $_SESSION['toast_message'];
-    $message_type = ($_SESSION['toast_type'] === 'success') ? 'success' : 'danger';
-    // Clear the session variables after displaying them
-    unset($_SESSION['toast_message'], $_SESSION['toast_type']);
+// Check if there's a message from a previous redirect (e.g., failed login)
+if (isset($_SESSION['login_message'])) {
+    $message = $_SESSION['login_message']['text'];
+    $message_type = $_SESSION['login_message']['type'];
+    unset($_SESSION['login_message']); // Clear the message after displaying it
 }
 
-// Redirect if already logged in (optional, but good for UX)
+// If admin is already logged in, redirect them to the dashboard
 if (isset($_SESSION['admin_logged_in']) && $_SESSION['admin_logged_in'] === true) {
-    header('Location: index.php'); // Redirect to your admin dashboard
-    exit();
+    header('Location: index.php');
+    exit;
 }
 ?>
 <!DOCTYPE html>
@@ -148,6 +148,5 @@ if (isset($_SESSION['admin_logged_in']) && $_SESSION['admin_logged_in'] === true
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
             integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
             crossorigin="anonymous"></script>
-    <script src="js/script.js"></script>
-</body>
+    </body>
 </html>
