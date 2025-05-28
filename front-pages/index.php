@@ -145,12 +145,11 @@ require_once __DIR__ . '/../config/db.php';
   </div>
 </section>
 
-<!-- Promotional Section -->
 <section style="background: var(--secondary); color: var(--text-dark); padding: 40px 0;">
   <div class="container text-center">
-    <h2 class="fw-bold mb-3">Spring Sale – Up to 30% Off Select Models!</h2>
-    <p class="mb-4">Don’t miss out on our limited-time offers on top bikes and gear.</p>
-    <a href="shop.php?promo=spring" class="btn btn-primary btn-lg" style="background: var(--primary); border:none;">Shop Deals</a>
+    <h2 class="fw-bold mb-3">Limited-Time Savings on Our Most Popular Items!</h2>
+    <p class="mb-4">Explore incredible deals on a wide selection of products, available only for a short time.</p>
+    <a href="shop.php?promo=deals" class="btn btn-primary btn-lg" style="background: var(--primary); border:none;">Discover Discounts</a>
   </div>
 </section>
 

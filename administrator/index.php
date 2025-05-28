@@ -46,8 +46,6 @@ $loggedInAdminUsername = $_SESSION['admin_username'] ?? 'Admin User';
         <i class="bi bi-person-circle me-2"></i><?php echo htmlspecialchars($loggedInAdminUsername); ?>
       </button>
       <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="adminDropdown">
-        <li><a class="dropdown-item" href="#"><i class="bi bi-person me-2"></i>Profile</a></li>
-        <li><a class="dropdown-item" href="#"><i class="bi bi-key me-2"></i>Change Password</a></li>
         <li><hr class="dropdown-divider bg-light"></li>
         <li><a class="dropdown-item" href="logout.php"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
       </ul>
@@ -89,30 +87,14 @@ $loggedInAdminUsername = $_SESSION['admin_username'] ?? 'Admin User';
             <i class="bi bi-clock-history"></i>
             <span>Log History</span>
         </a>
-        <a href="#settingsSubmenu" data-bs-toggle="collapse" class="list-group-item list-group-item-action dropdown-toggle">
-          <i class="bi bi-gear-fill"></i>
-          <span>Settings</span>
-        </a>
-        <ul class="submenu collapse" id="settingsSubmenu" data-bs-parent="#sidebar-wrapper .list-group">
-          <li>
-            <a href="submenu/settings_promotions.php" class="list-group-item list-group-item-action" data-content-id="settings_promotions">
+        <a href="submenu/settings_promotions.php" class="list-group-item list-group-item-action" data-content-id="settings_promotions">
               <i class="bi bi-tag-fill"></i>
-              <span>Promotions</span>
-            </a>
-          </li>
-          <li>
-            <a href="submenu/settings_content_management.php" class="list-group-item list-group-item-action" data-content-id="settings_content_management">
-              <i class="bi bi-journal-richtext"></i>
-              <span>Contents</span>
-            </a>
-          </li>
-          <li>
-            <a href="submenu/settings_users.php" class="list-group-item list-group-item-action" data-content-id="settings_users">
+            <span>Promotions</span>
+        </a>
+        <a href="submenu/settings_users.php" class="list-group-item list-group-item-action" data-content-id="settings_users">
               <i class="bi bi-person-circle"></i>
-              <span>Users</span>
-            </a>
-          </li>
-        </ul>
+            <span>Admin Users</span>
+        </a>
       </div>
       <div class="mt-auto p-3 text-center">
         <small class="text-muted">Bong Bicycle Shop &copy; 2025</small>

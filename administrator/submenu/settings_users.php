@@ -3,9 +3,6 @@ require_once '../../config/db.php'; // Include your database connection
 ?>
 
 <h2 class="mb-4">Settings: User Management</h2>
-<div class="alert alert-success" role="alert">
-    Manage administrative users and their permissions. This is a sub-menu item under Settings.
-</div>
 <div class="card shadow-sm">
     <div class="card-header">
         Admin Users

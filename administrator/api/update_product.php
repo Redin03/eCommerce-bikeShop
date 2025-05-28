@@ -64,9 +64,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt_product->close();
 
         // 2. Manage Product Variations
-        $current_variation_ids = [];
-        // Fetch existing variations for this product
-        $stmt_fetch_variations = $conn->prepare("SELECT id FROM product_variations WHERE product_id = ?");
+        $current_variation_data = [];
+        // Fetch existing variations (and their current stock) for this product
+        $stmt_fetch_variations = $conn->prepare("SELECT id, stock FROM product_variations WHERE product_id = ?");
         if (!$stmt_fetch_variations) {
             throw new Exception('Failed to prepare fetch variations statement: ' . $conn->error);
         }
@@ -74,51 +74,77 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt_fetch_variations->execute();
         $result_fetch_variations = $stmt_fetch_variations->get_result();
         while ($row = $result_fetch_variations->fetch_assoc()) {
-            $current_variation_ids[] = $row['id'];
+            $current_variation_data[$row['id']] = $row['stock'];
         }
         $stmt_fetch_variations->close();
 
         $submitted_variation_ids = [];
+        $stmt_stock_history = $conn->prepare("INSERT INTO stock_history (product_id, variation_id, quantity_changed, change_type, admin_id) VALUES (?, ?, ?, ?, ?)");
+        if (!$stmt_stock_history) {
+            throw new Exception("Stock history statement preparation failed: " . $conn->error);
+        }
+
         foreach ($variations_data as $variation) {
             $variation_id = filter_var($variation['id'] ?? '', FILTER_VALIDATE_INT);
             $size = trim($variation['size'] ?? '');
             $color = trim($variation['color'] ?? '');
-            $stock = filter_var($variation['stock'] ?? 0, FILTER_VALIDATE_INT);
+            $new_stock = filter_var($variation['stock'] ?? 0, FILTER_VALIDATE_INT);
             $price = filter_var($variation['price'] ?? 0.0, FILTER_VALIDATE_FLOAT);
 
-            if (empty($size) || empty($color) || $stock === false || $price === false) {
+            if (empty($size) || empty($color) || $new_stock === false || $price === false) {
                 throw new Exception('Invalid variation data provided. Size, Color, Stock, and Price are required.');
             }
 
-            if ($variation_id && in_array($variation_id, $current_variation_ids)) {
+            if ($variation_id && isset($current_variation_data[$variation_id])) {
                 // Update existing variation
+                $old_stock = $current_variation_data[$variation_id];
                 $stmt_update_variation = $conn->prepare("UPDATE product_variations SET size = ?, color = ?, stock = ?, price = ? WHERE id = ? AND product_id = ?");
                 if (!$stmt_update_variation) {
                     throw new Exception('Failed to prepare variation update statement: ' . $conn->error);
                 }
-                $stmt_update_variation->bind_param("ssiidi", $size, $color, $stock, $price, $variation_id, $product_id);
+                $stmt_update_variation->bind_param("ssiidi", $size, $color, $new_stock, $price, $variation_id, $product_id);
                 if (!$stmt_update_variation->execute()) {
                     throw new Exception('Failed to update variation: ' . $stmt_update_variation->error);
                 }
                 $stmt_update_variation->close();
                 $submitted_variation_ids[] = $variation_id; // Add to list of kept variations
+
+                // Log stock change if increased
+                if ($new_stock > $old_stock) {
+                    $quantity_added = $new_stock - $old_stock;
+                    $change_type = 'stock_added';
+                    $stmt_stock_history->bind_param("iiisi", $product_id, $variation_id, $quantity_added, $change_type, $admin_id_performing_action);
+                    if (!$stmt_stock_history->execute()) {
+                        throw new Exception("Stock history insertion failed for existing variation update: " . $stmt_stock_history->error);
+                    }
+                }
             } else {
                 // Insert new variation
                 $stmt_insert_variation = $conn->prepare("INSERT INTO product_variations (product_id, size, color, stock, price) VALUES (?, ?, ?, ?, ?)");
                 if (!$stmt_insert_variation) {
                     throw new Exception('Failed to prepare variation insert statement: ' . $conn->error);
                 }
-                $stmt_insert_variation->bind_param("issid", $product_id, $size, $color, $stock, $price);
+                $stmt_insert_variation->bind_param("issid", $product_id, $size, $color, $new_stock, $price);
                 if (!$stmt_insert_variation->execute()) {
                     throw new Exception('Failed to insert new variation: ' . $stmt_insert_variation->error);
                 }
+                $newly_inserted_variation_id = $conn->insert_id;
                 $stmt_insert_variation->close();
-                // We don't add newly inserted variation ID to submitted_variation_ids as it wasn't an existing one
+
+                // Log initial stock for the new variation
+                if ($new_stock > 0) { // Only log if initial stock is positive
+                    $change_type = 'initial_stock';
+                    $stmt_stock_history->bind_param("iiisi", $product_id, $newly_inserted_variation_id, $new_stock, $change_type, $admin_id_performing_action);
+                    if (!$stmt_stock_history->execute()) {
+                        throw new Exception("Stock history insertion failed for new variation: " . $stmt_stock_history->error);
+                    }
+                }
             }
         }
+        $stmt_stock_history->close(); // Close the stock history statement
 
         // Delete variations that were removed from the form
-        $variations_to_delete = array_diff($current_variation_ids, $submitted_variation_ids);
+        $variations_to_delete = array_diff(array_keys($current_variation_data), $submitted_variation_ids);
         if (!empty($variations_to_delete)) {
             $placeholders = implode(',', array_fill(0, count($variations_to_delete), '?'));
             $stmt_delete_variations = $conn->prepare("DELETE FROM product_variations WHERE id IN ($placeholders) AND product_id = ?");

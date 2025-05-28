@@ -1,0 +1,25 @@
+Github commit and push
+
+
+
+
+// Commit and Push in main //
+# 1. Stage all changes
+git add .
+
+# 2. Commit with a message
+git commit -m "Your commit message here"
+
+# 3. Push to the main branch
+git push origin main
+
+
+// Commit and Push in branch//
+# 1. Stage all changes
+git add .
+
+# 2. Commit with a message
+git commit -m "Your commit message here"
+
+# 3. Push to a specific branch
+git push origin feature-branch

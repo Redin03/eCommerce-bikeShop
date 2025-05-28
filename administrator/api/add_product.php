@@ -137,6 +137,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (!$stmt_variation) {
             throw new Exception("Variation statement preparation failed: " . $conn->error);
         }
+
+        $stmt_stock_history = $conn->prepare("INSERT INTO stock_history (product_id, variation_id, quantity_changed, change_type, admin_id) VALUES (?, ?, ?, ?, ?)");
+        if (!$stmt_stock_history) {
+            throw new Exception("Stock history statement preparation failed: " . $conn->error);
+        }
+
         foreach ($variations as $variation) {
             $size = trim($variation['size']);
             $color = trim($variation['color']);
@@ -147,8 +153,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if (!$stmt_variation->execute()) {
                 throw new Exception("Variation insertion failed: " . $stmt_variation->error);
             }
+            $variation_id = $conn->insert_id; // Get the ID of the newly inserted variation
+
+            // Log initial stock for the new variation
+            if ($stock > 0) { // Only log if initial stock is positive
+                $change_type = 'initial_stock';
+                $stmt_stock_history->bind_param("iiisi", $product_id, $variation_id, $stock, $change_type, $admin_id);
+                if (!$stmt_stock_history->execute()) {
+                    throw new Exception("Stock history insertion failed for new variation: " . $stmt_stock_history->error);
+                }
+            }
         }
         $stmt_variation->close();
+        $stmt_stock_history->close(); // Close the stock history statement
+
 
         // 6. Insert into product_images table
         if (!empty($image_paths)) {

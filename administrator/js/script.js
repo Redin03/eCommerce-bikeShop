@@ -77,6 +77,34 @@ document.addEventListener('DOMContentLoaded', function() {
                     if (typeof setupDynamicVariationLogic === 'function') {
                         setupDynamicVariationLogic('productVariationsContainer', 'addVariationBtn', 'variations', [], false); // For Add Modal
                     }
+                } else if (contentId === 'settings_promotions') { // Promotions page logic
+                    if (typeof setupPromotionsPageLogic === 'function') {
+                        setupPromotionsPageLogic();
+                    }
+                }
+
+                // --- Reset Filter button handlers ---
+                // For log_history.php
+                const resetLogFilterBtn = document.getElementById('resetFilterBtn');
+                if (resetLogFilterBtn) {
+                    resetLogFilterBtn.addEventListener('click', function() {
+                        // Explicitly clear date inputs in log history form
+                        document.getElementById('startDate').value = '';
+                        document.getElementById('endDate').value = '';
+                        loadContent('submenu/log_history.php', 'log_history', {}); // Pass empty params to clear filters
+                    });
+                }
+
+                // For products.php (REVISED)
+                const resetProductsFilterBtn = document.getElementById('resetProductsFilterBtn');
+                if (resetProductsFilterBtn) {
+                    resetProductsFilterBtn.addEventListener('click', function() {
+                        // Explicitly clear filter inputs for products.php
+                        document.getElementById('productStartDate').value = '';
+                        document.getElementById('productEndDate').value = '';
+                        document.getElementById('productCategoryFilter').selectedIndex = 0; // Set to "All Categories"
+                        loadContent('submenu/products.php', 'products', {}); // Pass empty params to clear filters
+                    });
                 }
 
             })
@@ -142,7 +170,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
                     const currentActiveContent = localStorage.getItem('lastActiveContent');
                     // Reload content area if it's one of the affected pages
-                    if (currentActiveContent === 'settings_users' || currentActiveContent === 'log_history' || currentActiveContent === 'products') {
+                    if (currentActiveContent === 'settings_users' || currentActiveContent === 'log_history' || currentActiveContent === 'products' || currentActiveContent === 'settings_promotions') {
                         const modal = bootstrap.Modal.getInstance(apiForm.closest('.modal'));
                         if (modal) modal.hide();
 
@@ -156,6 +184,9 @@ document.addEventListener('DOMContentLoaded', function() {
                                 }
                                 if (currentUrlParams.has('end_date')) {
                                     filterParams.end_date = currentUrlParams.get('end_date');
+                                }
+                                if (currentUrlParams.has('category')) { // Added for product filters
+                                    filterParams.category = currentUrlParams.get('category');
                                 }
                             }
                             loadContent(`submenu/${currentActiveContent}.php`, currentActiveContent, filterParams);
@@ -185,7 +216,7 @@ document.addEventListener('DOMContentLoaded', function() {
             loadContent('submenu/log_history.php', 'log_history', params);
         }
 
-        // Handle Products Filter Form Submission (NEW)
+        // Handle Products Filter Form Submission
         const productsFilterForm = event.target.closest('form#productsFilterForm');
         if (productsFilterForm) {
             event.preventDefault();
@@ -335,70 +366,213 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
+    // --- Promotions Page Specific Logic (settings_promotions.php) ---
+    function setupPromotionsPageLogic() {
+        const selectProduct = document.getElementById('selectProduct');
+        const productVariationsContainer = document.getElementById('productVariationsContainer');
+        const selectVariation = document.getElementById('selectVariation');
+        // const removeItemDiscountBtn = document.getElementById('removeItemDiscountBtn'); // This button is removed from settings_promotions.php now
+        const itemDiscountValueInput = document.getElementById('itemDiscountValue');
+        const itemDiscountExpiryDateInput = document.getElementById('itemDiscountExpiryDate');
+        const applyItemDiscountForm = document.getElementById('applyItemDiscountForm');
 
-    // --- Reset Filter Button Handler ---
-    contentArea.addEventListener('click', function(event) {
-        if (event.target.id === 'resetFilterBtn') { // For log_history
-            const currentActiveContent = localStorage.getItem('lastActiveContent');
-            if (currentActiveContent === 'log_history') {
-                loadContent('submenu/log_history.php', 'log_history');
-            }
-        } else if (event.target.id === 'resetProductsFilterBtn') { // NEW: For products
-            const currentActiveContent = localStorage.getItem('lastActiveContent');
-            if (currentActiveContent === 'products') {
-                loadContent('submenu/products.php', 'products');
-            }
-        }
-    });
 
-    // Sidebar Toggle
-    sidebarToggle.addEventListener('click', function() {
-        wrapper.classList.toggle('toggled');
-    });
+        // Function to populate variations dropdown
+        async function populateVariations(productId) {
+            selectVariation.innerHTML = '<option value="">-- Apply to All Variations of this Product --</option>'; // Reset
+            // removeItemDiscountBtn.style.display = 'none'; // No longer needed for the main form button
+            // removeItemDiscountBtn.dataset.productId = '';
+            // removeItemDiscountBtn.dataset.variationId = '';
+            itemDiscountValueInput.value = ''; // Clear discount fields
+            itemDiscountExpiryDateInput.value = '';
 
-    // Handle Sidebar Link Clicks
-    sidebarLinks.forEach(link => {
-        link.addEventListener('click', function(event) {
-            if (this.hasAttribute('data-bs-toggle') && this.getAttribute('data-bs-toggle') === 'collapse') {
+            if (!productId) {
+                productVariationsContainer.style.display = 'none';
                 return;
             }
-            event.preventDefault();
 
-            const url = this.getAttribute('href');
-            const contentId = this.getAttribute('data-content-id');
+            productVariationsContainer.style.display = 'block';
 
-            if (url && contentId) {
-                loadContent(url, contentId); // No parameters initially
-                setActiveLink(contentId);
+            try {
+                const response = await fetch(`api/get_product_variations.php?product_id=${productId}`);
+                const data = await response.json();
+
+                if (data.success) {
+                    data.variations.forEach(variation => {
+                        const option = document.createElement('option');
+                        option.value = variation.id;
+                        option.textContent = variation.text;
+                        selectVariation.appendChild(option);
+                    });
+                } else {
+                    console.error('Error fetching variations:', data.message);
+                    // Optionally display a message to the user
+                }
+            } catch (error) {
+                console.error('Network or server error fetching variations:', error);
+                // Optionally display a message to the user
             }
+        }
 
-            if (window.innerWidth <= 768 && wrapper.classList.contains('toggled')) {
-                wrapper.classList.remove('toggled');
-            }
-        });
-    });
+        // Event listener for product selection
+        if (selectProduct) {
+            selectProduct.addEventListener('change', function() {
+                populateVariations(this.value);
+            });
+        }
+
+        // --- Modals for Promotions Page (settings_promotions.php) ---
+        // Event listener for when the Edit Item Discount modal is shown
+        const editItemDiscountModal = document.getElementById('editItemDiscountModal');
+        if (editItemDiscountModal) {
+            editItemDiscountModal.addEventListener('show.bs.modal', function (event) {
+                const button = event.relatedTarget; // Button that triggered the modal
+                const productId = button.getAttribute('data-product-id');
+                const variationId = button.getAttribute('data-variation-id');
+                const discountPercentage = button.getAttribute('data-discount-percentage');
+                const discountExpiryDate = button.getAttribute('data-discount-expiry-date');
+
+                // Populate modal fields
+                const modalProductIdInput = this.querySelector('#editModalProductId');
+                const modalVariationIdInput = this.querySelector('#editModalVariationId');
+                const modalDiscountValueInput = this.querySelector('#editModalDiscountValue');
+                const modalExpiryDateInput = this.querySelector('#editModalExpiryDate');
+                const modalProductNameDisplay = this.querySelector('#editModalProductName');
+                const modalVariationDetailsDisplay = this.querySelector('#editModalVariationDetails');
+                const modalVariationDetailsContainer = this.querySelector('#editModalVariationDetailsContainer');
+
+                modalProductIdInput.value = productId;
+                modalVariationIdInput.value = variationId;
+                modalDiscountValueInput.value = discountPercentage;
+                modalExpiryDateInput.value = discountExpiryDate;
+
+                // Fetch product and variation details for display in modal
+                // This is crucial for showing readable names instead of just IDs
+                fetch(`api/get_product_variations.php?product_id=${productId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success && data.variations) {
+                            // Find the product name from the main selectProduct options
+                            const product = document.querySelector(`#selectProduct option[value="${productId}"]`);
+                            if (product) {
+                                modalProductNameDisplay.value = product.textContent; // Set product name
+                            } else {
+                                modalProductNameDisplay.value = 'Product Not Found';
+                            }
+
+                            if (variationId && variationId !== '0') { // Check if variationId is not empty or '0'
+                                const selectedVariation = data.variations.find(v => v.id == variationId);
+                                if (selectedVariation) {
+                                    // Extract and display size and color from selectedVariation.text
+                                    // Assuming selectedVariation.text format is "Size: X, Color: Y (Current Discount: Z%)"
+                                    const match = selectedVariation.text.match(/Size: (.*?), Color: (.*?)\s*(\(Current Discount:.*)?$/);
+                                    if (match) {
+                                        modalVariationDetailsDisplay.value = `Size: ${match[1]}, Color: ${match[2]}`;
+                                    } else {
+                                        modalVariationDetailsDisplay.value = selectedVariation.text; // Fallback
+                                    }
+                                    modalVariationDetailsContainer.style.display = 'block';
+                                } else {
+                                    modalVariationDetailsDisplay.value = 'Variation Not Found';
+                                    modalVariationDetailsContainer.style.display = 'block';
+                                }
+                            } else {
+                                modalVariationDetailsDisplay.value = 'All Variations';
+                                modalVariationDetailsContainer.style.display = 'block'; // Show even if "All Variations"
+                            }
+                        } else {
+                            modalProductNameDisplay.value = 'Error fetching product/variation details.';
+                            modalVariationDetailsContainer.style.display = 'none';
+                            console.error('Error fetching variations:', data.message);
+                        }
+                    })
+                    .catch(error => {
+                        modalProductNameDisplay.value = 'Network Error';
+                        modalVariationDetailsContainer.style.display = 'none';
+                        console.error('Fetch error:', error);
+                    });
+            });
+        }
+
+        // Event listener for when the Remove Item Discount modal is shown
+        const removeItemDiscountModal = document.getElementById('removeItemDiscountModal');
+        if (removeItemDiscountModal) {
+            removeItemDiscountModal.addEventListener('show.bs.modal', function (event) {
+                const button = event.relatedTarget; // Button that triggered the modal
+                const productId = button.getAttribute('data-product-id');
+                const variationId = button.getAttribute('data-variation-id');
+
+                // Populate hidden fields
+                this.querySelector('#removeModalProductId').value = productId;
+                this.querySelector('#removeModalVariationId').value = variationId;
+
+                // Populate display fields
+                const modalProductNameDisplay = this.querySelector('#removeModalProductName');
+                const modalVariationDetailsDisplay = this.querySelector('#removeModalVariationDetails');
+
+                // Fetch product and variation details for display in modal
+                fetch(`api/get_product_variations.php?product_id=${productId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success && data.variations) {
+                            const product = document.querySelector(`#selectProduct option[value="${productId}"]`);
+                            if (product) {
+                                modalProductNameDisplay.textContent = product.textContent; // Set product name
+                            } else {
+                                modalProductNameDisplay.textContent = 'Product Not Found';
+                            }
+
+                            if (variationId && variationId !== '0') { // Check if variationId is not empty or '0'
+                                const selectedVariation = data.variations.find(v => v.id == variationId);
+                                if (selectedVariation) {
+                                    const match = selectedVariation.text.match(/Size: (.*?), Color: (.*?)\s*(\(Current Discount:.*)?$/);
+                                    if (match) {
+                                        modalVariationDetailsDisplay.textContent = `Variation: Size: ${match[1]}, Color: ${match[2]}`;
+                                    } else {
+                                        modalVariationDetailsDisplay.textContent = `Variation: ${selectedVariation.text}`; // Fallback
+                                    }
+                                } else {
+                                    modalVariationDetailsDisplay.textContent = 'Variation Not Found';
+                                }
+                            } else {
+                                modalVariationDetailsDisplay.textContent = 'All Variations of this Product';
+                            }
+                        } else {
+                            modalProductNameDisplay.textContent = 'Error fetching product details.';
+                            modalVariationDetailsDisplay.textContent = '';
+                            console.error('Error fetching variations for remove modal:', data.message);
+                        }
+                    })
+                    .catch(error => {
+                        modalProductNameDisplay.textContent = 'Network Error';
+                        modalVariationDetailsDisplay.textContent = '';
+                        console.error('Fetch error for remove modal:', error);
+                    });
+            });
+        }
+    }
+
 
     // Initial content load based on URL or localStorage
-    const urlParams = new URLSearchParams(window.location.search);
-    const tabFromUrl = urlParams.get('tab');
-    const lastActiveContent = localStorage.getItem('lastActiveContent');
-
     let initialContentIdToLoad = 'dashboard';
+    const urlParams = new URLSearchParams(window.location.search);
+    const lastActiveContent = localStorage.getItem('lastActiveContent');
     const initialParams = {};
 
-    if (tabFromUrl) {
-        initialContentIdToLoad = tabFromUrl;
-        // If loading log_history or products from URL, preserve its date parameters
-        if (tabFromUrl === 'log_history' || tabFromUrl === 'products') { // MODIFIED
+    if (urlParams.has('tab')) {
+        initialContentIdToLoad = urlParams.get('tab');
+        if (initialContentIdToLoad === 'log_history' || initialContentIdToLoad === 'products') {
             if (urlParams.has('start_date')) initialParams.start_date = urlParams.get('start_date');
             if (urlParams.has('end_date')) initialParams.end_date = urlParams.get('end_date');
+            if (urlParams.has('category')) initialParams.category = urlParams.get('category');
         }
     } else if (lastActiveContent) {
         initialContentIdToLoad = lastActiveContent;
         // If loading log_history or products from localStorage, preserve its date parameters from current URL
-        if (lastActiveContent === 'log_history' || lastActiveContent === 'products') { // MODIFIED
+        if (lastActiveContent === 'log_history' || lastActiveContent === 'products') {
             if (urlParams.has('start_date')) initialParams.start_date = urlParams.get('start_date');
             if (urlParams.has('end_date')) initialParams.end_date = urlParams.get('end_date');
+            if (urlParams.has('category')) initialParams.category = urlParams.get('category');
         }
     }
 
@@ -414,4 +588,56 @@ document.addEventListener('DOMContentLoaded', function() {
             setActiveLink(dashboardLink.getAttribute('data-content-id'));
         }
     }
+
+    // --- Sidebar Toggle Logic (Stays the same) ---
+    if (sidebarToggle) {
+        sidebarToggle.addEventListener('click', function() {
+            wrapper.classList.toggle('toggled');
+            // Change icon based on sidebar state
+            const icon = this.querySelector('i');
+            if (wrapper.classList.contains('toggled')) {
+                icon.classList.remove('bi-arrow-left-circle-fill');
+                icon.classList.add('bi-arrow-right-circle-fill');
+            } else {
+                icon.classList.remove('bi-arrow-right-circle-fill');
+                icon.classList.add('bi-arrow-left-circle-fill');
+            }
+        });
+    }
+
+    // --- Handle Sidebar Navigation (Stays the same, uses loadContent) ---
+    sidebarLinks.forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            const contentId = this.getAttribute('data-content-id');
+            const url = this.getAttribute('href');
+            loadContent(url, contentId);
+            setActiveLink(contentId);
+        });
+    });
+
+    // Handle browser history back/forward
+    window.addEventListener('popstate', function(event) {
+        if (event.state && event.state.contentId) {
+            loadContent(`submenu/${event.state.contentId}.php`, event.state.contentId, event.state.params || {});
+            setActiveLink(event.state.contentId);
+        } else if (window.location.search.includes('tab=')) {
+            const currentTab = new URLSearchParams(window.location.search).get('tab');
+            const currentParams = {};
+            for (const [key, value] of new URLSearchParams(window.location.search).entries()) {
+                if (key !== 'tab') {
+                    currentParams[key] = value;
+                }
+            }
+            loadContent(`submenu/${currentTab}.php`, currentTab, currentParams);
+            setActiveLink(currentTab);
+        } else {
+            // Default to dashboard if no specific state or tab in URL
+            const dashboardLink = document.querySelector('[data-content-id="dashboard"]');
+            if (dashboardLink) {
+                loadContent(dashboardLink.getAttribute('href'), dashboardLink.getAttribute('data-content-id'));
+                setActiveLink(dashboardLink.getAttribute('data-content-id'));
+            }
+        }
+    });
 });

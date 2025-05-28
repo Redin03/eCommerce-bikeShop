@@ -20,7 +20,7 @@ $filter_end_date = $_GET['end_date'] ?? '';
 $filter_category = $_GET['category'] ?? '';
 
 
-// Fetch products from the database
+// Fetch all products from the database for the main table
 $sql = "
     SELECT
         p.id AS product_id,
@@ -129,15 +129,120 @@ if ($stmt) {
     error_log("Error preparing products fetch query: " . $conn->error);
 }
 
+
+// --- Low Stock Products Logic ---
+$low_stock_products = [];
+$low_stock_threshold = 10; // Define low stock threshold
+
+$sql_low_stock = "
+    SELECT
+        p.id AS product_id,
+        p.name AS product_name,
+        p.category,
+        p.subcategory,
+        pv.id AS variation_id,
+        pv.size,
+        pv.color,
+        pv.stock,
+        pv.price,
+        pi.image_path AS main_image_path
+    FROM
+        products p
+    JOIN
+        product_variations pv ON p.id = pv.product_id
+    LEFT JOIN
+        product_images pi ON p.id = pi.product_id AND pi.is_main = 1
+    WHERE
+        pv.stock <= ?
+    ORDER BY
+        p.name ASC, pv.size ASC, pv.color ASC
+";
+
+$stmt_low_stock = $conn->prepare($sql_low_stock);
+if ($stmt_low_stock) {
+    $stmt_low_stock->bind_param('i', $low_stock_threshold);
+    $stmt_low_stock->execute();
+    $result_low_stock = $stmt_low_stock->get_result();
+
+    if ($result_low_stock && $result_low_stock->num_rows > 0) {
+        while ($row_low_stock = $result_low_stock->fetch_assoc()) {
+            $low_stock_products[] = [
+                'product_id' => htmlspecialchars($row_low_stock['product_id']),
+                'product_name' => htmlspecialchars($row_low_stock['product_name']),
+                'category' => htmlspecialchars($row_low_stock['category']),
+                'subcategory' => htmlspecialchars($row_low_stock['subcategory']),
+                'variation_id' => htmlspecialchars($row_low_stock['variation_id']),
+                'size' => htmlspecialchars($row_low_stock['size']),
+                'color' => htmlspecialchars($row_low_stock['color']),
+                'stock' => htmlspecialchars($row_low_stock['stock']),
+                'price' => htmlspecialchars(number_format($row_low_stock['price'], 2)),
+                'image_path' => htmlspecialchars($row_low_stock['main_image_path'] ?? 'path/to/default/image.jpg') // Provide a default if no main image
+            ];
+        }
+    }
+    $result_low_stock->free();
+    $stmt_low_stock->close();
+} else {
+    error_log("Error preparing low stock query: " . $conn->error);
+}
+
+// --- Stock History Logic ---
+$stock_history_records = [];
+// This query assumes you have a `stock_history` table as described above
+$sql_stock_history = "
+    SELECT
+        sh.id AS history_id,
+        p.name AS product_name,
+        pv.size,
+        pv.color,
+        sh.quantity_changed,
+        sh.change_type,
+        sh.changed_at
+        -- Optional: Add admin_id if you want to show who made the change
+        -- a.username AS admin_username
+    FROM
+        stock_history sh
+    JOIN
+        products p ON sh.product_id = p.id
+    JOIN
+        product_variations pv ON sh.variation_id = pv.id
+    WHERE
+        sh.quantity_changed > 0 -- Only show added stock for this view
+    ORDER BY
+        sh.changed_at DESC
+    LIMIT 100; -- Limit to recent 100 records for performance
+";
+
+$stmt_stock_history = $conn->prepare($sql_stock_history);
+if ($stmt_stock_history) {
+    $stmt_stock_history->execute();
+    $result_stock_history = $stmt_stock_history->get_result();
+
+    if ($result_stock_history && $result_stock_history->num_rows > 0) {
+        while ($row_history = $result_stock_history->fetch_assoc()) {
+            $stock_history_records[] = [
+                'history_id' => htmlspecialchars($row_history['history_id']),
+                'product_name' => htmlspecialchars($row_history['product_name']),
+                'size' => htmlspecialchars($row_history['size']),
+                'color' => htmlspecialchars($row_history['color']),
+                'quantity_changed' => htmlspecialchars($row_history['quantity_changed']),
+                'change_type' => htmlspecialchars($row_history['change_type']),
+                'changed_at' => htmlspecialchars($row_history['changed_at']),
+                // 'admin_username' => htmlspecialchars($row_history['admin_username'] ?? 'N/A') // Uncomment if joining with admins table
+            ];
+        }
+    }
+    $result_stock_history->free();
+    $stmt_stock_history->close();
+} else {
+    error_log("Error preparing stock history query: " . $conn->error);
+}
+
 $conn->close();
 
 ?>
 
 <h2 class="mb-4">Product Management</h2>
-<div class="alert alert-info" role="alert">
-    Manage bicycle inventory, add new products, update details, and more.
-</div>
-
 <div class="card shadow-sm mb-4">
     <div class="card-header d-flex justify-content-between align-items-center">
         <span>Filter Products</span>
@@ -164,7 +269,7 @@ $conn->close();
             </div>
             <div class="col-md-auto">
                 <button type="submit" class="btn btn-accent"><i class="bi bi-funnel me-2"></i>Apply Filter</button>
-                <button type="button" class="btn btn-secondary ms-2" id="resetProductsFilterBtn"><i class="bi bi-arrow-counterclockwise me-2"></i>Reset Filter</button>
+                <button type="submit" class="btn btn-secondary ms-2" id="resetProductsFilterBtn"><i class="bi bi-arrow-counterclockwise me-2"></i>Reset Filter</button>
             </div>
         </form>
     </div>
@@ -173,9 +278,17 @@ $conn->close();
 <div class="card shadow-sm mb-4">
     <div class="card-header d-flex justify-content-between align-items-center">
         <span>Products Overview</span>
-        <button class="btn btn-accent" data-bs-toggle="modal" data-bs-target="#addProductModal">
-            <i class="bi bi-plus-circle me-2"></i>Add New Product
-        </button>
+        <div>
+            <button class="btn btn-warning me-2" data-bs-toggle="modal" data-bs-target="#lowStockAlertModal">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i>Low Stock Alert (<?= count($low_stock_products) ?>)
+            </button>
+            <button class="btn btn-info me-2" data-bs-toggle="modal" data-bs-target="#stockHistoryModal">
+                <i class="bi bi-clock-history me-2"></i>Stock History (<?= count($stock_history_records) ?>)
+            </button>
+            <button class="btn btn-accent" data-bs-toggle="modal" data-bs-target="#addProductModal">
+                <i class="bi bi-plus-circle me-2"></i>Add New Product
+            </button>
+        </div>
     </div>
     <div class="card-body">
         <div class="table-responsive">
@@ -414,6 +527,106 @@ $conn->close();
                     <button type="submit" class="btn btn-danger">Delete Product</button>
                 </div>
             </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="lowStockAlertModal" tabindex="-1" aria-labelledby="lowStockAlertModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="lowStockAlertModalLabel"><i class="bi bi-exclamation-triangle-fill me-2 text-warning"></i>Low Stock Products</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <?php if (!empty($low_stock_products)): ?>
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover small">
+                            <thead>
+                                <tr>
+                                    <th>Image</th>
+                                    <th>Product Name</th>
+                                    <th>Category</th>
+                                    <th>Variation</th>
+                                    <th>Current Stock</th>
+                                    <th>Price</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php foreach ($low_stock_products as $item): ?>
+                                    <tr>
+                                        <td>
+                                            <?php if (!empty($item['image_path'])): ?>
+                                                <img src="../<?= $item['image_path'] ?>" alt="<?= $item['product_name'] ?>" class="img-thumbnail" style="width: 40px; height: 40px; object-fit: cover;">
+                                            <?php else: ?>
+                                                No Image
+                                            <?php endif; ?>
+                                        </td>
+                                        <td><?= $item['product_name'] ?></td>
+                                        <td><?= $item['category'] ?></td>
+                                        <td>Size: <?= $item['size'] ?>, Color: <?= $item['color'] ?></td>
+                                        <td><span class="badge bg-danger"><?= $item['stock'] ?></span></td>
+                                        <td>₱<?= $item['price'] ?></td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                <?php else: ?>
+                    <div class="alert alert-success" role="alert">
+                        <i class="bi bi-check-circle me-2"></i>Great! All products currently have sufficient stock units.
+                    </div>
+                <?php endif; ?>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="stockHistoryModal" tabindex="-1" aria-labelledby="stockHistoryModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="stockHistoryModalLabel"><i class="bi bi-clock-history me-2"></i>Stock History</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <?php if (!empty($stock_history_records)): ?>
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover small">
+                            <thead>
+                                <tr>
+                                    <th>Product Name</th>
+                                    <th>Variation</th>
+                                    <th>Quantity Added</th>
+                                    <th>Type</th>
+                                    <th>Date/Time</th>
+                                    </tr>
+                            </thead>
+                            <tbody>
+                                <?php foreach ($stock_history_records as $record): ?>
+                                    <tr>
+                                        <td><?= $record['product_name'] ?></td>
+                                        <td>Size: <?= $record['size'] ?>, Color: <?= $record['color'] ?></td>
+                                        <td><span class="badge bg-success">+<?= $record['quantity_changed'] ?></span></td>
+                                        <td><?= ucfirst(str_replace('_', ' ', $record['change_type'])) ?></td>
+                                        <td><?= date('Y-m-d H:i:s', strtotime($record['changed_at'])) ?></td>
+                                        </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                <?php else: ?>
+                    <div class="alert alert-info" role="alert">
+                        <i class="bi bi-info-circle me-2"></i>
+                    </div>
+                <?php endif; ?>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
         </div>
     </div>
 </div>

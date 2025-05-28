@@ -66,10 +66,6 @@ $sql .= " ORDER BY al.log_time DESC"; // Order by most recent first
 ?>
 
 <h2 class="mb-4">Activity Log History</h2>
-<div class="alert alert-info" role="alert">
-    View a chronological record of administrative actions. Logs older than <?php echo htmlspecialchars($days_to_keep); ?> days are automatically deleted.
-</div>
-
 <div class="card shadow-sm mb-4">
     <div class="card-header d-flex justify-content-between align-items-center">
         <span>Filter Activity Log</span>
