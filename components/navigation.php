@@ -127,7 +127,7 @@
            <a class="nav-link <?php if(basename($_SERVER['PHP_SELF']) == 'contact.php') echo 'active'; ?>" href="contact.php">Contact Us</a>
          </li>
          <li class="nav-item">
-           <a class="nav-link <?php if(basename($_SERVER['PHP_SELF']) == 'resources.php') echo 'active'; ?>" href="resources.php">Resources</a>
+           <a class="nav-link <?php if(basename($_SERVER['PHP_SELF']) == 'resources.php') echo 'active'; ?>" href="guides.php">Guides</a>
          </li>
          <?php if (isset($_SESSION['user_id'])): ?>
          <li class="nav-item">

@@ -1,5 +1,7 @@
 <?php
+// Start the session
 session_start();
+// Require the database configuration file
 require_once __DIR__ . '/../config/db.php';
 ?>
 <!DOCTYPE html>
@@ -9,82 +11,71 @@ require_once __DIR__ . '/../config/db.php';
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Bong Bicycle Shop</title>
 
-  <!-- Bootstrap Icons CDN -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
-  <!-- Google Font: Montserrat -->
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
 
-  <!-- Favicon -->
   <link rel="icon" type="image/png" href="../assets/images/favicon/favicon.svg">
 
-  <!-- Bootstrap 5 CSS -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" 
         rel="stylesheet" 
         integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" 
         crossorigin="anonymous">
 </head>
 <body>
-<!-- Navbar -->
-<?php include '../components/navigation.php'; ?>
+<?php include '../components/navigation.php'; // Include the navigation bar ?>
 
-<!-- Hero Section -->
 <section class="hero-section d-flex align-items-center justify-content-center" style="background: url('../assets/images/content-image/hero-banner.jpg') center/cover no-repeat; min-height: 70vh; position: relative;">
   <div style="background: rgba(0, 106, 78, 0.14); position: absolute; inset: 0;"></div>
   <div class="container position-relative text-center" style="z-index:2;">
     <h1 class="display-4 fw-bold text-light">Welcome to Bong Bicycle Shop</h1>
     <p class="lead text-light">Your one-stop shop for bikes, parts, and cycling guides at the best prices.</p>
     <a href="shop.php" class="btn btn-accent btn-lg mt-3 me-2">Shop Now</a>
-    <a href="resources.php" class="btn btn-outline-light btn-lg mt-3">Resources</a>
+    <a href="guides.php" class="btn btn-outline-light btn-lg mt-3">Guides</a>
   </div>
 </section>
 
-<!-- Featured Products Section -->
 <section style="background: var(--bg-light); padding: 60px 0;">
   <div class="container">
     <h2 class="text-center mb-5" style="color: var(--primary); font-weight:700;">Product Highlights</h2>
     <div class="row">
-      <!-- Electric Bikes -->
       <div class="col-md-3 mb-4">
         <div class="card h-100 shadow-sm border-0">
           <img src="../assets/images/products/electric-bike.jpg" class="card-img-top" alt="Electric Bike">
           <div class="card-body">
             <h5 class="card-title" style="color:var(--primary);">Electric Bikes</h5>
             <p class="card-text">Latest e-bikes for effortless rides.</p>
-            <a href="shop.php?category=electric" class="btn btn-accent btn-sm">Shop Electric</a>
+            <a href="shop.php?category=Electric Bikes" class="btn btn-accent btn-sm">Shop Electric</a>
           </div>
         </div>
       </div>
-      <!-- Mountain Bikes -->
       <div class="col-md-3 mb-4">
         <div class="card h-100 shadow-sm border-0">
           <img src="../assets/images/products/mountain-bike.jpg" class="card-img-top" alt="Mountain Bike">
           <div class="card-body">
             <h5 class="card-title" style="color:var(--primary);">Mountain Bikes</h5>
             <p class="card-text">Conquer any trail with our MTB range.</p>
-            <a href="shop.php?category=mountain" class="btn btn-accent btn-sm">Shop Mountain</a>
+            <a href="shop.php?category=Mountain Bikes" class="btn btn-accent btn-sm">Shop Mountain</a>
           </div>
         </div>
       </div>
-      <!-- Road Bikes -->
       <div class="col-md-3 mb-4">
         <div class="card h-100 shadow-sm border-0">
           <img src="../assets/images/products/road-bike.jpg" class="card-img-top" alt="Road Bike">
           <div class="card-body">
             <h5 class="card-title" style="color:var(--primary);">Road Bikes</h5>
             <p class="card-text">Speed and performance for every rider.</p>
-            <a href="shop.php?category=road" class="btn btn-accent btn-sm">Shop Road</a>
+            <a href="shop.php?category=Road Bikes" class="btn btn-accent btn-sm">Shop Road</a>
           </div>
         </div>
       </div>
-      <!-- Kids' Bikes -->
       <div class="col-md-3 mb-4">
         <div class="card h-100 shadow-sm border-0">
           <img src="../assets/images/products/kids-bike.jpg" class="card-img-top" alt="Kids Bike">
           <div class="card-body">
             <h5 class="card-title" style="color:var(--primary);">Kids’ Bikes</h5>
             <p class="card-text">Fun, safe bikes for young riders.</p>
-            <a href="shop.php?category=kids" class="btn btn-accent btn-sm">Shop Kids</a>
+            <a href="shop.php?category=Kids' Bikes" class="btn btn-accent btn-sm">Shop Kids</a>
           </div>
         </div>
       </div>
@@ -92,52 +83,47 @@ require_once __DIR__ . '/../config/db.php';
   </div>
 </section>
 
-<!-- Categories Section -->
 <section style="background: var(--primary); padding: 50px 0;">
   <div class="container">
     <h2 class="text-center text-light mb-5" style="font-weight:700;">Shop by Category</h2>
     <div class="row g-4 justify-content-center">
-      <!-- Bikes -->
       <div class="col-12 col-md-3">
         <div class="card h-100 shadow-sm border-0" style="background: var(--bg-light);">
           <img src="../assets/images/content-image/shop-by-bikes.jpg" class="card-img-top" alt="Bikes" style="height:180px; object-fit:cover;">
           <div class="card-body text-center">
             <h5 class="card-title" style="color:var(--primary);">Bikes</h5>
             <p class="card-text">Explore our full range of mountain, road, electric, and kids' bikes.</p>
-            <a href="shop.php?category=BIK" class="btn btn-accent">Shop Bikes</a>
+            <a href="shop.php?category=Bikes" class="btn btn-accent">Shop Bikes</a>
           </div>
         </div>
       </div>
-      <!-- Accessories -->
       <div class="col-12 col-md-3">
         <div class="card h-100 shadow-sm border-0" style="background: var(--bg-light);">
           <img src="../assets/images/content-image/shop-by-accessories.jpg" class="card-img-top" alt="Accessories" style="height:180px; object-fit:cover;">
           <div class="card-body text-center">
             <h5 class="card-title" style="color:var(--primary);">Accessories</h5>
             <p class="card-text">Helmets, lights, pumps, locks, and more for every cyclist.</p>
-            <a href="shop.php?category=ACC" class="btn btn-accent">Shop Accessories</a>
+            <a href="shop.php?category=Accessories" class="btn btn-accent">Shop Accessories</a>
           </div>
         </div>
       </div>
-      <!-- Apparel -->
       <div class="col-12 col-md-3">
         <div class="card h-100 shadow-sm border-0" style="background: var(--bg-light);">
           <img src="../assets/images/content-image/shop-by-apparel.jpg" class="card-img-top" alt="Apparel" style="height:180px; object-fit:cover;">
           <div class="card-body text-center">
             <h5 class="card-title" style="color:var(--primary);">Apparel</h5>
             <p class="card-text">Explore our full range of cycling apparel — from performance jerseys and padded shorts to gloves, jackets, and protective gear.</p>
-            <a href="shop.php?category=APP" class="btn btn-accent">Shop Apparel</a>
+            <a href="shop.php?category=Apparel" class="btn btn-accent">Shop Apparel</a>
           </div>
         </div>
       </div>
-      <!-- Bike Parts / Components -->
       <div class="col-12 col-md-3">
         <div class="card h-100 shadow-sm border-0" style="background: var(--bg-light);">
           <img src="../assets/images/content-image/shop-by-parts-components.jpg" class="card-img-top" alt="Bike Parts" style="height:180px; object-fit:cover;">
           <div class="card-body text-center">
             <h5 class="card-title" style="color:var(--primary);">Bike Parts / Components</h5>
             <p class="card-text">Quality parts and components to keep your bike running smoothly.</p>
-            <a href="shop.php?category=PAR" class="btn btn-accent">Shop Parts/ Components</a>
+            <a href="shop.php?category=<?php echo urlencode('Parts & Components'); ?>" class="btn btn-accent">Shop Parts/ Components</a>
           </div>
         </div>
       </div>
@@ -149,11 +135,10 @@ require_once __DIR__ . '/../config/db.php';
   <div class="container text-center">
     <h2 class="fw-bold mb-3">Limited-Time Savings on Our Most Popular Items!</h2>
     <p class="mb-4">Explore incredible deals on a wide selection of products, available only for a short time.</p>
-    <a href="shop.php?promo=deals" class="btn btn-primary btn-lg" style="background: var(--primary); border:none;">Discover Discounts</a>
+    <a href="shop.php?category=Discounted" class="btn btn-primary btn-lg" style="background: var(--primary); border:none;">Discover Discounts</a>
   </div>
 </section>
 
-<!-- Testimonials Section -->
 <section style="background: var(--bg-light); padding: 60px 0;">
   <div class="container">
     <h2 class="text-center mb-5" style="color: var(--primary); font-weight:700;">What Our Customers Say</h2>
@@ -207,7 +192,6 @@ require_once __DIR__ . '/../config/db.php';
   </div>
 </section>
 
-<!-- Cycling Educational Content Section -->
 <section style="background: var(--bg-dark); padding: 40px 0;">
   <div class="container text-center">
     <h2 class="text-light mb-4" style="font-weight:700;">Cycling Educational Content</h2>
@@ -255,19 +239,16 @@ require_once __DIR__ . '/../config/db.php';
   </div>
 </section>
 
-<!-- Cycling Educational Resources Section -->
 <section style="background: var(--accent); color: var(--text-light); padding: 50px 0;">
   <div class="container text-center">
     <h2 class="fw-bold mb-3">Boost Your Cycling Skills</h2>
     <p class="mb-4">Explore beginner to advanced tips on safety, handling, fitness, and urban riding.</p>
-    <a href="#educational-resources" class="btn btn-secondary btn-lg" style="background: var(--secondary); color: var(--text-dark); border: none;">
+    <a href="guides.php" class="btn btn-secondary btn-lg" style="background: var(--secondary); color: var(--text-dark); border: none;">
       View Cycling Guides
     </a>
   </div>
 </section>
 
-
-<!-- FAQ Section -->
 <section style="background: var(--bg-light); padding: 50px 0;">
   <div class="container">
     <h2 class="text-center mb-5" style="color: var(--primary); font-weight:700;">Frequently Asked Questions</h2>
@@ -280,19 +261,19 @@ require_once __DIR__ . '/../config/db.php';
         </h2>
         <div id="collapse1" class="accordion-collapse collapse show" aria-labelledby="faq1" data-bs-parent="#faqAccordion">
           <div class="accordion-body">
-            We offer a wide range of bikes including mountain bikes, road bikes, electric bikes, and kids’ bikes.
+            We offer a wide range of bikes, including mountain bikes, road bikes, electric bikes, and kids' bikes.
           </div>
         </div>
       </div>
       <div class="accordion-item">
         <h2 class="accordion-header" id="faq2">
           <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse2" aria-expanded="false" aria-controls="collapse2" style="color:var(--primary); font-weight:600;">
-            Do you provide bike repair and maintenance services?
+            Are your educational cycling guides free to access?
           </button>
         </h2>
         <div id="collapse2" class="accordion-collapse collapse" aria-labelledby="faq2" data-bs-parent="#faqAccordion">
           <div class="accordion-body">
-            Yes! Our shop offers professional repair and maintenance services for all types of bicycles.
+            Yes, our cycling guides are free for all riders! Simply visit our <a href="guides.php" style="color:var(--accent);">Guides</a> page.
           </div>
         </div>
       </div>
@@ -304,7 +285,7 @@ require_once __DIR__ . '/../config/db.php';
         </h2>
         <div id="collapse3" class="accordion-collapse collapse" aria-labelledby="faq3" data-bs-parent="#faqAccordion">
           <div class="accordion-body">
-            Absolutely! You can shop online and choose in-store pickup at checkout for your convenience.
+            Absolutely! You can shop online and pay at the store to receive the item you checked out.
           </div>
         </div>
       </div>
@@ -316,7 +297,7 @@ require_once __DIR__ . '/../config/db.php';
         </h2>
         <div id="collapse4" class="accordion-collapse collapse" aria-labelledby="faq4" data-bs-parent="#faqAccordion">
           <div class="accordion-body">
-            We accept credit/debit cards, PayPal, and cash for in-store purchases.
+            We accept Cash on Delivery (COD), GCash, and in-store payments for pickup orders.
           </div>
         </div>
       </div>
@@ -337,13 +318,13 @@ require_once __DIR__ . '/../config/db.php';
 </section>
 
 <?php
+// Get success and error messages from URL parameters
 $success = isset($_GET['success']) ? urldecode($_GET['success']) : '';
 $error = isset($_GET['error']) ? urldecode($_GET['error']) : '';
 ?>
-<!-- Toast Container -->
 <div aria-live="polite" aria-atomic="true" class="position-relative">
   <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 9999;">
-    <?php if ($success): ?>
+    <?php if ($success): // Display success toast if message exists ?>
       <div class="toast align-items-center text-bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true"
            data-bs-autohide="true" data-bs-delay="5000" id="successToast">
         <div class="d-flex">
@@ -355,7 +336,7 @@ $error = isset($_GET['error']) ? urldecode($_GET['error']) : '';
         </div>
       </div>
     <?php endif; ?>
-    <?php if ($error): ?>
+    <?php if ($error): // Display error toast if message exists ?>
       <div class="toast align-items-center text-bg-danger border-0" role="alert" aria-live="assertive" aria-atomic="true"
            data-bs-autohide="true" data-bs-delay="5000" id="errorToast">
         <div class="d-flex">
@@ -371,10 +352,10 @@ $error = isset($_GET['error']) ? urldecode($_GET['error']) : '';
 </div>
 
 
-<!-- Footer -->
-<?php include '../components/footer.php'; ?>
+<?php include '../components/footer.php'; // Include the footer ?>
 
 <script>
+  // JavaScript to initialize and show Bootstrap toasts
   document.addEventListener('DOMContentLoaded', function () {
     var toastElList = [].slice.call(document.querySelectorAll('.toast'));
     toastElList.forEach(function (toastEl) {
@@ -384,7 +365,6 @@ $error = isset($_GET['error']) ? urldecode($_GET['error']) : '';
   });
 </script>
 
-  <!-- Bootstrap JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" 
           integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" 
           crossorigin="anonymous"></script>

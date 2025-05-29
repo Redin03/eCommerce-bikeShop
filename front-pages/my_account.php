@@ -15,7 +15,8 @@ $stmt->execute();
 $stmt->bind_result($name, $email, $gender, $contact_number, $shipping_address, $profile_image);
 $stmt->fetch();
 $stmt->close();
-$conn->close();
+// Note: $conn is closed here after fetching user data.
+// It will be re-opened in the activity log section.
 
 $address = null;
 if ($shipping_address) {
@@ -29,22 +30,17 @@ if ($shipping_address) {
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Bong Bicycle Shop</title>
 
-  <!-- Bootstrap Icons CDN -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
-  <!-- Google Font: Montserrat -->
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
 
-  <!-- Custom Styles -->
   <link rel="stylesheet" href="../assets/css/my_account.css">
 
-  <!-- Favicon -->
   <link rel="icon" type="image/png" href="../assets/images/favicon/favicon.svg">
 
-  <!-- Bootstrap 5 CSS -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" 
-        rel="stylesheet" 
-        integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" 
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css"
+        rel="stylesheet"
+        integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC"
         crossorigin="anonymous">
 </head>
 <body>
@@ -55,7 +51,6 @@ if ($shipping_address) {
 $success = isset($_GET['success']) ? urldecode($_GET['success']) : '';
 $error = isset($_GET['error']) ? urldecode($_GET['error']) : '';
 ?>
-<!-- Toast Container -->
 <div aria-live="polite" aria-atomic="true" class="position-relative">
   <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 9999;">
     <?php if ($success): ?>
@@ -87,9 +82,7 @@ $error = isset($_GET['error']) ? urldecode($_GET['error']) : '';
 
 <div class="container-fluid mt-5">
   <div class="row">
-    <!-- Sidebar -->
-    <div class="col-md-3 px-3 mb-4"><!-- px-2 adds a little horizontal space -->
-      <div class="card shadow-sm rounded-0">
+    <div class="col-md-3 px-3 mb-4"><div class="card shadow-sm rounded-0">
         <div class="card-body text-center">
           <?php if (!empty($profile_image)): ?>
             <img src="../uploads/profile/<?php echo htmlspecialchars($profile_image); ?>" alt="Profile Image" class="rounded-circle mb-2" style="width:100px;height:100px;object-fit:cover;">
@@ -113,8 +106,8 @@ $error = isset($_GET['error']) ? urldecode($_GET['error']) : '';
           <a href="#orders" class="list-group-item list-group-item-action" data-bs-toggle="tab">
             <i class="bi bi-bag-check me-2"></i> My Orders
           </a>
-          <a href="#wishlist" class="list-group-item list-group-item-action" data-bs-toggle="tab">
-            <i class="bi bi-heart me-2"></i> Wishlist
+          <a href="#activity_log" class="list-group-item list-group-item-action" data-bs-toggle="tab">
+            <i class="bi bi-activity me-2"></i> Activity Log
           </a>
           <a href="../auth/logout.php" class="list-group-item list-group-item-action text-danger">
             <i class="bi bi-box-arrow-right me-2"></i> Logout
@@ -122,9 +115,7 @@ $error = isset($_GET['error']) ? urldecode($_GET['error']) : '';
         </div>
       </div>
     </div>
-    <!-- Tab Content -->
-    <div class="col-md-9 px-3"><!-- px-2 adds a little horizontal space -->
-      <div class="tab-content card shadow-sm p-4 rounded-0">
+    <div class="col-md-9 px-3"><div class="tab-content card shadow-sm p-4 rounded-0">
         <div class="tab-pane fade show active" id="profile">
           <h5 class="mb-3" style="color:var(--primary);">My Profile</h5>
           <p><strong>Name:</strong> <?php echo htmlspecialchars($name); ?></p>
@@ -188,17 +179,54 @@ $error = isset($_GET['error']) ? urldecode($_GET['error']) : '';
           <h5 class="mb-3" style="color:var(--primary);">My Orders</h5>
           <p>Your order history will appear here.</p>
         </div>
-        <div class="tab-pane fade" id="wishlist">
-          <h5 class="mb-3" style="color:var(--primary);">Wishlist</h5>
-          <p>Your wishlist items will appear here.</p>
+
+        <div class="tab-pane fade" id="activity_log">
+          <h5 class="mb-3" style="color:var(--primary);">My Activity Log</h5>
+          <div class="table-responsive">
+            <table class="table table-striped table-hover">
+              <thead>
+                <tr>
+                  <th>Date & Time</th>
+                  <th>Activity Type</th>
+                  <th>Description</th>
+                </tr>
+              </thead>
+              <tbody>
+                <?php
+                // Re-establish connection for this block as it was closed earlier
+                // This ensures the connection is fresh for fetching activity logs
+                require_once __DIR__ . '/../config/db.php';
+                $user_id = $_SESSION['user_id'];
+                // Select from customer_activity_logs table
+                $stmt_logs = $conn->prepare("SELECT activity_type, description, activity_timestamp FROM customer_activity_logs WHERE user_id=? ORDER BY activity_timestamp DESC LIMIT 100");
+                $stmt_logs->bind_param("i", $user_id);
+                $stmt_logs->execute();
+                $result_logs = $stmt_logs->get_result();
+
+                if ($result_logs->num_rows > 0) {
+                    while ($log = $result_logs->fetch_assoc()) {
+                        echo '<tr>';
+                        echo '<td>' . htmlspecialchars(date('M d, Y h:i A', strtotime($log['activity_timestamp']))) . '</td>';
+                        echo '<td>' . htmlspecialchars($log['activity_type']) . '</td>';
+                        echo '<td>' . htmlspecialchars($log['description']) . '</td>';
+                        echo '</tr>';
+                    }
+                } else {
+                    echo '<tr><td colspan="3" class="text-center">No activity history found.</td></tr>';
+                }
+                $stmt_logs->close();
+                $conn->close(); // Close connection after fetching logs for this block
+                ?>
+              </tbody>
+            </table>
+          </div>
         </div>
-      </div>
+        </div>
     </div>
   </div>
 </div>
 
 
-<!-- Edit Profile Modal -->
 <div class="modal fade" id="editProfileModal" tabindex="-1" aria-labelledby="editProfileModalLabel" aria-hidden="true">
   <div class="modal-dialog">
     <form class="modal-content" method="POST" action="../config/edit_profile.php">
@@ -324,9 +352,8 @@ document.addEventListener('DOMContentLoaded', async function() {
 });
 </script>
 
-<!-- Bootstrap JS -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" 
-        integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" 
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
         crossorigin="anonymous"></script>
 </body>
 </html>

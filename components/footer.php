@@ -30,8 +30,8 @@
             </a>
           </li>
           <li>
-            <a class="footer-link d-flex align-items-center" href="resources.php">
-              Resources
+            <a class="footer-link d-flex align-items-center" href="guides.php">
+              Guides
             </a>
           </li>
         </ul>

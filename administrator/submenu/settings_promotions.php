@@ -92,7 +92,7 @@ $conn->close(); // Close the connection after fetching necessary data
             <input type="number" class="form-control" id="itemDiscountValue" name="discount_percentage" step="0.01" min="0" max="100" placeholder="e.g., 15" required>
         </div>
         <div class="mb-3">
-            <label for="itemDiscountExpiryDate" class="form-label">Discount Expiry Date (Optional)</label>
+            <label for="itemDiscountExpiryDate" class="form-label">Discount Expiry Date</label>
             <input type="date" class="form-control" id="itemDiscountExpiryDate" name="discount_expiry_date">
             <small class="text-muted">Leave empty for no expiry for this specific item discount.</small>
         </div>
@@ -109,7 +109,6 @@ $conn->close(); // Close the connection after fetching necessary data
             <table class="table table-striped table-hover">
                 <thead>
                     <tr>
-                        <th>Type</th>
                         <th>Details</th>
                         <th>Value</th>
                         <th>Expires On</th>
@@ -134,7 +133,6 @@ $conn->close(); // Close the connection after fetching necessary data
                     <?php if (!empty($item_discounts)): ?>
                         <?php foreach ($item_discounts as $item_discount): ?>
                             <tr>
-                                <td>Item Specific</td>
                                 <td>
                                     Product: <?= htmlspecialchars($item_discount['product_name']) ?><br>
                                     <?php if (!empty($item_discount['variation_id'])): ?>

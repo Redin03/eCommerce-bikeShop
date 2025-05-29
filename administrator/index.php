@@ -37,20 +37,20 @@ $loggedInAdminUsername = $_SESSION['admin_username'] ?? 'Admin User';
 </head>
 <body>
 
-  <header id="header">
-    <a class="navbar-brand" href="#">
-      <i class="bi bi-gear-fill me-2"></i>Admin Dashboard
-    </a>
-    <div class="dropdown">
-      <button class="btn btn-accent dropdown-toggle" type="button" id="adminDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-        <i class="bi bi-person-circle me-2"></i><?php echo htmlspecialchars($loggedInAdminUsername); ?>
-      </button>
-      <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="adminDropdown">
-        <li><hr class="dropdown-divider bg-light"></li>
-        <li><a class="dropdown-item" href="logout.php"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
-      </ul>
-    </div>
-  </header>
+<header id="header">
+  <a class="navbar-brand" href="#">
+    <img src="../assets/images/logos/logo.svg" alt="Your Website Name Logo" style="height: 30px; margin-right: 10px;"> Bong Bicycle Shop
+  </a>
+  <div class="dropdown">
+    <button class="btn btn-accent dropdown-toggle" type="button" id="adminDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+      <i class="bi bi-person-circle me-2"></i><?php echo htmlspecialchars($loggedInAdminUsername); ?>
+    </button>
+    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="adminDropdown">
+      <li><hr class="dropdown-divider bg-light"></li>
+      <li><a class="dropdown-item" href="logout.php"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
+    </ul>
+  </div>
+</header>
 
   <div id="wrapper">
     <div id="sidebar-wrapper">
