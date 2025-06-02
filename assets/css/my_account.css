@@ -6,3 +6,10 @@
       border: none;
     }
 
+.settings-menu-parent.active,
+.settings-menu-parent.active:focus,
+.settings-menu-parent.active:hover {
+  background-color: transparent !important;
+  color: inherit !important;
+  border: none;
+}

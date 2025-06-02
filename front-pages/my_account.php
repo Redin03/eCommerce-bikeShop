@@ -116,9 +116,9 @@ if ($stmt_cart) {
 
 // --- Tab persistence logic ---
 $active_tab = 'profile'; // Default active tab
-if (isset($_GET['tab']) && in_array($_GET['tab'], ['profile', 'cart', 'orders', 'activity_log'])) {
+if (isset($_GET['tab']) && in_array($_GET['tab'], ['profile', 'cart', 'orders', 'activity_log', 'ticket'])) {
     $active_tab = $_GET['tab'];
-} else if (isset($_SESSION['active_tab']) && in_array($_SESSION['active_tab'], ['profile', 'cart', 'orders', 'activity_log'])) {
+} else if (isset($_SESSION['active_tab']) && in_array($_SESSION['active_tab'], ['profile', 'cart', 'orders', 'activity_log', 'ticket'])) {
     $active_tab = $_SESSION['active_tab'];
 }
 
@@ -215,14 +215,17 @@ $error = isset($_GET['error']) ? urldecode($_GET['error']) : '';
           <a href="#profile" class="list-group-item list-group-item-action <?php echo ($active_tab == 'profile') ? 'active' : ''; ?>" data-bs-toggle="tab">
             <i class="bi bi-person me-2"></i> My Profile
           </a>
+          <a href="#orders" class="list-group-item list-group-item-action <?php echo ($active_tab == 'orders') ? 'active' : ''; ?>" data-bs-toggle="tab">
+            <i class="bi bi-bag-check me-2"></i> My Orders
+          </a>
           <a href="#cart" class="list-group-item list-group-item-action <?php echo ($active_tab == 'cart') ? 'active' : ''; ?>" data-bs-toggle="tab">
             <i class="bi bi-cart me-2"></i> My Cart
             <?php if ($cart_item_count > 0): ?>
                 <span class="badge bg-danger rounded-pill float-end"><?php echo $cart_item_count; ?></span>
             <?php endif; ?>
           </a>
-          <a href="#orders" class="list-group-item list-group-item-action <?php echo ($active_tab == 'orders') ? 'active' : ''; ?>" data-bs-toggle="tab">
-            <i class="bi bi-bag-check me-2"></i> My Orders
+          <a href="#ticket" class="list-group-item list-group-item-action <?php echo ($active_tab == 'ticket') ? 'active' : ''; ?>" data-bs-toggle="tab">
+            <i class="bi bi-ticket-perforated me-2"></i> My Ticket
           </a>
           <a href="#activity_log" class="list-group-item list-group-item-action <?php echo ($active_tab == 'activity_log') ? 'active' : ''; ?>" data-bs-toggle="tab">
             <i class="bi bi-activity me-2"></i> Activity Log
@@ -250,8 +253,12 @@ $error = isset($_GET['error']) ? urldecode($_GET['error']) : '';
               <?php if (!empty($address['region'])) echo ', ' . htmlspecialchars($address['region']); ?>
             </div>
             <button type="button" class="btn btn-accent btn-sm mb-3" data-bs-toggle="modal" data-bs-target="#editProfileModal">
-  <i class="bi bi-pencil-square"></i> Edit Profile
-</button>
+              <i class="bi bi-pencil-square"></i> Edit Profile
+            </button>
+            <button type="button" class="btn btn-accent btn-sm mb-3" data-bs-toggle="modal" data-bs-target="#changePasswordModal">
+                <i class="bi bi-key"></i> Change Password
+            </button>
+            
           <?php else: ?>
             <div class="mb-3 text-muted"><em>No shipping address saved yet.</em></div>
           <?php endif; ?>
@@ -289,98 +296,115 @@ $error = isset($_GET['error']) ? urldecode($_GET['error']) : '';
             <button type="submit" class="btn btn-accent mt-2">Save Address</button>
           </form>
         </div>
-        <div class="tab-pane fade <?php echo ($active_tab == 'cart') ? 'show active' : ''; ?>" id="cart">
+       <div class="tab-pane fade <?php echo ($active_tab == 'cart') ? 'show active' : ''; ?>" id="cart">
           <h5 class="mb-3" style="color:var(--primary);">My Cart</h5>
           <?php if (!empty($cartItems)): ?>
-            <div class="table-responsive">
-              <table class="table table-hover align-middle">
-                <thead>
-  <tr>
-    <th scope="col">Product Image</th>
-    <th scope="col">Product Details</th>
-    <th scope="col">Price</th>
-    <th scope="col">Quantity</th>
-    <th scope="col">Subtotal</th>
-    <th scope="col">Actions</th>
-  </tr>
-</thead>
-<tbody>
-<?php foreach ($cartItems as $item): ?>
-  <tr>
-    <!-- Product Image -->
-    <td>
-      <?php
-      $imagePath = !empty($item['main_image']) ? '../' . htmlspecialchars($item['main_image']) : '../assets/images/no_image.png';
-      ?>
-      <img src="<?php echo $imagePath; ?>" class="img-thumbnail" alt="<?php echo htmlspecialchars($item['product_name']); ?>" style="width: 60px; height: 60px; object-fit: cover;">
-    </td>
-    <!-- Product Details -->
-    <td>
-      <div><strong><?php echo htmlspecialchars($item['product_name']); ?></strong></div>
-      <div>
-        <?php
-          $details = [];
-          if (!empty($item['size']) && $item['size'] !== 'Not Available') $details[] = 'Size: ' . htmlspecialchars($item['size']);
-          if (!empty($item['color']) && $item['color'] !== 'Not Available') $details[] = 'Color: ' . htmlspecialchars($item['color']);
-          echo implode(' | ', $details);
-        ?>
-      </div>
-    </td>
-    <!-- Price -->
-    <td>
-      <?php if ($item['is_discounted']): ?>
-        <span class="text-muted text-decoration-line-through">₱<?php echo number_format($item['original_price'], 2); ?></span>
-        <strong class="ms-1">₱<?php echo number_format($item['display_price'], 2); ?></strong>
-      <?php else: ?>
-        <strong>₱<?php echo number_format($item['display_price'], 2); ?></strong>
-      <?php endif; ?>
-    </td>
-    <!-- Quantity with + and - -->
-    <td>
-      <form class="update-quantity-form d-flex align-items-center" data-cart-id="<?php echo $item['cart_id']; ?>">
-        <button type="button" class="btn btn-outline-secondary btn-sm btn-qty-minus" aria-label="Decrease quantity">-</button>
-        <input type="number" name="quantity" min="1" value="<?php echo htmlspecialchars($item['quantity']); ?>" class="form-control form-control-sm mx-1 text-center no-arrow" style="width:60px;" readonly>
-        <button type="button" class="btn btn-outline-secondary btn-sm btn-qty-plus" aria-label="Increase quantity">+</button>
-        <input type="hidden" name="cart_id" value="<?php echo htmlspecialchars($item['cart_id']); ?>">
-      </form>
-    </td>
-    <!-- Subtotal -->
-    <td>₱<?php echo number_format($item['subtotal'], 2); ?></td>
-    <!-- Actions -->
-    <td>
-      <form action="../config/remove_from_cart.php" method="POST" class="remove-from-cart-form">
-        <input type="hidden" name="cart_id" value="<?php echo htmlspecialchars($item['cart_id']); ?>">
-        <button type="submit" class="btn btn-danger btn-sm"><i class="bi bi-trash"></i></button>
-      </form>
-    </td>
-  </tr>
-<?php endforeach; ?>
-</tbody>
-                <tfoot>
-                  <tr>
-                    <th colspan="4" class="text-end">Total:</th>
-                    <th colspan="2">₱<?php echo number_format($cart_total_amount, 2); ?></th>
-                  </tr>
-                </tfoot>
-              </table>
-            </div>
-            <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-3">
-                <button class="btn btn-success btn-lg" type="button"><i class="bi bi-cash-stack"></i> Proceed to Checkout</button>
-            </div>
+            <form id="checkoutForm" method="POST" action="checkout.php">
+              <div class="table-responsive" style="max-height: 800px; overflow-y: auto;">
+                <table class="table table-hover align-middle">
+                  <thead>
+                    <tr>
+                      <th scope="col">Select All
+                        <input type="checkbox" id="selectAllCart" />
+                      </th>
+                      <th scope="col">Product Image</th>
+                      <th scope="col">Product Details</th>
+                      <th scope="col">Price</th>
+                      <th scope="col">Quantity</th>
+                      <th scope="col">Subtotal</th>
+                      <th scope="col">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                  <?php foreach ($cartItems as $item): ?>
+                    <tr>
+                      <td>
+                        <input type="checkbox" name="cart_ids[]" value="<?php echo htmlspecialchars($item['cart_id']); ?>" class="cart-item-checkbox" data-price="<?php echo $item['display_price']; ?>" data-qty="<?php echo $item['quantity']; ?>" data-subtotal="<?php echo $item['subtotal']; ?>" />
+                      </td>
+                      <td>
+                        <?php
+                        $imagePath = !empty($item['main_image']) ? '../' . htmlspecialchars($item['main_image']) : '../assets/images/no_image.png';
+                        ?>
+                        <img src="<?php echo $imagePath; ?>" class="img-thumbnail" alt="<?php echo htmlspecialchars($item['product_name']); ?>" style="width: 60px; height: 60px; object-fit: cover;">
+                      </td>
+                      <td>
+                        <div><strong><?php echo htmlspecialchars($item['product_name']); ?></strong></div>
+                        <div>
+                          <?php
+                            $details = [];
+                            if (!empty($item['size']) && $item['size'] !== 'Not Available') $details[] = 'Size: ' . htmlspecialchars($item['size']);
+                            if (!empty($item['color']) && $item['color'] !== 'Not Available') $details[] = 'Color: ' . htmlspecialchars($item['color']);
+                            echo implode(' | ', $details);
+                          ?>
+                        </div>
+                      </td>
+                      <td>
+                        <?php if ($item['is_discounted']): ?>
+                          <span class="text-muted text-decoration-line-through">₱<?php echo number_format($item['original_price'], 2); ?></span>
+                          <strong class="ms-1">₱<?php echo number_format($item['display_price'], 2); ?></strong>
+                        <?php else: ?>
+                          <strong>₱<?php echo number_format($item['display_price'], 2); ?></strong>
+                        <?php endif; ?>
+                      </td>
+                      <td>
+                        <div class="update-quantity-form d-flex align-items-center" data-cart-id="<?php echo $item['cart_id']; ?>">
+                          <button type="button" class="btn btn-outline-secondary btn-sm btn-qty-minus" aria-label="Decrease quantity">-</button>
+                          <input type="number" name="quantity" min="1" value="<?php echo htmlspecialchars($item['quantity']); ?>" class="form-control form-control-sm mx-1 text-center no-arrow" style="width:60px;" readonly>
+                          <button type="button" class="btn btn-outline-secondary btn-sm btn-qty-plus" aria-label="Increase quantity">+</button>
+                          <input type="hidden" name="cart_id" value="<?php echo htmlspecialchars($item['cart_id']); ?>">
+                        </div>
+                      </td>
+                      <td>
+                        ₱<span class="item-subtotal"><?php echo number_format($item['subtotal'], 2); ?></span>
+                      </td>
+                      <td>
+                        <form action="../config/remove_from_cart.php" method="POST" class="remove-from-cart-form d-inline">
+                          <input type="hidden" name="cart_id" value="<?php echo htmlspecialchars($item['cart_id']); ?>">
+                           <button type="button"
+                                class="btn btn-danger btn-sm remove-from-cart-btn"
+                                data-cart-id="<?php echo htmlspecialchars($item['cart_id']); ?>">
+                          <i class="bi bi-trash"></i>
+                        </button>
+                        </form>
+                      </td>
+                    </tr>
+                  <?php endforeach; ?>
+                </tbody>
+                  <tfoot>
+                    <tr>
+                      <th colspan="5" class="text-end">Total:</th>
+                      <th colspan="2">₱<span id="cartTotalAmount">0.00</span></th>
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
+              <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-3">
+                <button class="btn btn-accent btn-md" type="submit" id="proceedCheckoutBtn" disabled>
+                  <i class="bi bi-cash-stack"></i> Proceed to Checkout
+                </button>
+              </div>
+            </form>
           <?php else: ?>
             <div class="alert alert-info text-center" role="alert">
-                <i class="bi bi-info-circle me-2"></i>Your cart is empty. Start shopping now!
+              <i class="bi bi-info-circle me-2"></i>Your cart is empty. Start shopping now!
             </div>
           <?php endif; ?>
         </div>
-        <div class="tab-pane fade <?php echo ($active_tab == 'orders') ? 'show active' : ''; ?>" id="orders">
-          <h5 class="mb-3" style="color:var(--primary);">My Orders</h5>
-          <p>Your order history will appear here.</p>
+
+        <div class="tab-pane fade <?php echo ($active_tab == 'ticket') ? 'show active' : ''; ?>" id="ticket">
+          <h5 class="mb-3" style="color:var(--primary);"><i class="bi bi-ticket-perforated me-2"></i>My Ticket</h5>
+          <p>Your support tickets will appear here.</p>
+          <!-- You can add a table or ticket submission form here -->
         </div>
 
         <div class="tab-pane fade <?php echo ($active_tab == 'activity_log') ? 'show active' : ''; ?>" id="activity_log">
           <h5 class="mb-3" style="color:var(--primary);">My Activity Log</h5>
-          <div class="table-responsive">
+          <form method="POST" action="../config/clear_activity_log.php" class="mb-3">
+            <button type="submit" name="clear_activity_log" class="btn btn-danger btn-sm">
+              <i class="bi bi-trash"></i> Clear All History
+            </button>
+          </form>
+          <div class="table-responsive" style="max-height: 800px; overflow-y: auto;">
             <table class="table table-striped table-hover">
               <thead>
                 <tr>
@@ -448,6 +472,36 @@ $error = isset($_GET['error']) ? urldecode($_GET['error']) : '';
         <div class="mb-3">
           <label for="editContact" class="form-label">Contact Number</label>
           <input type="text" class="form-control" id="editContact" name="contact_number" value="<?php echo htmlspecialchars($contact_number); ?>" required>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="submit" class="btn btn-accent">Save Changes</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+
+<div class="modal fade" id="changePasswordModal" tabindex="-1" aria-labelledby="changePasswordModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <form method="POST" action="../config/change_password.php" class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="changePasswordModalLabel"> Change Password</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-3">
+          <label for="current_password" class="form-label">Current Password</label>
+          <input type="password" class="form-control" id="current_password" name="current_password" required>
+        </div>
+        <div class="mb-3">
+          <label for="new_password" class="form-label">New Password</label>
+          <input type="password" class="form-control" id="new_password" name="new_password" required>
+        </div>
+        <div class="mb-3">
+          <label for="confirm_password" class="form-label">Confirm New Password</label>
+          <input type="password" class="form-control" id="confirm_password" name="confirm_password" required>
         </div>
       </div>
       <div class="modal-footer">

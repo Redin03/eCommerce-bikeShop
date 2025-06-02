@@ -161,10 +161,11 @@ document.addEventListener('DOMContentLoaded', async function () {
 
 // --- Remove from Cart AJAX ---
 document.addEventListener('DOMContentLoaded', function () {
-  document.querySelectorAll('.remove-from-cart-form').forEach(form => {
-    form.addEventListener('submit', function (event) {
-      event.preventDefault();
-      const formData = new FormData(this);
+  document.querySelectorAll('.remove-from-cart-btn').forEach(btn => {
+    btn.addEventListener('click', function () {
+      const cartId = this.getAttribute('data-cart-id');
+      const formData = new FormData();
+      formData.append('cart_id', cartId);
       fetch('../config/remove_from_cart.php', {
         method: 'POST',
         body: formData,
@@ -174,7 +175,7 @@ document.addEventListener('DOMContentLoaded', function () {
         .then(data => {
           if (data.success) {
             showToast(data.message, 'success');
-            setTimeout(() => location.reload(), 800); // Wait for toast before reload
+            setTimeout(() => location.reload(), 800);
           } else {
             showToast(data.message, 'error');
           }
@@ -189,41 +190,85 @@ document.addEventListener('DOMContentLoaded', function () {
 
 // --- Quantity + / - AJAX ---
 document.addEventListener('DOMContentLoaded', function () {
-  document.querySelectorAll('.update-quantity-form').forEach(form => {
-    const minusBtn = form.querySelector('.btn-qty-minus');
-    const plusBtn = form.querySelector('.btn-qty-plus');
-    const qtyInput = form.querySelector('input[name="quantity"]');
+  document.querySelectorAll('.update-quantity-form').forEach(div => {
+    const minusBtn = div.querySelector('.btn-qty-minus');
+    const plusBtn = div.querySelector('.btn-qty-plus');
+    const qtyInput = div.querySelector('input[name="quantity"]');
+    const cartId = div.getAttribute('data-cart-id');
 
     minusBtn.addEventListener('click', function () {
       let qty = parseInt(qtyInput.value, 10);
       if (qty > 1) {
         qtyInput.value = qty - 1;
-        form.dispatchEvent(new Event('submit', { cancelable: true }));
+        updateQuantity(cartId, qty - 1);
       }
     });
 
     plusBtn.addEventListener('click', function () {
       let qty = parseInt(qtyInput.value, 10);
       qtyInput.value = qty + 1;
-      form.dispatchEvent(new Event('submit', { cancelable: true }));
-    });
-
-    form.addEventListener('submit', function (event) {
-      event.preventDefault();
-      const formData = new FormData(form);
-      fetch('../config/update_cart_quantity.php', {
-        method: 'POST',
-        body: formData,
-        headers: { 'X-Requested-With': 'XMLHttpRequest' }
-      })
-        .then(res => res.json())
-        .then(data => {
-          showToast(data.message, data.success ? 'success' : 'error');
-          if (data.success) {
-            setTimeout(() => location.reload(), 800);
-          }
-        })
-        .catch(() => showToast('Error updating quantity.', 'error'));
+      updateQuantity(cartId, qty + 1);
     });
   });
+
+  function updateQuantity(cartId, quantity) {
+    const formData = new FormData();
+    formData.append('cart_id', cartId);
+    formData.append('quantity', quantity);
+    fetch('../config/update_cart_quantity.php', {
+      method: 'POST',
+      body: formData,
+      headers: { 'X-Requested-With': 'XMLHttpRequest' }
+    })
+      .then(res => res.json())
+      .then(data => {
+        showToast(data.message, data.success ? 'success' : 'error');
+        if (data.success) {
+          setTimeout(() => location.reload(), 800);
+        }
+      })
+      .catch(() => showToast('Error updating quantity.', 'error'));
+  }
+});
+
+
+// --- Cart Checkbox & Total Calculation ---
+document.addEventListener('DOMContentLoaded', function () {
+  const selectAll = document.getElementById('selectAllCart');
+  const checkboxes = document.querySelectorAll('.cart-item-checkbox');
+  const totalSpan = document.getElementById('cartTotalAmount');
+  const proceedBtn = document.getElementById('proceedCheckoutBtn');
+
+  function updateTotal() {
+    let total = 0;
+    let anyChecked = false;
+    checkboxes.forEach(cb => {
+      if (cb.checked) {
+        total += parseFloat(cb.getAttribute('data-subtotal'));
+        anyChecked = true;
+      }
+    });
+    totalSpan.textContent = total.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    proceedBtn.disabled = !anyChecked;
+  }
+
+  if (selectAll) {
+    selectAll.addEventListener('change', function () {
+      checkboxes.forEach(cb => cb.checked = selectAll.checked);
+      updateTotal();
+    });
+  }
+
+  checkboxes.forEach(cb => {
+    cb.addEventListener('change', function () {
+      // If any is unchecked, uncheck selectAll
+      if (!this.checked && selectAll) selectAll.checked = false;
+      // If all are checked, check selectAll
+      if ([...checkboxes].every(c => c.checked) && selectAll) selectAll.checked = true;
+      updateTotal();
+    });
+  });
+
+  // Initialize total on page load
+  updateTotal();
 });
