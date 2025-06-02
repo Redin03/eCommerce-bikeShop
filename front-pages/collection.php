@@ -209,7 +209,7 @@ $conn->close(); // Close the database connection
         <h1 class="text-center display-4 mb-4">Explore Our Collection</h1>
         <div class="row justify-content-center align-items-center g-2">
             <div class="col-12 col-md-8 col-lg-6 mb-3 mb-md-0">
-                <form class="d-flex" action="shop.php" method="GET">
+                <form class="d-flex" action="collection.php" method="GET">
                     <input class="form-control me-2" type="search" placeholder="Search products..." aria-label="Search" name="search" value="<?php echo htmlspecialchars($searchTerm); ?>">
                     <button class="btn btn-accent" type="submit">Search
                     </button>
@@ -219,12 +219,12 @@ $conn->close(); // Close the database connection
                 </form>
             </div>
             <div class="col-12 col-lg-9 text-center category-buttons">
-                <a href="shop.php?search=<?php echo htmlspecialchars($searchTerm); ?>" class="btn btn-outline-secondary <?php echo empty($selectedCategory) ? 'active' : ''; ?>">All Products</a>
-                <a href="shop.php?search=<?php echo htmlspecialchars($searchTerm); ?>&category=Bikes" class="btn btn-outline-secondary <?php echo ($selectedCategory === 'Bikes') ? 'active' : ''; ?>">Bikes</a>
-                <a href="shop.php?search=<?php echo htmlspecialchars($searchTerm); ?>&category=Apparel" class="btn btn-outline-secondary <?php echo ($selectedCategory === 'Apparel') ? 'active' : ''; ?>">Apparel</a>
-                <a href="shop.php?search=<?php echo htmlspecialchars($searchTerm); ?>&category=<?php echo urlencode('Parts & Components'); ?>" class="btn btn-outline-secondary <?php echo ($selectedCategory === 'Parts & Components') ? 'active' : ''; ?>">Parts & Components</a>
-                <a href="shop.php?search=<?php echo htmlspecialchars($searchTerm); ?>&category=Accessories" class="btn btn-outline-secondary <?php echo ($selectedCategory === 'Accessories') ? 'active' : ''; ?>">Accessories</a>
-                <a href="shop.php?search=<?php echo htmlspecialchars($searchTerm); ?>&category=Discounted" class="btn btn-outline-danger <?php echo ($selectedCategory === 'Discounted') ? 'active' : ''; ?>">Discounted</a>
+                <a href="collection.php?search=<?php echo htmlspecialchars($searchTerm); ?>" class="btn btn-outline-secondary <?php echo empty($selectedCategory) ? 'active' : ''; ?>">All Products</a>
+                <a href="collection.php?search=<?php echo htmlspecialchars($searchTerm); ?>&category=Bikes" class="btn btn-outline-secondary <?php echo ($selectedCategory === 'Bikes') ? 'active' : ''; ?>">Bikes</a>
+                <a href="collection.php?search=<?php echo htmlspecialchars($searchTerm); ?>&category=Apparel" class="btn btn-outline-secondary <?php echo ($selectedCategory === 'Apparel') ? 'active' : ''; ?>">Apparel</a>
+                <a href="collection.php?search=<?php echo htmlspecialchars($searchTerm); ?>&category=<?php echo urlencode('Parts & Components'); ?>" class="btn btn-outline-secondary <?php echo ($selectedCategory === 'Parts & Components') ? 'active' : ''; ?>">Parts & Components</a>
+                <a href="collection.php?search=<?php echo htmlspecialchars($searchTerm); ?>&category=Accessories" class="btn btn-outline-secondary <?php echo ($selectedCategory === 'Accessories') ? 'active' : ''; ?>">Accessories</a>
+                <a href="collection.php?search=<?php echo htmlspecialchars($searchTerm); ?>&category=Discounted" class="btn btn-outline-danger <?php echo ($selectedCategory === 'Discounted') ? 'active' : ''; ?>">Discounted</a>
             </div>
         </div>
     </div>

@@ -118,7 +118,7 @@
            <a class="nav-link <?php if(basename($_SERVER['PHP_SELF']) == 'index.php') echo 'active'; ?>" href="index.php">Home</a>
          </li>
          <li class="nav-item">
-           <a class="nav-link <?php if(basename($_SERVER['PHP_SELF']) == 'shop.php') echo 'active'; ?>" href="shop.php">Shop</a>
+           <a class="nav-link <?php if(basename($_SERVER['PHP_SELF']) == 'shop.php') echo 'active'; ?>" href="collection.php">Collection</a>
          </li>
          <li class="nav-item">
            <a class="nav-link <?php if(basename($_SERVER['PHP_SELF']) == 'about.php') echo 'active'; ?>" href="about.php">About Us</a>

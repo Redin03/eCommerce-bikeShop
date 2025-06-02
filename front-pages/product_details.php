@@ -1,581 +1,543 @@
 <?php
 session_start();
-require_once __DIR__ . '/../config/db.php'; // Your database connection
+require_once __DIR__ . '/../config/db.php'; // This path for db.php remains correct
 
 $product = null;
-$productImages = [];
-$productVariations = [];
-$error_message = '';
+$productId = $_GET['id'] ?? null;
 
-// Get product ID from URL
-$product_id = $_GET['id'] ?? null;
+if ($productId) {
+    // Fetch product details, variations, and images
+    $sql = "SELECT
+                p.id AS product_id,
+                p.name AS product_name,
+                p.category,
+                p.subcategory,
+                p.description,
+                pv.id AS variation_id,
+                pv.size,
+                pv.color,
+                pv.stock,
+                pv.price,
+                pv.discount_percentage,
+                pv.discount_expiry_date,
+                pi.image_path,
+                pi.is_main
+            FROM
+                products p
+            LEFT JOIN
+                product_variations pv ON p.id = pv.product_id
+            LEFT JOIN
+                product_images pi ON p.id = pi.product_id
+            WHERE
+                p.id = ?
+            ORDER BY
+                pv.id ASC, pi.is_main DESC, pi.id ASC";
 
-if (!$product_id || !is_numeric($product_id)) {
-    $error_message = "Invalid product ID provided.";
-} else {
-    try {
-        // Fetch product details
-        $sql_product = "SELECT id, name, category_key, subcategory_key, price, description FROM products WHERE id = ?";
-        $stmt_product = $conn->prepare($sql_product);
-        if ($stmt_product === false) {
-            throw new Exception('MySQLi prepare failed: ' . $conn->error);
+    $stmt = $conn->prepare($sql);
+    if ($stmt) {
+        $stmt->bind_param('i', $productId);
+        $stmt->execute();
+        $result = $stmt->get_result();
+
+        if ($result && $result->num_rows > 0) {
+            while ($row = $result->fetch_assoc()) {
+                if ($product === null) {
+                    $product = [
+                        'id' => $row['product_id'],
+                        'name' => $row['product_name'],
+                        'category' => $row['category'],
+                        'subcategory' => $row['subcategory'],
+                        'description' => $row['description'],
+                        'variations' => [],
+                        'images' => []
+                    ];
+                }
+
+                // Add unique variations
+                $variation_id = $row['variation_id'];
+                if ($variation_id && !isset($product['variations'][$variation_id])) {
+                    $current_price = (float)$row['price']; // Ensure it's a float
+                    $discounted_price = $current_price;
+                    $is_discounted = false;
+
+                    if ($row['discount_percentage'] !== null && $row['discount_expiry_date'] !== null) {
+                        $discount_expiry_timestamp = strtotime($row['discount_expiry_date']);
+                        if (time() <= $discount_expiry_timestamp) { // Check if discount is still valid
+                            $discount_amount = $current_price * ($row['discount_percentage'] / 100);
+                            $discounted_price = $current_price - $discount_amount;
+                            $is_discounted = true;
+                        }
+                    }
+
+                    $product['variations'][$variation_id] = [
+                        'id' => $variation_id,
+                        'size' => $row['size'],
+                        'color' => $row['color'],
+                        'stock' => $row['stock'],
+                        'original_price' => $current_price, // Store raw float
+                        'display_price' => $discounted_price, // Store raw float
+                        'discount_percentage' => $row['discount_percentage'],
+                        'discount_expiry_date' => $row['discount_expiry_date'],
+                        'is_discounted' => $is_discounted
+                    ];
+                }
+
+                // Add unique images
+                $cleanedImagePath = ltrim($row['image_path'], './');
+                if (!empty($row['image_path']) && !in_array($cleanedImagePath, array_column($product['images'], 'path'))) {
+                    $product['images'][] = [
+                        'path' => $cleanedImagePath,
+                        'is_main' => $row['is_main']
+                    ];
+                }
+            }
         }
-        $stmt_product->bind_param("i", $product_id);
-        $stmt_product->execute();
-        $result_product = $stmt_product->get_result();
-        $product = $result_product->fetch_assoc();
-        $stmt_product->close();
-
-        if ($product) {
-            // Fetch product images
-            $sql_images = "SELECT image_path, is_main, display_order FROM product_images WHERE product_id = ? ORDER BY display_order ASC, id ASC";
-            $stmt_images = $conn->prepare($sql_images);
-            if ($stmt_images === false) {
-                throw new Exception('MySQLi prepare failed: ' . $conn->error);
-            }
-            $stmt_images->bind_param("i", $product_id);
-            $stmt_images->execute();
-            $result_images = $stmt_images->get_result();
-            while ($row = $result_images->fetch_assoc()) {
-                $productImages[] = $row;
-            }
-            $stmt_images->close();
-
-            // Fetch product variations
-            $sql_variations = "SELECT color_name, size_name, quantity FROM product_variations WHERE product_id = ? ORDER BY color_name, size_name";
-            $stmt_variations = $conn->prepare($sql_variations);
-            if ($stmt_variations === false) {
-                throw new Exception('MySQLi prepare failed: ' . $conn->error);
-            }
-            $stmt_variations->bind_param("i", $product_id);
-            $stmt_variations->execute();
-            $result_variations = $stmt_variations->get_result();
-            while ($row = $result_variations->fetch_assoc()) {
-                $productVariations[] = $row;
-            }
-            $stmt_variations->close();
-
-        } else {
-            $error_message = "Product not found.";
-        }
-
-    } catch (Exception $e) {
-        error_log("Error fetching product details: " . $e->getMessage());
-        $error_message = "An error occurred while loading product details. Please try again later.";
+        $stmt->close();
     }
-}
-
-// Group variations by color for easier display
-$colors = [];
-$sizesByColor = [];
-foreach ($productVariations as $variation) {
-    if (!in_array($variation['color_name'], $colors)) {
-        $colors[] = $variation['color_name'];
-    }
-    if (!isset($sizesByColor[$variation['color_name']])) {
-        $sizesByColor[$variation['color_name']] = [];
-    }
-    $sizesByColor[$variation['color_name']][] = [
-        'size' => $variation['size_name'],
-        'quantity' => $variation['quantity']
-    ];
-}
-
-// Determine the main image for display
-$mainDisplayImage = '../assets/images/placeholder.webp'; // Default placeholder
-if (!empty($productImages)) {
-    // Try to find an image marked as main
-    foreach ($productImages as $img) {
-        if ($img['is_main'] == 1) {
-            $mainDisplayImage = '../' . htmlspecialchars($img['image_path']);
-            break;
-        }
-    }
-    // If no main image, use the first one from the list (ordered by display_order/id)
-    if ($mainDisplayImage === '../assets/images/placeholder.webp') {
-        $mainDisplayImage = '../' . htmlspecialchars($productImages[0]['image_path']);
-    }
+    $conn->close();
 }
 
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>
-        <?php echo $product ? htmlspecialchars($product['name']) . ' - Bong Bicycle Shop' : 'Product Not Found - Bong Bicycle Shop'; ?>
-    </title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bong Bicycle Shop</title>
 
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/png" href="../assets/images/favicon/favicon.svg">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css"
+        rel="stylesheet"
+        integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC"
+        crossorigin="anonymous">
+  <style>
+    /* Product Details Page Specific Styles */
+    .product-image-main {
+        max-width: 100%;
+        height: auto;
+        border-radius: .5rem;
+        box-shadow: 0 .5rem 1rem rgba(0,0,0,.1);
+    }
+    .product-thumbnail-wrapper {
+        width: 70px; /* Smaller width */
+        height: 70px; /* Smaller height */
+        margin: 4px; /* Adjusted spacing */
+        overflow: hidden;
+        border-radius: .25rem;
+        border: 2px solid transparent;
+        cursor: pointer;
+        transition: border-color 0.2s;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    .product-thumbnail {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    .product-thumbnail-wrapper.active,
+    .product-thumbnail-wrapper:hover {
+        border-color: var(--primary);
+    }
 
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
-
-    <link rel="icon" type="image/png" href="../assets/images/favicon/favicon.svg">
-
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css"
-          rel="stylesheet"
-          integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC"
-          crossorigin="anonymous">
-
-    <style>
-        :root {
-            --primary: #006A4E;
-            --secondary: #FFB703;
-            --accent: #00BFA6;
-            --bg-light: #F4F4F4;
-            --bg-dark: #003D33;
-            --text-dark: #1E1E1E;
-            --text-light: #FFFFFF;
-            --border-gray: #D9D9D9;
-        }
-
-        body {
-            background-color: var(--bg-light);
-            color: var(--text-dark);
-            font-family: 'Montserrat', sans-serif;
-        }
-
-        .navbar {
-            background-color: var(--primary);
-        }
-
-        .navbar-brand,
-        .nav-link {
-            color: var(--text-light) !important;
-            position: relative;
-            padding-bottom: 5px;
-            font-weight: 500;
-        }
-
-        .nav-link:hover {
-            color: var(--secondary) !important;
-        }
-
-        .nav-link.active::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: 3px;
-            background-color: var(--secondary);
-        }
-
-        .btn-accent {
-            background-color: var(--accent);
-            color: var(--text-light);
-        }
-
-        .btn-accent:hover {
-            background-color: var(--secondary);
-            color: var(--text-dark);
-        }
-
-        footer {
-            background-color: var(--bg-dark);
-            color: var(--text-light);
-            padding: 40px 0;
-        }
-
-        .footer-link {
-            color: var(--text-light);
-            text-decoration: none;
-        }
-
-        .footer-link:hover {
-            color: var(--secondary);
-        }
-
-        .border-top {
-            border-top: 1px solid var(--border-gray);
-        }
-
-        .navbar-logo {
-            width: 40px;
-            height: 40px;
-            margin-right: 10px;
-            object-fit: contain;
-        }
-
-        .navbar-brand-text {
-            font-weight: 600;
-            font-size: 1.2rem;
-        }
-
-        /* Product Details Page Specific Styles */
-        .product-details-container {
-            background-color: var(--text-light);
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-            padding: 30px;
-        }
-
-        .main-product-image-container {
-            height: 450px; /* Fixed height for main image */
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            border: 1px solid var(--border-gray);
-            border-radius: 8px;
-            overflow: hidden;
-            margin-bottom: 20px;
-        }
-
-        .main-product-image {
-            max-width: 100%;
-            max-height: 100%;
-            object-fit: contain; /* Ensure entire image is visible */
-        }
-
-        .thumbnail-gallery {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            justify-content: center;
-            margin-bottom: 20px;
-        }
-
-        .thumbnail-gallery img {
-            width: 80px;
-            height: 80px;
-            object-fit: contain;
-            border: 2px solid var(--border-gray);
-            border-radius: 4px;
-            cursor: pointer;
-            transition: border-color 0.2s, transform 0.2s;
-        }
-
-        .thumbnail-gallery img:hover {
-            border-color: var(--accent);
-            transform: translateY(-2px);
-        }
-
-        .thumbnail-gallery img.active-thumbnail {
-            border-color: var(--primary);
-            box-shadow: 0 0 5px rgba(0, 106, 78, 0.5);
-        }
-
-        .product-title {
-            color: var(--primary);
-            font-size: 2.2rem;
-            font-weight: 700;
-            margin-bottom: 10px;
-        }
-
-        .product-price-details {
-            color: var(--accent);
-            font-size: 2rem;
-            font-weight: 700;
-            margin-bottom: 20px;
-        }
-
-        .product-description {
-            color: var(--text-dark);
-            line-height: 1.6;
-            margin-bottom: 25px;
-        }
-
-        .variation-section h5 {
-            color: var(--primary);
-            font-size: 1.1rem;
-            margin-bottom: 10px;
-        }
-
-        .variation-options .btn {
-            margin-right: 10px;
-            margin-bottom: 10px;
-            background-color: var(--bg-light);
-            color: var(--text-dark);
-            border: 1px solid var(--border-gray);
-            transition: all 0.2s ease;
-        }
-
-        .variation-options .btn:hover:not(.active) {
-            background-color: var(--primary);
-            color: var(--text-light);
-            border-color: var(--primary);
-        }
-
-        .variation-options .btn.active {
-            background-color: var(--primary);
-            color: var(--text-light);
-            border-color: var(--primary);
-            box-shadow: 0 2px 5px rgba(0, 106, 78, 0.2);
-        }
-
-        .quantity-selector .form-control {
-            width: 80px;
-            text-align: center;
-            border-color: var(--primary);
-        }
-
-        .add-to-cart-btn {
-            background-color: var(--secondary);
-            color: var(--text-dark);
-            font-weight: 600;
-            padding: 12px 25px;
-            border-radius: .3rem;
-            transition: background-color 0.2s, transform 0.2s;
-        }
-
-        .add-to-cart-btn:hover {
-            background-color: var(--accent);
-            color: var(--text-light);
-            transform: translateY(-2px);
-        }
-    </style>
+    .price-display .original-price {
+        text-decoration: line-through;
+        color: #6c757d;
+        font-size: 1.1em; /* Adjusted font size */
+        margin-right: 8px; /* Adjusted margin */
+    }
+    .price-display .current-price {
+        color: var(--primary);
+        font-weight: bold;
+        font-size: 1.6em; /* Adjusted font size */
+    }
+    .price-display .discount-badge {
+        background-color: #dc3545; /* Red for discount */
+        color: white;
+        padding: .2em .5em; /* Adjusted padding */
+        border-radius: .2rem; /* Adjusted border-radius */
+        font-size: .7em; /* Adjusted font size */
+        vertical-align: middle;
+        margin-left: 8px; /* Adjusted margin */
+    }
+    .variation-select {
+        margin-top: 12px; /* Adjusted margin */
+        margin-bottom: 5px; /* Reduced margin to make space for stock display */
+    }
+    .variation-select label {
+        font-weight: bold;
+        margin-bottom: 4px; /* Adjusted margin */
+        font-size: 0.9rem; /* Adjusted font size */
+    }
+    .variation-select select {
+        width: 100%;
+        padding: .4rem .6rem; /* Adjusted padding */
+        border: 1px solid var(--border-gray);
+        border-radius: .25rem;
+        font-size: 0.9rem; /* Adjusted font size */
+    }
+    /* New styles for product name */
+    .product-details-name {
+        font-size: 2.2rem; /* Slightly smaller product name */
+        font-weight: 700; /* Bolder */
+        color: var(--primary);
+        margin-bottom: 0.4rem; /* Adjusted margin */
+    }
+    .card-text.lead {
+        font-size: 0.95rem; /* Adjusted font size for description */
+    }
+    .btn {
+        font-size: 0.9rem; /* Adjusted button font size */
+        padding: .6rem 1.2rem; /* Adjusted button padding */
+    }
+    .stock-display {
+        margin-top: 10px;
+        margin-bottom: 20px;
+        font-size: 0.95rem;
+        font-weight: 600;
+        color: var(--text-dark);
+    }
+    .button-group {
+        display: flex;
+        gap: 10px; /* Space between buttons */
+        justify-content: flex-start; /* Align to start */
+        flex-wrap: wrap; /* Allow wrapping on smaller screens */
+    }
+    .button-group .btn {
+        flex: 1; /* Allow buttons to grow and shrink */
+        min-width: 150px; /* Ensure buttons don't get too small */
+    }
+    .btn i {
+        margin-right: 5px;
+    }
+  </style>
 </head>
 <body>
-    <?php include '../components/navigation.php'; ?>
 
-    <main class="container my-5">
-        <?php if ($error_message): ?>
-            <div class="alert alert-danger text-center" role="alert">
-                <?php echo htmlspecialchars($error_message); ?>
-                <br><a href="shop.php" class="btn btn-primary mt-3 btn-accent">Back to Shop</a>
-            </div>
-        <?php elseif ($product): ?>
-            <div class="product-details-container">
-                <div class="row">
-                    <div class="col-lg-6 mb-4 mb-lg-0">
-                        <div class="main-product-image-container">
-                            <img id="mainProductImage" src="<?php echo htmlspecialchars($mainDisplayImage); ?>" alt="<?php echo htmlspecialchars($product['name']); ?>" class="main-product-image">
-                        </div>
-                        <?php if (count($productImages) > 1): ?>
-                            <div class="thumbnail-gallery">
-                                <?php foreach ($productImages as $index => $img): ?>
-                                    <img src="../<?php echo htmlspecialchars($img['image_path']); ?>"
-                                         alt="Thumbnail <?php echo $index + 1; ?>"
-                                         class="product-thumbnail <?php echo ($mainDisplayImage === '../' . htmlspecialchars($img['image_path'])) ? 'active-thumbnail' : ''; ?>"
-                                         data-full-image="../<?php echo htmlspecialchars($img['image_path']); ?>">
-                                <?php endforeach; ?>
+<?php include '../components/navigation.php'; // Include your navigation bar ?>
+
+<div aria-live="polite" aria-atomic="true" class="position-relative">
+  <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 9999;">
+    </div>
+</div>
+
+<div class="container my-4">
+    <?php if ($product): ?>
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="main-image-container mb-3 text-center">
+                        <?php
+                        $mainImagePath = '../assets/images/no_image.png';
+                        if (!empty($product['images'])) {
+                            $foundMain = false;
+                            foreach ($product['images'] as $image) {
+                                if ($image['is_main'] == 1) {
+                                    $mainImagePath = '../' . htmlspecialchars($image['path']);
+                                    $foundMain = true;
+                                    break;
+                                }
+                            }
+                            if (!$foundMain && isset($product['images'][0])) {
+                                $mainImagePath = '../' . htmlspecialchars($product['images'][0]['path']);
+                            }
+                        }
+                        ?>
+                        <img src="<?php echo $mainImagePath; ?>" class="img-fluid product-image-main" alt="<?php echo htmlspecialchars($product['name']); ?>">
+                    </div>
+                    <div class="d-flex flex-wrap mt-3 justify-content-start">
+                        <?php foreach ($product['images'] as $image): ?>
+                            <div class="product-thumbnail-wrapper <?php echo ($image['path'] == ltrim($mainImagePath, '../')) ? 'active' : ''; ?>"
+                                 onclick="changeMainImage(this.querySelector('img'))">
+                                <img src="../<?php echo htmlspecialchars($image['path']); ?>" class="product-thumbnail img-fluid" alt="Thumbnail">
                             </div>
-                        <?php endif; ?>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <h1 class="product-details-name"><?php echo htmlspecialchars($product['name']); ?></h1>
+
+                    <div class="price-display my-3">
+                        <strong>Price: </strong>
+                        <?php
+                        $firstVariation = reset($product['variations']); // Get the first variation to display price
+                        if ($firstVariation) {
+                            $formattedOriginalPrice = number_format($firstVariation['original_price'], 2);
+                            $formattedDisplayPrice = number_format($firstVariation['display_price'], 2);
+
+                            if ($firstVariation['is_discounted']) {
+                                echo '<span class="original-price">₱' . $formattedOriginalPrice . '</span> ';
+                                echo '<span class="current-price">₱' . $formattedDisplayPrice . '</span>';
+                                echo '<span class="badge discount-badge">SAVE ' . htmlspecialchars($firstVariation['discount_percentage']) . '%</span>';
+                                echo '<p class="text-danger mt-1" style="font-size:0.85rem;">Discount ends: ' . date('M d, Y', strtotime($firstVariation['discount_expiry_date'])) . '</p>';
+                            } else {
+                                echo '<span class="current-price">₱' . $formattedDisplayPrice . '</span>';
+                            }
+                        } else {
+                            echo '<span class="current-price">Price Not Available</span>';
+                        }
+                        ?>
                     </div>
 
-                    <div class="col-lg-6">
-                        <h1 class="product-title"><?php echo htmlspecialchars($product['name']); ?></h1>
-                        <p class="product-price-details">₱<?php echo number_format($product['price'], 2); ?></p>
+                    <p class="card-text lead"><?php echo htmlspecialchars($product['description']); ?></p>
 
-                        <div class="product-description mb-4">
-                            <h4>Description</h4>
-                            <p><?php echo nl2br(htmlspecialchars($product['description'])); ?></p>
-                        </div>
+                    <?php if (!empty($product['variations'])): ?>
+                    <div class="variation-select">
+                        <label for="productVariation">Select Variation:</label>
+                        <select class="form-select" id="productVariation">
+                            <?php foreach ($product['variations'] as $variation): ?>
+                                <option value="<?php echo htmlspecialchars($variation['id']); ?>"
+                                        data-original-price="<?php echo htmlspecialchars($variation['original_price']); ?>"
+                                        data-display-price="<?php echo htmlspecialchars($variation['display_price']); ?>"
+                                        data-discount-percentage="<?php echo htmlspecialchars($variation['discount_percentage']); ?>"
+                                        data-discount-expiry-date="<?php echo htmlspecialchars($variation['discount_expiry_date']); ?>"
+                                        data-is-discounted="<?php echo $variation['is_discounted'] ? 'true' : 'false'; ?>"
+                                        data-stock="<?php echo htmlspecialchars($variation['stock']); ?>">
+                                    <?php
+                                    $variation_display = [];
+                                    if (!empty($variation['size']) && $variation['size'] !== 'Not Available') {
+                                        $variation_display[] = 'Size: ' . htmlspecialchars($variation['size']);
+                                    }
+                                    if (!empty($variation['color']) && $variation['color'] !== 'Not Available') {
+                                        $variation_display[] = 'Color: ' . htmlspecialchars($variation['color']);
+                                    }
+                                    echo implode(' / ', $variation_display);
+                                    ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                    <div class="stock-display">
+                        Stock: <span id="currentStock">
+                            <?php
+                                if ($firstVariation) {
+                                    echo htmlspecialchars($firstVariation['stock'] == 0 ? 'No Stock Available' : $firstVariation['stock']);
+                                } else {
+                                    echo 'N/A';
+                                }
+                            ?>
+                        </span>
+                    </div>
 
-                        <?php if (!empty($colors)): ?>
-                            <div class="variation-section mb-3">
-                                <h5>Color: <span id="selectedColor" class="fw-bold text-primary"></span></h5>
-                                <div class="variation-options" id="colorOptions">
-                                    <?php foreach ($colors as $color): ?>
-                                        <button type="button" class="btn btn-outline-secondary" data-color="<?php echo htmlspecialchars($color); ?>">
-                                            <?php echo htmlspecialchars($color); ?>
-                                        </button>
-                                    <?php endforeach; ?>
-                                </div>
-                            </div>
-                        <?php endif; ?>
+                    <div class="mb-3">
+                        <label for="quantityInput" class="form-label">Quantity:</label>
+                        <input type="number" class="form-control" id="quantityInput" value="1" min="1" max="<?php echo htmlspecialchars($firstVariation['stock']); ?>" style="width: 100px;">
+                    </div>
 
-                        <?php if (!empty($sizesByColor)): ?>
-                            <div class="variation-section mb-3">
-                                <h5>Size: <span id="selectedSize" class="fw-bold text-primary"></span></h5>
-                                <div class="variation-options" id="sizeOptions">
-                                    </div>
-                            </div>
-                        <?php endif; ?>
+                    <?php else: ?>
+                        <p class="text-warning" style="font-size:0.9rem;">No variations available for this product.</p>
+                    <?php endif; ?>
 
-                        <div class="d-flex align-items-center mb-4">
-                            <h5 class="me-3 mb-0">Quantity:</h5>
-                            <input type="number" class="form-control quantity-selector" id="quantityInput" value="1" min="1" max="1" disabled>
-                            <span class="ms-2 text-muted" id="availableStock"></span>
-                        </div>
-
-                        <button type="button" class="btn add-to-cart-btn w-100" id="addToCartBtn" disabled>
-                            <i class="bi bi-cart-plus me-2"></i> Add to Cart
-                        </button>
-
-                        <div id="cartMessage" class="mt-3 alert d-none" role="alert"></div>
+                    <div class="button-group mt-3">
+                        <button class="btn btn-primary btn-accent" type="button" id="addToCartBtn"><i class="bi bi-cart-plus"></i> Add to Cart</button>
+                        <button class="btn btn-outline-secondary" type="button" id="buyNowBtn"><i class="bi bi-bag-check"></i> Buy Now</button>
                     </div>
                 </div>
             </div>
-        <?php endif; ?>
-    </main>
+        </div>
+    </div>
+    <?php else: ?>
+    <div class="alert alert-warning text-center" role="alert" style="font-size:1rem;">
+      Product not found.
+    </div>
+    <?php endif; ?>
+</div>
 
-    <?php include '../components/footer.php'; ?>
+<?php include '../components/footer.php'; // Include your footer ?>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
-            integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
-            crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+        crossorigin="anonymous"></script>
+<script>
+    function changeMainImage(thumbnail) {
+        const mainImage = document.querySelector('.product-image-main');
+        mainImage.src = thumbnail.src;
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const mainProductImage = document.getElementById('mainProductImage');
-            const productThumbnails = document.querySelectorAll('.product-thumbnail');
-            const colorOptionsContainer = document.getElementById('colorOptions');
-            const sizeOptionsContainer = document.getElementById('sizeOptions');
-            const quantityInput = document.getElementById('quantityInput');
-            const availableStockSpan = document.getElementById('availableStock');
-            const addToCartBtn = document.getElementById('addToCartBtn');
-            const selectedColorSpan = document.getElementById('selectedColor');
-            const selectedSizeSpan = document.getElementById('selectedSize');
-            const cartMessage = document.getElementById('cartMessage');
-
-            let selectedColor = null;
-            let selectedSize = null;
-            let currentAvailableStock = 0;
-
-            // PHP data passed to JavaScript
-            const variationsData = <?php echo json_encode($productVariations); ?>;
-
-            // --- Image Gallery Logic ---
-            productThumbnails.forEach(thumbnail => {
-                thumbnail.addEventListener('click', function() {
-                    mainProductImage.src = this.dataset.fullImage;
-                    productThumbnails.forEach(t => t.classList.remove('active-thumbnail'));
-                    this.classList.add('active-thumbnail');
-                });
-            });
-
-            // Set initial active thumbnail if it matches main image
-            const initialMainImageSrc = mainProductImage.src;
-            productThumbnails.forEach(thumbnail => {
-                if (thumbnail.dataset.fullImage === initialMainImageSrc) {
-                    thumbnail.classList.add('active-thumbnail');
-                }
-            });
-
-
-            // --- Variation Selection Logic ---
-
-            // Function to update available sizes based on selected color
-            function updateSizes() {
-                sizeOptionsContainer.innerHTML = ''; // Clear previous sizes
-                selectedSize = null; // Reset selected size
-                selectedSizeSpan.textContent = ''; // Clear displayed size
-
-                if (!selectedColor) {
-                    quantityInput.value = 1;
-                    quantityInput.max = 1;
-                    quantityInput.disabled = true;
-                    availableStockSpan.textContent = '';
-                    addToCartBtn.disabled = true;
-                    return;
-                }
-
-                const sizesForColor = variationsData.filter(v => v.color_name === selectedColor);
-                if (sizesForColor.length > 0) {
-                    sizesForColor.forEach(variation => {
-                        const button = document.createElement('button');
-                        button.type = 'button';
-                        button.classList.add('btn', 'btn-outline-secondary');
-                        button.dataset.size = variation.size_name;
-                        button.dataset.quantity = variation.quantity;
-                        button.textContent = variation.size_name;
-                        sizeOptionsContainer.appendChild(button);
-
-                        button.addEventListener('click', function() {
-                            sizeOptionsContainer.querySelectorAll('.btn').forEach(btn => btn.classList.remove('active'));
-                            this.classList.add('active');
-                            selectedSize = this.dataset.size;
-                            currentAvailableStock = parseInt(this.dataset.quantity);
-                            selectedSizeSpan.textContent = selectedSize;
-                            updateQuantityInput();
-                            addToCartBtn.disabled = false;
-                        });
-                    });
-                } else {
-                    sizeOptionsContainer.innerHTML = '<p class="text-muted">No sizes available for this color.</p>';
-                    quantityInput.value = 1;
-                    quantityInput.max = 1;
-                    quantityInput.disabled = true;
-                    availableStockSpan.textContent = '';
-                    addToCartBtn.disabled = true;
-                }
-            }
-
-            // Function to update quantity input and stock display
-            function updateQuantityInput() {
-                quantityInput.max = currentAvailableStock;
-                quantityInput.value = Math.min(quantityInput.value, currentAvailableStock); // Ensure value doesn't exceed max
-                quantityInput.disabled = currentAvailableStock === 0;
-                availableStockSpan.textContent = `(${currentAvailableStock} in stock)`;
-
-                if (currentAvailableStock === 0) {
-                    addToCartBtn.disabled = true;
-                    quantityInput.value = 0;
-                } else {
-                    addToCartBtn.disabled = false;
-                }
-            }
-
-            // Event listener for color selection
-            if (colorOptionsContainer) {
-                colorOptionsContainer.addEventListener('click', function(event) {
-                    if (event.target.tagName === 'BUTTON') {
-                        colorOptionsContainer.querySelectorAll('.btn').forEach(btn => btn.classList.remove('active'));
-                        event.target.classList.add('active');
-                        selectedColor = event.target.dataset.color;
-                        selectedColorSpan.textContent = selectedColor;
-                        updateSizes(); // Update sizes when color changes
-                    }
-                });
-            }
-
-            // Event listener for quantity input changes
-            quantityInput.addEventListener('input', function() {
-                let val = parseInt(this.value);
-                if (isNaN(val) || val < 1) {
-                    val = 1;
-                }
-                if (val > currentAvailableStock) {
-                    val = currentAvailableStock;
-                }
-                this.value = val;
-            });
-
-            // --- Add to Cart Logic (Placeholder) ---
-            addToCartBtn.addEventListener('click', function() {
-                if (!selectedColor || !selectedSize || quantityInput.value < 1 || quantityInput.value > currentAvailableStock) {
-                    displayMessage('Please select a color and size, and ensure a valid quantity.', 'alert-warning');
-                    return;
-                }
-
-                const productId = <?php echo json_encode($product['id'] ?? null); ?>;
-                const productName = <?php echo json_encode($product['name'] ?? null); ?>;
-                const price = <?php echo json_encode($product['price'] ?? null); ?>;
-                const quantity = parseInt(quantityInput.value);
-
-                // In a real application, you would send this data to a server-side script
-                // via AJAX to add to a session cart or database cart.
-                console.log({
-                    productId: productId,
-                    productName: productName,
-                    selectedColor: selectedColor,
-                    selectedSize: selectedSize,
-                    quantity: quantity,
-                    pricePerItem: price
-                });
-
-                displayMessage(`Added ${quantity} of ${productName} (${selectedColor}, ${selectedSize}) to cart!`, 'alert-success');
-
-                // Optionally, reset selections or clear message after a delay
-                // setTimeout(() => {
-                //     // Reset UI or redirect
-                // }, 2000);
-            });
-
-            function displayMessage(message, type) {
-                cartMessage.textContent = message;
-                cartMessage.className = `mt-3 alert ${type}`; // Reset classes
-                cartMessage.classList.remove('d-none');
-                setTimeout(() => {
-                    cartMessage.classList.add('d-none');
-                }, 3000); // Hide after 3 seconds
-            }
-
-            // Initial state update
-            updateSizes(); // Call once to set initial quantity/stock state
+        // Remove active class from all thumbnail wrappers
+        document.querySelectorAll('.product-thumbnail-wrapper').forEach(wrapper => {
+            wrapper.classList.remove('active');
         });
-    </script>
+        // Add active class to the clicked thumbnail's wrapper
+        thumbnail.closest('.product-thumbnail-wrapper').classList.add('active');
+    }
+
+    // Function to show Bootstrap toast messages
+    function showToast(message, type = 'success') {
+        const toastContainer = document.querySelector('.toast-container');
+        if (!toastContainer) {
+            console.error('Toast container not found!');
+            return;
+        }
+
+        const iconClass = type === 'success' ? 'bi bi-check-circle-fill' : 'bi bi-x-circle-fill';
+        const bgColorClass = type === 'success' ? 'text-bg-success' : 'text-bg-danger';
+
+        const toastHtml = `
+            <div class="toast align-items-center ${bgColorClass} border-0" role="alert" aria-live="assertive" aria-atomic="true"
+                 data-bs-autohide="true" data-bs-delay="5000">
+                <div class="d-flex">
+                    <div class="toast-body">
+                        <i class="${iconClass} me-2"></i>
+                        ${message}
+                    </div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+            </div>
+        `;
+
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = toastHtml;
+        const toastElement = tempDiv.firstElementChild;
+        toastContainer.appendChild(toastElement);
+
+        const toast = new bootstrap.Toast(toastElement);
+        toast.show();
+
+        // Remove toast from DOM after it's hidden to keep DOM clean
+        toastElement.addEventListener('hidden.bs.toast', function () {
+            toastElement.remove();
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const variationSelect = document.getElementById('productVariation');
+        const currentStockSpan = document.getElementById('currentStock');
+        const quantityInput = document.getElementById('quantityInput'); // Get quantity input
+        const addToCartBtn = document.getElementById('addToCartBtn');
+        const buyNowBtn = document.getElementById('buyNowBtn');
+
+        function formatCurrency(value) {
+            return parseFloat(value).toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+
+        function updateProductUI() {
+            if (!variationSelect || variationSelect.options.length === 0) {
+                if (addToCartBtn) addToCartBtn.disabled = true;
+                if (buyNowBtn) buyNowBtn.disabled = true;
+                if (currentStockSpan) currentStockSpan.textContent = 'N/A';
+                if (quantityInput) { // Disable and set max to 0 if no variations
+                    quantityInput.disabled = true;
+                    quantityInput.value = 0;
+                    quantityInput.setAttribute('max', 0);
+                }
+                return;
+            }
+
+            const selectedOption = variationSelect.options[variationSelect.selectedIndex];
+            const originalPrice = parseFloat(selectedOption.dataset.originalPrice);
+            const displayPrice = parseFloat(selectedOption.dataset.displayPrice);
+            const discountPercentage = selectedOption.dataset.discountPercentage;
+            const discountExpiryDate = selectedOption.dataset.discountExpiryDate;
+            const isDiscounted = selectedOption.dataset.isDiscounted === 'true';
+            const stock = parseInt(selectedOption.dataset.stock);
+
+            const priceDisplay = document.querySelector('.price-display');
+            let priceHtml = '<strong>Price: </strong>';
+
+            if (isDiscounted) {
+                priceHtml += `<span class="original-price">₱${formatCurrency(originalPrice)}</span> `;
+                priceHtml += `<span class="current-price">₱${formatCurrency(displayPrice)}</span>`;
+                priceHtml += `<span class="badge discount-badge">SAVE ${discountPercentage}%</span>`;
+                priceHtml += `<p class="text-danger mt-1" style="font-size:0.85rem;">Discount ends: ${new Date(discountExpiryDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</p>`;
+            } else {
+                priceHtml += `<span class="current-price">₱${formatCurrency(displayPrice)}</span>`;
+            }
+            priceDisplay.innerHTML = priceHtml;
+
+            if (currentStockSpan) {
+                currentStockSpan.textContent = stock === 0 ? 'No Stock Available' : stock;
+            }
+
+            if (quantityInput) {
+                quantityInput.setAttribute('max', stock); // Set max quantity to available stock
+                if (parseInt(quantityInput.value) > stock) {
+                    quantityInput.value = stock > 0 ? 1 : 0; // Reset quantity if it exceeds new max
+                }
+                quantityInput.disabled = stock === 0; // Disable quantity input if no stock
+            }
+
+            if (stock === 0) {
+                if (addToCartBtn) addToCartBtn.disabled = true;
+                if (buyNowBtn) buyNowBtn.disabled = true;
+            } else {
+                if (addToCartBtn) addToCartBtn.disabled = false;
+                if (buyNowBtn) buyNowBtn.disabled = false;
+            }
+        }
+
+        if (variationSelect) {
+            variationSelect.addEventListener('change', updateProductUI);
+        }
+
+        // Add event listener for Add to Cart button
+        if (addToCartBtn) {
+            addToCartBtn.addEventListener('click', function() {
+                const selectedVariationId = variationSelect ? variationSelect.value : null;
+                const quantity = quantityInput ? parseInt(quantityInput.value) : 1;
+
+                if (!selectedVariationId) {
+                    showToast('Please select a product variation.', 'error');
+                    return;
+                }
+                if (quantity <= 0) {
+                    showToast('Quantity must be at least 1.', 'error');
+                    return;
+                }
+                const currentStock = parseInt(variationSelect.options[variationSelect.selectedIndex].dataset.stock);
+                if (quantity > currentStock) {
+                    showToast('Cannot add more than available stock.', 'error');
+                    return;
+                }
+
+                // AJAX request to add_to_cart.php
+                fetch('../config/add_to_cart.php', { // Adjusted path for add_to_cart.php
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: `variation_id=${selectedVariationId}&quantity=${quantity}`
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showToast(data.message, 'success');
+                        updateProductUI(); // Re-fetch stock after adding (if stock is dynamic from DB)
+                    } else {
+                        showToast(data.message, 'error');
+                        // if (data.message.includes("log in")) { // No longer redirect on error, just show toast
+                        //     window.location.href = '../front-pages/my_account.php?error=' + encodeURIComponent(data.message);
+                        // }
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showToast('An unexpected error occurred while adding to cart.', 'error');
+                });
+            });
+        }
+
+
+        // Set initial active thumbnail on page load
+        const mainImageElement = document.querySelector('.product-image-main');
+        if (mainImageElement) {
+            const mainImagePath = mainImageElement.src;
+            document.querySelectorAll('.product-thumbnail').forEach(thumb => {
+                const thumbSrcRelative = thumb.src.replace(/^https?:\/\/[^\/]+\//i, '/');
+                const mainSrcRelative = mainImagePath.replace(/^https?:\/\/[^\/]+\//i, '/');
+
+                if (thumbSrcRelative.endsWith(mainSrcRelative.substring(mainSrcRelative.lastIndexOf('/') + 1)) || thumb.src === mainImagePath) {
+                    thumb.closest('.product-thumbnail-wrapper').classList.add('active');
+                }
+            });
+        }
+
+        // Call once on DOMContentLoaded to set initial state
+        updateProductUI();
+    });
+</script>
 </body>
 </html>

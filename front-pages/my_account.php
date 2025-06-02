@@ -1,6 +1,7 @@
+
 <?php
 session_start();
-require_once __DIR__ . '/../config/db.php';
+require_once __DIR__ . '/../config/db.php'; // Ensure this path is correct
 
 // Redirect to login if not logged in
 if (!isset($_SESSION['user_id'])) {
@@ -9,19 +10,121 @@ if (!isset($_SESSION['user_id'])) {
 }
 
 $user_id = $_SESSION['user_id'];
+
+// --- Fetch User Data ---
+// Re-establish connection for user data if it was closed before
+if (!isset($conn) || $conn->connect_error) {
+    require_once __DIR__ . '/../config/db.php'; // Re-open connection
+}
 $stmt = $conn->prepare("SELECT name, email, gender, contact_number, shipping_address, profile_image FROM users WHERE id=?");
 $stmt->bind_param("i", $user_id);
 $stmt->execute();
 $stmt->bind_result($name, $email, $gender, $contact_number, $shipping_address, $profile_image);
 $stmt->fetch();
 $stmt->close();
-// Note: $conn is closed here after fetching user data.
-// It will be re-opened in the activity log section.
+// After fetching user data, $conn is implicitly closed if it's the only reference and goes out of scope, or explicitly if it's closed in db.php include.
+// To be safe and consistent with activity log, we will re-open for cart.
 
 $address = null;
 if ($shipping_address) {
     $address = json_decode($shipping_address, true);
 }
+
+// --- Fetch Cart Items and Count ---
+$cartItems = [];
+$cart_total_amount = 0;
+$cart_item_count = 0; // Initialize cart item count
+
+// Re-establish connection for cart items and count
+if (!isset($conn) || $conn->connect_error) {
+    require_once __DIR__ . '/../config/db.php'; // Re-open connection
+}
+
+// Query to get total item count in cart (sum of quantities)
+$stmt_count = $conn->prepare("SELECT SUM(quantity) AS total_quantity FROM cart WHERE user_id = ?");
+if ($stmt_count) {
+    $stmt_count->bind_param("i", $user_id);
+    $stmt_count->execute();
+    $result_count = $stmt_count->get_result();
+    $row_count = $result_count->fetch_assoc();
+    $cart_item_count = $row_count['total_quantity'] ?? 0;
+    $stmt_count->close();
+}
+
+
+$sql_cart = "SELECT
+                c.id AS cart_id,
+                c.quantity,
+                pv.id AS variation_id,
+                pv.size,
+                pv.color,
+                pv.price AS variation_price,
+                pv.discount_percentage,
+                pv.discount_expiry_date,
+                p.name AS product_name,
+                (SELECT image_path FROM product_images WHERE product_id = p.id AND is_main = 1 LIMIT 1) AS main_image
+             FROM
+                cart c
+             JOIN
+                product_variations pv ON c.variation_id = pv.id
+             JOIN
+                products p ON pv.product_id = p.id
+             WHERE
+                c.user_id = ?";
+
+$stmt_cart = $conn->prepare($sql_cart);
+if ($stmt_cart) {
+    $stmt_cart->bind_param("i", $user_id);
+    $stmt_cart->execute();
+    $result_cart = $stmt_cart->get_result();
+
+    if ($result_cart->num_rows > 0) {
+        while ($item = $result_cart->fetch_assoc()) {
+            $current_price = (float)$item['variation_price'];
+            $display_price = $current_price;
+            $is_discounted = false;
+
+            if ($item['discount_percentage'] !== null && $item['discount_expiry_date'] !== null) {
+                $discount_expiry_timestamp = strtotime($item['discount_expiry_date']);
+                if (time() <= $discount_expiry_timestamp) { // Check if discount is still active
+                    $discount_amount = $current_price * ($item['discount_percentage'] / 100);
+                    $display_price = $current_price - $discount_amount;
+                    $is_discounted = true;
+                }
+            }
+
+            $subtotal = $display_price * $item['quantity'];
+            $cart_total_amount += $subtotal;
+
+            $cartItems[] = [
+                'cart_id' => $item['cart_id'],
+                'product_name' => $item['product_name'],
+                'size' => $item['size'],
+                'color' => $item['color'],
+                'quantity' => $item['quantity'],
+                'original_price' => $current_price,
+                'display_price' => $display_price,
+                'is_discounted' => $is_discounted,
+                'main_image' => $item['main_image'],
+                'subtotal' => $subtotal
+            ];
+        }
+    }
+    $stmt_cart->close();
+}
+// $conn is implicitly closed here. It will be re-opened for activity log.
+
+// --- Tab persistence logic ---
+$active_tab = 'profile'; // Default active tab
+if (isset($_GET['tab']) && in_array($_GET['tab'], ['profile', 'cart', 'orders', 'activity_log'])) {
+    $active_tab = $_GET['tab'];
+} else if (isset($_SESSION['active_tab']) && in_array($_SESSION['active_tab'], ['profile', 'cart', 'orders', 'activity_log'])) {
+    $active_tab = $_SESSION['active_tab'];
+}
+
+// Clear active_tab from session after use
+unset($_SESSION['active_tab']);
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -43,6 +146,18 @@ if ($shipping_address) {
         integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC"
         crossorigin="anonymous">
 </head>
+
+<style>
+  /* Remove arrows from number input */
+input[type=number].no-arrow::-webkit-inner-spin-button, 
+input[type=number].no-arrow::-webkit-outer-spin-button { 
+  -webkit-appearance: none;
+  margin: 0;
+}
+input[type=number].no-arrow {
+  -moz-appearance: textfield;
+}
+</style>
 <body>
 <?php include '../components/navigation.php'; ?>
 
@@ -97,16 +212,19 @@ $error = isset($_GET['error']) ? urldecode($_GET['error']) : '';
           </form>
         </div>
         <div class="list-group list-group-flush">
-          <a href="#profile" class="list-group-item list-group-item-action active" data-bs-toggle="tab">
+          <a href="#profile" class="list-group-item list-group-item-action <?php echo ($active_tab == 'profile') ? 'active' : ''; ?>" data-bs-toggle="tab">
             <i class="bi bi-person me-2"></i> My Profile
           </a>
-          <a href="#cart" class="list-group-item list-group-item-action" data-bs-toggle="tab">
+          <a href="#cart" class="list-group-item list-group-item-action <?php echo ($active_tab == 'cart') ? 'active' : ''; ?>" data-bs-toggle="tab">
             <i class="bi bi-cart me-2"></i> My Cart
+            <?php if ($cart_item_count > 0): ?>
+                <span class="badge bg-danger rounded-pill float-end"><?php echo $cart_item_count; ?></span>
+            <?php endif; ?>
           </a>
-          <a href="#orders" class="list-group-item list-group-item-action" data-bs-toggle="tab">
+          <a href="#orders" class="list-group-item list-group-item-action <?php echo ($active_tab == 'orders') ? 'active' : ''; ?>" data-bs-toggle="tab">
             <i class="bi bi-bag-check me-2"></i> My Orders
           </a>
-          <a href="#activity_log" class="list-group-item list-group-item-action" data-bs-toggle="tab">
+          <a href="#activity_log" class="list-group-item list-group-item-action <?php echo ($active_tab == 'activity_log') ? 'active' : ''; ?>" data-bs-toggle="tab">
             <i class="bi bi-activity me-2"></i> Activity Log
           </a>
           <a href="../auth/logout.php" class="list-group-item list-group-item-action text-danger">
@@ -116,7 +234,7 @@ $error = isset($_GET['error']) ? urldecode($_GET['error']) : '';
       </div>
     </div>
     <div class="col-md-9 px-3"><div class="tab-content card shadow-sm p-4 rounded-0">
-        <div class="tab-pane fade show active" id="profile">
+        <div class="tab-pane fade <?php echo ($active_tab == 'profile') ? 'show active' : ''; ?>" id="profile">
           <h5 class="mb-3" style="color:var(--primary);">My Profile</h5>
           <p><strong>Name:</strong> <?php echo htmlspecialchars($name); ?></p>
           <p><strong>Email:</strong> <?php echo htmlspecialchars($email); ?></p>
@@ -171,16 +289,96 @@ $error = isset($_GET['error']) ? urldecode($_GET['error']) : '';
             <button type="submit" class="btn btn-accent mt-2">Save Address</button>
           </form>
         </div>
-        <div class="tab-pane fade" id="cart">
+        <div class="tab-pane fade <?php echo ($active_tab == 'cart') ? 'show active' : ''; ?>" id="cart">
           <h5 class="mb-3" style="color:var(--primary);">My Cart</h5>
-          <p>Your cart items will appear here.</p>
+          <?php if (!empty($cartItems)): ?>
+            <div class="table-responsive">
+              <table class="table table-hover align-middle">
+                <thead>
+  <tr>
+    <th scope="col">Product Image</th>
+    <th scope="col">Product Details</th>
+    <th scope="col">Price</th>
+    <th scope="col">Quantity</th>
+    <th scope="col">Subtotal</th>
+    <th scope="col">Actions</th>
+  </tr>
+</thead>
+<tbody>
+<?php foreach ($cartItems as $item): ?>
+  <tr>
+    <!-- Product Image -->
+    <td>
+      <?php
+      $imagePath = !empty($item['main_image']) ? '../' . htmlspecialchars($item['main_image']) : '../assets/images/no_image.png';
+      ?>
+      <img src="<?php echo $imagePath; ?>" class="img-thumbnail" alt="<?php echo htmlspecialchars($item['product_name']); ?>" style="width: 60px; height: 60px; object-fit: cover;">
+    </td>
+    <!-- Product Details -->
+    <td>
+      <div><strong><?php echo htmlspecialchars($item['product_name']); ?></strong></div>
+      <div>
+        <?php
+          $details = [];
+          if (!empty($item['size']) && $item['size'] !== 'Not Available') $details[] = 'Size: ' . htmlspecialchars($item['size']);
+          if (!empty($item['color']) && $item['color'] !== 'Not Available') $details[] = 'Color: ' . htmlspecialchars($item['color']);
+          echo implode(' | ', $details);
+        ?>
+      </div>
+    </td>
+    <!-- Price -->
+    <td>
+      <?php if ($item['is_discounted']): ?>
+        <span class="text-muted text-decoration-line-through">₱<?php echo number_format($item['original_price'], 2); ?></span>
+        <strong class="ms-1">₱<?php echo number_format($item['display_price'], 2); ?></strong>
+      <?php else: ?>
+        <strong>₱<?php echo number_format($item['display_price'], 2); ?></strong>
+      <?php endif; ?>
+    </td>
+    <!-- Quantity with + and - -->
+    <td>
+      <form class="update-quantity-form d-flex align-items-center" data-cart-id="<?php echo $item['cart_id']; ?>">
+        <button type="button" class="btn btn-outline-secondary btn-sm btn-qty-minus" aria-label="Decrease quantity">-</button>
+        <input type="number" name="quantity" min="1" value="<?php echo htmlspecialchars($item['quantity']); ?>" class="form-control form-control-sm mx-1 text-center no-arrow" style="width:60px;" readonly>
+        <button type="button" class="btn btn-outline-secondary btn-sm btn-qty-plus" aria-label="Increase quantity">+</button>
+        <input type="hidden" name="cart_id" value="<?php echo htmlspecialchars($item['cart_id']); ?>">
+      </form>
+    </td>
+    <!-- Subtotal -->
+    <td>₱<?php echo number_format($item['subtotal'], 2); ?></td>
+    <!-- Actions -->
+    <td>
+      <form action="../config/remove_from_cart.php" method="POST" class="remove-from-cart-form">
+        <input type="hidden" name="cart_id" value="<?php echo htmlspecialchars($item['cart_id']); ?>">
+        <button type="submit" class="btn btn-danger btn-sm"><i class="bi bi-trash"></i></button>
+      </form>
+    </td>
+  </tr>
+<?php endforeach; ?>
+</tbody>
+                <tfoot>
+                  <tr>
+                    <th colspan="4" class="text-end">Total:</th>
+                    <th colspan="2">₱<?php echo number_format($cart_total_amount, 2); ?></th>
+                  </tr>
+                </tfoot>
+              </table>
+            </div>
+            <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-3">
+                <button class="btn btn-success btn-lg" type="button"><i class="bi bi-cash-stack"></i> Proceed to Checkout</button>
+            </div>
+          <?php else: ?>
+            <div class="alert alert-info text-center" role="alert">
+                <i class="bi bi-info-circle me-2"></i>Your cart is empty. Start shopping now!
+            </div>
+          <?php endif; ?>
         </div>
-        <div class="tab-pane fade" id="orders">
+        <div class="tab-pane fade <?php echo ($active_tab == 'orders') ? 'show active' : ''; ?>" id="orders">
           <h5 class="mb-3" style="color:var(--primary);">My Orders</h5>
           <p>Your order history will appear here.</p>
         </div>
 
-        <div class="tab-pane fade" id="activity_log">
+        <div class="tab-pane fade <?php echo ($active_tab == 'activity_log') ? 'show active' : ''; ?>" id="activity_log">
           <h5 class="mb-3" style="color:var(--primary);">My Activity Log</h5>
           <div class="table-responsive">
             <table class="table table-striped table-hover">
@@ -265,95 +463,22 @@ $error = isset($_GET['error']) ? urldecode($_GET['error']) : '';
 
 
 <script>
-  document.addEventListener('DOMContentLoaded', function () {
-    var toastElList = [].slice.call(document.querySelectorAll('.toast'));
-    toastElList.forEach(function (toastEl) {
-      var toast = new bootstrap.Toast(toastEl);
-      toast.show();
-    });
-  });
+  const address = <?php echo json_encode($address ?? []); ?>;
+  const activeTab = '<?php echo $active_tab; ?>'; // Pass the active tab to JavaScript
 </script>
 
-<script>
-let regions = [], provinces = [], cities = [];
-const address = <?php echo json_encode($address ?? []); ?>;
-
-function loadJSON(url) {
-  return fetch(url).then(res => res.json());
-}
-
-function populateRegions() {
-  const regionSelect = document.getElementById('region');
-  regionSelect.innerHTML = '<option value="">Select Region</option>';
-  regions.forEach(region => {
-    let opt = document.createElement('option');
-    opt.value = region.key;
-    opt.textContent = region.long + ' (' + region.name + ')';
-    regionSelect.appendChild(opt);
-  });
-}
-
-function populateProvinces(regionKey) {
-  const provinceSelect = document.getElementById('province');
-  provinceSelect.innerHTML = '<option value="">Select Province</option>';
-  provinces.filter(p => p.region === regionKey)
-    .forEach(prov => {
-      let opt = document.createElement('option');
-      opt.value = prov.key;
-      opt.textContent = prov.name;
-      provinceSelect.appendChild(opt);
-    });
-}
-
-function populateCities(provinceKey) {
-  const citySelect = document.getElementById('city');
-  citySelect.innerHTML = '<option value="">Select City/Municipality</option>';
-  cities.filter(c => c.province === provinceKey)
-    .forEach(city => {
-      let opt = document.createElement('option');
-      opt.value = city.name;
-      opt.textContent = city.name;
-      citySelect.appendChild(opt);
-    });
-}
-
-document.addEventListener('DOMContentLoaded', async function() {
-  regions = await loadJSON('../assets/ph-address/regions.json');
-  provinces = await loadJSON('../assets/ph-address/provinces.json');
-  cities = await loadJSON('../assets/ph-address/cities.json');
-  populateRegions();
-
-  // Set region if exists
-  if (address.region) {
-    document.getElementById('region').value = address.region;
-    populateProvinces(address.region);
-
-    // Set province if exists
-    if (address.province) {
-      document.getElementById('province').value = address.province;
-      populateCities(address.province);
-
-      // Set city if exists
-      if (address.city) {
-        document.getElementById('city').value = address.city;
-      }
-    }
-  }
-
-  document.getElementById('region').addEventListener('change', function() {
-    populateProvinces(this.value);
-    document.getElementById('province').value = '';
-    document.getElementById('city').value = '';
-  });
-  document.getElementById('province').addEventListener('change', function() {
-    populateCities(this.value);
-    document.getElementById('city').value = '';
-  });
-});
-</script>
+<script src="../assets/js/my_account.js"></script>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
         crossorigin="anonymous"></script>
 </body>
 </html>
+
+
+
+
+
+
+
+

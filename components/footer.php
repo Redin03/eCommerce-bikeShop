@@ -1,43 +1,39 @@
-<!-- Footer -->
 <footer>
   <div class="container text-center text-md-start">
     <div class="row">
-      <!-- Logo & Description -->
-      <div class="col-md-4 mb-4 mb-md-0 d-flex flex-column align-items-center align-items-md-start">
+      <div class="col-md-4 mb-4 mb-md-0 d-flex flex-column align-items-center align-items-md-start text-md-start text-center">
         <div class="d-flex align-items-center mb-2">
           <img src="../assets/images/logos/logo.svg" alt="Bong Bicycle Shop Logo" style="width:40px; height:40px; object-fit:contain; margin-right:10px;">
           <span class="navbar-brand-text" style="font-size:1.3rem; font-weight:700;">Bong Bicycle Shop</span>
         </div>
         <p style="max-width:260px;">Your one-stop shop for bikes, parts, and cycling guides at the best prices.</p>
       </div>
-      <!-- Quick Links -->
-      <div class="col-md-4 mb-4 mb-md-0">
+      <div class="col-md-4 mb-4 mb-md-0 text-center text-md-start">
         <h5><strong>Quick Links</strong></h5>
         <ul class="list-unstyled">
           <li>
-            <a class="footer-link d-flex align-items-center" href="index.php">
+            <a class="footer-link d-flex align-items-center justify-content-center justify-content-md-start" href="index.php">
               Home
             </a>
           </li>
           <li>
-            <a class="footer-link d-flex align-items-center" href="about.php">
+            <a class="footer-link d-flex align-items-center justify-content-center justify-content-md-start" href="about.php">
               About Us
             </a>
           </li>
           <li>
-            <a class="footer-link d-flex align-items-center" href="contact.php">
+            <a class="footer-link d-flex align-items-center justify-content-center justify-content-md-start" href="contact.php">
               Contact Us
             </a>
           </li>
           <li>
-            <a class="footer-link d-flex align-items-center" href="guides.php">
+            <a class="footer-link d-flex align-items-center justify-content-center justify-content-md-start" href="guides.php">
               Guides
             </a>
           </li>
         </ul>
       </div>
-      <!-- Shop Information -->
-      <div class="col-md-4">
+      <div class="col-md-4 text-center text-md-start">
         <h5><strong>Shop Information</strong></h5>
         <div class="mb-2">
           <i class="bi bi-envelope me-2"></i> bongbicycleshop@gmail.com
