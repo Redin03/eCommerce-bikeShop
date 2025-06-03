@@ -392,9 +392,15 @@ $error = isset($_GET['error']) ? urldecode($_GET['error']) : '';
         </div>
 
         <div class="tab-pane fade <?php echo ($active_tab == 'ticket') ? 'show active' : ''; ?>" id="ticket">
-          <h5 class="mb-3" style="color:var(--primary);"><i class="bi bi-ticket-perforated me-2"></i>My Ticket</h5>
+          <h5 class="mb-3" style="color:var(--primary);">My Ticket</h5>
           <p>Your support tickets will appear here.</p>
           <!-- You can add a table or ticket submission form here -->
+        </div>
+
+        <div class="tab-pane fade <?php echo ($active_tab == 'orders') ? 'show active' : ''; ?>" id="orders">
+          <!-- My Orders content here -->
+           <h5 class="mb-3" style="color:var(--primary);">My Orders</h5>
+          <p>Your Orders will appear here.</p>
         </div>
 
         <div class="tab-pane fade <?php echo ($active_tab == 'activity_log') ? 'show active' : ''; ?>" id="activity_log">
