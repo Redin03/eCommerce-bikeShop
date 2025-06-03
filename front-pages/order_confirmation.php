@@ -78,105 +78,6 @@ $conn->close();
         integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC"
         crossorigin="anonymous">
   <style>
-    :root {
-      --primary: #006A4E;
-      --secondary: #FFB703;
-      --accent: #00BFA6;
-      --bg-light: #F4F4F4;
-      --bg-dark: #003D33;
-      --text-dark: #1E1E1E;
-      --text-light: #FFFFFF;
-      --border-gray: #D9D9D9;
-    }
-
-    body {
-      background-color: var(--bg-light);
-      color: var(--text-dark);
-      font-family: 'Montserrat', sans-serif;
-    }
-
-    .navbar {
-      background-color: var(--primary);
-    }
-
-    .navbar-brand,
-    .nav-link {
-      color: var(--text-light) !important;
-      position: relative;
-      padding-bottom: 5px;
-      font-weight: 500;
-    }
-
-    .nav-link:hover {
-      color: var(--secondary) !important;
-    }
-
-    .nav-link.active::after {
-      content: '';
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      width: 100%;
-      height: 3px;
-      background-color: var(--secondary);
-    }
-
-    .btn-accent {
-      background-color: var(--accent);
-      color: var(--text-light);
-    }
-
-    .btn-accent:hover {
-      background-color: var(--secondary);
-      color: var(--text-dark);
-    }
-
-    .hero-section {
-      background-color: var(--bg-light);
-      padding: 80px 20px;
-      text-align: center;
-    }
-
-    .hero-section h1 {
-      color: var(--primary);
-    }
-
-    .hero-section p {
-      max-width: 600px;
-      margin: 20px auto;
-    }
-
-    footer {
-      background-color: var(--bg-dark);
-      color: var(--text-light);
-      padding: 40px 0;
-    }
-
-    .footer-link {
-      color: var(--text-light);
-      text-decoration: none;
-    }
-
-    .footer-link:hover {
-      color: var(--secondary);
-    }
-
-    .border-top {
-      border-top: 1px solid var(--border-gray);
-    }
-
-    .navbar-logo {
-      width: 40px;
-      height: 40px;
-      margin-right: 10px;
-      object-fit: contain;
-    }
-
-    .navbar-brand-text {
-      font-weight: 600;
-      font-size: 1.2rem;
-    }
-
     /* Product card styles (reused from checkout) */
     .product-checkout-item {
         display: flex;
@@ -190,7 +91,7 @@ $conn->close();
     .product-checkout-item img {
         width: 80px;
         height: 80px;
-        object-fit: cover;
+        object-fit: contain;
         margin-right: 15px;
         border-radius: .25rem;
     }
@@ -296,9 +197,7 @@ $conn->close();
             <p class="text-muted">No products found for this order.</p>
           <?php endif; ?>
         </div>
-        <div class="text-end mt-3">
-          <h5 class="total-amount">Grand Total: <span style="color:var(--primary);">₱<?php echo number_format($order_details['total_amount'], 2); ?></span></h5>
-        </div>
+        
 
         <div class="d-flex justify-content-center mt-4">
           <a href="my_account.php?tab=orders" class="btn btn-secondary me-2"><i class="bi bi-box-seam me-2"></i>View My Orders</a>

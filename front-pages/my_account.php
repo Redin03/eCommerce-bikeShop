@@ -137,8 +137,6 @@ unset($_SESSION['active_tab']);
 
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
 
-  <link rel="stylesheet" href="../assets/css/my_account.css">
-
   <link rel="icon" type="image/png" href="../assets/images/favicon/favicon.svg">
 
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css"
@@ -148,6 +146,22 @@ unset($_SESSION['active_tab']);
 </head>
 
 <style>
+.list-group-item.active,
+    .list-group-item.active:focus,
+    .list-group-item.active:hover {
+      background-color: var(--accent) !important;
+      color: var(--text-light) !important;
+      border: none;
+    }
+
+.settings-menu-parent.active,
+.settings-menu-parent.active:focus,
+.settings-menu-parent.active:hover {
+  background-color: transparent !important;
+  color: inherit !important;
+  border: none;
+}
+
   /* Remove arrows from number input */
 input[type=number].no-arrow::-webkit-inner-spin-button, 
 input[type=number].no-arrow::-webkit-outer-spin-button { 

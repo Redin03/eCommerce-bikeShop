@@ -9,10 +9,13 @@ if (!isset($_SESSION['user_id'])) {
 
 $user_id = $_SESSION['user_id'];
 $cart_ids = $_POST['cart_ids'] ?? [];
+$buy_now = isset($_POST['buy_now']) && $_POST['buy_now'] == '1';
+$variation_id = $_POST['variation_id'] ?? null;
+$quantity = isset($_POST['quantity']) ? (int)$_POST['quantity'] : 1;
 
 // Re-establish connection for user data if it was closed before
 if (!isset($conn) || $conn->connect_error) {
-    require_once __DIR__ . '/../config/db.php'; // Re-open connection
+    require_once __DIR__ . '/../config/db.php';
 }
 
 // Fetch user's shipping address for pre-filling the form
@@ -28,46 +31,79 @@ if ($shipping_address_json) {
     $shipping_address = json_decode($shipping_address_json, true);
 }
 
-if (empty($cart_ids)) {
-    header("Location: my_account.php?tab=cart&error=" . urlencode("Please select at least one item to checkout."));
-    exit;
-}
-
-// Prepare placeholders for SQL IN clause
-$placeholders = implode(',', array_fill(0, count($cart_ids), '?'));
-$types = str_repeat('i', count($cart_ids));
-
-// Fetch selected cart items
-$sql = "SELECT c.id AS cart_id, c.quantity, pv.size, pv.color, pv.price AS variation_price, pv.discount_percentage, pv.discount_expiry_date, p.name AS product_name, (SELECT image_path FROM product_images WHERE product_id = p.id AND is_main = 1 LIMIT 1) AS main_image
-        FROM cart c
-        JOIN product_variations pv ON c.variation_id = pv.id
-        JOIN products p ON pv.product_id = p.id
-        WHERE c.user_id = ? AND c.id IN ($placeholders)";
-$stmt = $conn->prepare($sql);
-$params = array_merge([$user_id], $cart_ids);
-$stmt->bind_param('i' . $types, ...$params);
-$stmt->execute();
-$result = $stmt->get_result();
-
 $items = [];
 $total = 0;
-while ($item = $result->fetch_assoc()) {
-    $current_price = (float)$item['variation_price'];
-    $display_price = $current_price;
-    if ($item['discount_percentage'] !== null && $item['discount_expiry_date'] !== null) {
-        $discount_expiry_timestamp = strtotime($item['discount_expiry_date']);
-        if (time() <= $discount_expiry_timestamp) {
-            $discount_amount = $current_price * ($item['discount_percentage'] / 100);
-            $display_price = $current_price - $discount_amount;
+
+if ($buy_now && $variation_id) {
+    // Direct Buy Now: fetch the variation and product info
+    $stmt = $conn->prepare("SELECT pv.id AS variation_id, pv.size, pv.color, pv.price AS variation_price, pv.discount_percentage, pv.discount_expiry_date, pv.stock, p.name AS product_name, (SELECT image_path FROM product_images WHERE product_id = p.id AND is_main = 1 LIMIT 1) AS main_image, pv.product_id FROM product_variations pv JOIN products p ON pv.product_id = p.id WHERE pv.id = ?");
+    $stmt->bind_param("i", $variation_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    if ($row = $result->fetch_assoc()) {
+        if ($quantity > $row['stock']) {
+            header("Location: product_details.php?id=" . $row['product_id'] . "&error=" . urlencode("Not enough stock."));
+            exit;
         }
+        $current_price = (float)$row['variation_price'];
+        $display_price = $current_price;
+        if ($row['discount_percentage'] !== null && $row['discount_expiry_date'] !== null) {
+            $discount_expiry_timestamp = strtotime($row['discount_expiry_date']);
+            if (time() <= $discount_expiry_timestamp) {
+                $discount_amount = $current_price * ($row['discount_percentage'] / 100);
+                $display_price = $current_price - $discount_amount;
+            }
+        }
+        $subtotal = $display_price * $quantity;
+        $total += $subtotal;
+        $row['display_price'] = $display_price;
+        $row['subtotal'] = $subtotal;
+        $row['quantity'] = $quantity;
+        $items[] = $row;
+    } else {
+        header("Location: index.php?error=" . urlencode("Product not found."));
+        exit;
     }
-    $subtotal = $display_price * $item['quantity'];
-    $total += $subtotal;
-    $item['display_price'] = $display_price;
-    $item['subtotal'] = $subtotal;
-    $items[] = $item;
+    $stmt->close();
+    $cart_ids = [];
+} else {
+    if (empty($cart_ids)) {
+        header("Location: my_account.php?tab=cart&error=" . urlencode("Please select at least one item to checkout."));
+        exit;
+    }
+    // Prepare placeholders for SQL IN clause
+    $placeholders = implode(',', array_fill(0, count($cart_ids), '?'));
+    $types = str_repeat('i', count($cart_ids));
+
+    $sql = "SELECT c.id AS cart_id, c.quantity, pv.size, pv.color, pv.price AS variation_price, pv.discount_percentage, pv.discount_expiry_date, pv.stock, p.name AS product_name, (SELECT image_path FROM product_images WHERE product_id = p.id AND is_main = 1 LIMIT 1) AS main_image, pv.product_id
+            FROM cart c
+            JOIN product_variations pv ON c.variation_id = pv.id
+            JOIN products p ON pv.product_id = p.id
+            WHERE c.user_id = ? AND c.id IN ($placeholders)";
+    $stmt = $conn->prepare($sql);
+    $params = array_merge([$user_id], $cart_ids);
+    $stmt->bind_param('i' . $types, ...$params);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    while ($item = $result->fetch_assoc()) {
+        $current_price = (float)$item['variation_price'];
+        $display_price = $current_price;
+        if ($item['discount_percentage'] !== null && $item['discount_expiry_date'] !== null) {
+            $discount_expiry_timestamp = strtotime($item['discount_expiry_date']);
+            if (time() <= $discount_expiry_timestamp) {
+                $discount_amount = $current_price * ($item['discount_percentage'] / 100);
+                $display_price = $current_price - $discount_amount;
+            }
+        }
+        $subtotal = $display_price * $item['quantity'];
+        $total += $subtotal;
+        $item['display_price'] = $display_price;
+        $item['subtotal'] = $subtotal;
+        $items[] = $item;
+    }
+    $stmt->close();
 }
-$stmt->close();
 $conn->close();
 ?>
 <!DOCTYPE html>
@@ -88,105 +124,6 @@ $conn->close();
         integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC"
         crossorigin="anonymous">
   <style>
-    :root {
-      --primary: #006A4E;
-      --secondary: #FFB703;
-      --accent: #00BFA6;
-      --bg-light: #F4F4F4;
-      --bg-dark: #003D33;
-      --text-dark: #1E1E1E;
-      --text-light: #FFFFFF;
-      --border-gray: #D9D9D9;
-    }
-
-    body {
-      background-color: var(--bg-light);
-      color: var(--text-dark);
-      font-family: 'Montserrat', sans-serif;
-    }
-
-    .navbar {
-      background-color: var(--primary);
-    }
-
-    .navbar-brand,
-    .nav-link {
-      color: var(--text-light) !important;
-      position: relative;
-      padding-bottom: 5px;
-      font-weight: 500;
-    }
-
-    .nav-link:hover {
-      color: var(--secondary) !important;
-    }
-
-    .nav-link.active::after {
-      content: '';
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      width: 100%;
-      height: 3px;
-      background-color: var(--secondary);
-    }
-
-    .btn-accent {
-      background-color: var(--accent);
-      color: var(--text-light);
-    }
-
-    .btn-accent:hover {
-      background-color: var(--secondary);
-      color: var(--text-dark);
-    }
-
-    .hero-section {
-      background-color: var(--bg-light);
-      padding: 80px 20px;
-      text-align: center;
-    }
-
-    .hero-section h1 {
-      color: var(--primary);
-    }
-
-    .hero-section p {
-      max-width: 600px;
-      margin: 20px auto;
-    }
-
-    footer {
-      background-color: var(--bg-dark);
-      color: var(--text-light);
-      padding: 40px 0;
-    }
-
-    .footer-link {
-      color: var(--text-light);
-      text-decoration: none;
-    }
-
-    .footer-link:hover {
-      color: var(--secondary);
-    }
-
-    .border-top {
-      border-top: 1px solid var(--border-gray);
-    }
-
-    .navbar-logo {
-      width: 40px;
-      height: 40px;
-      margin-right: 10px;
-      object-fit: contain;
-    }
-
-    .navbar-brand-text {
-      font-weight: 600;
-      font-size: 1.2rem;
-    }
-
     /* Styles for the wizard steps */
     .checkout-wizard .nav-link {
         color: var(--text-dark) !important;
@@ -275,7 +212,7 @@ $conn->close();
     .product-checkout-item img {
         width: 80px;
         height: 80px;
-        object-fit: cover;
+        object-fit: contain;
         margin-right: 15px;
         border-radius: .25rem;
     }
@@ -365,9 +302,15 @@ $conn->close();
         </ul>
 
         <form id="checkoutForm" method="POST" action="../config/place_order.php" enctype="multipart/form-data">
+          <?php if ($buy_now && $variation_id): ?>
+            <input type="hidden" name="buy_now" value="1">
+            <input type="hidden" name="variation_id" value="<?php echo htmlspecialchars($variation_id); ?>">
+            <input type="hidden" name="quantity" value="<?php echo htmlspecialchars($quantity); ?>">
+          <?php else: ?>
           <?php foreach ($cart_ids as $cid): ?>
             <input type="hidden" name="cart_ids[]" value="<?php echo htmlspecialchars($cid); ?>">
           <?php endforeach; ?>
+          <?php endif; ?>
 
           <div class="tab-content" id="checkoutWizardContent">
             <div class="tab-pane fade show active" id="product-info" role="tabpanel" aria-labelledby="product-info-tab">
@@ -428,7 +371,7 @@ $conn->close();
                 </div>
                 <div class="col-12" id="gcashPaymentDetails" style="display:none;">
                     <p class="text-center">Scan the QR code to pay via GCash:</p>
-                    <img src="../assets/images/gcash_qr.png" alt="GCash QR Code" class="img-fluid mb-3">
+                    <img src="../assets/images/content-image/qrcode.jpeg" alt="GCash QR Code" class="img-fluid mb-3">
                     <label for="proofOfPayment" class="form-label">Upload Proof of Payment (GCash Screenshot)</label>
                     <input type="file" class="form-control" id="proofOfPayment" name="proof_of_payment" accept="image/*">
                     <small class="text-muted">Please upload a screenshot of your successful GCash transaction.</small>
