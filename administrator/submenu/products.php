@@ -292,7 +292,7 @@ $conn->close();
     </div>
     <div class="card-body">
         <div class="table-responsive">
-            <table class="table table-striped table-hover">
+            <table class="table table-striped table-hover"  style="font-size: 0.85em;">
                 <thead>
                     <tr>
                         <th>ID</th>
@@ -301,7 +301,6 @@ $conn->close();
                         <th>Category</th>
                         <th>Sub-Category</th>
                         <th>Variations</th>
-                        <th>Added On</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
@@ -312,7 +311,7 @@ $conn->close();
                                 <td><?= $product['id'] ?></td>
                                 <td>
                                     <?php if (!empty($product['images'])): ?>
-                                        <img src="../<?= $product['images'][0]['path'] ?>" alt="<?= $product['name'] ?>" class="img-thumbnail" style="width: 50px; height: 50px; object-fit: cover;">
+                                        <img src="../<?= $product['images'][0]['path'] ?>" alt="<?= $product['name'] ?>" class="img-thumbnail" style="width: 50px; height: 50px; object-fit: contain;">
                                         <?php if (count($product['images']) > 1): ?>
                                             <span class="badge bg-secondary">+<?= count($product['images']) - 1 ?></span>
                                         <?php endif; ?>
@@ -325,24 +324,36 @@ $conn->close();
                                 <td><?= $product['subcategory'] ?></td>
                                 <td>
                                     <?php if (!empty($product['variations'])): ?>
-                                        <ul class="list-unstyled mb-0 small">
-                                            <?php foreach ($product['variations'] as $index => $variation): ?>
-                                                <li>
-                                                    <strong><?= $variation['size'] ?></strong> / <?= $variation['color'] ?>: (Stock: <?= $variation['stock'] ?>, Price: ₱<?= $variation['price'] ?>)
-                                                </li>
-                                            <?php endforeach; ?>
-                                        </ul>
+                                        <div class="table-responsive" style="max-height: 150px; overflow-y: auto;">
+                                            <table class="table table-sm table-bordered mb-0 small">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Size</th>
+                                                        <th>Color</th>
+                                                        <th>Stock</th>
+                                                        <th>Price</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <?php foreach ($product['variations'] as $variation): ?>
+                                                        <tr>
+                                                            <td><?= $variation['size'] ?></td>
+                                                            <td><?= $variation['color'] ?></td>
+                                                            <td><?= $variation['stock'] ?></td>
+                                                            <td>₱<?= $variation['price'] ?></td>
+                                                        </tr>
+                                                    <?php endforeach; ?>
+                                                </tbody>
+                                            </table>
+                                        </div>
                                     <?php else: ?>
                                         No Variations
                                     <?php endif; ?>
                                 </td>
-                                <td><?= date('Y-m-d', strtotime($product['created_at'])) ?></td>
                                 <td>
-                                    <button class="btn btn-sm btn-warning me-2 edit-product-btn mb-2" data-bs-toggle="modal" data-bs-target="#editProductModal" data-product-id="<?= $product['id'] ?>">
-                                        <i class="bi bi-pencil"></i> Edit
+                                    <button class="btn btn-sm btn-warning me-2 edit-product-btn mb-2" data-bs-toggle="modal" data-bs-target="#editProductModal" data-product-id="<?= $product['id'] ?>"><i class="bi bi-pencil-square me-2"></i>EDIT
                                     </button>
-                                    <button class="btn btn-sm btn-danger delete-product-btn" data-bs-toggle="modal" data-bs-target="#deleteProductModal" data-product-id="<?= $product['id'] ?>">
-                                        <i class="bi bi-trash"></i> Delete
+                                    <button class="btn btn-sm btn-danger delete-product-btn" data-bs-toggle="modal" data-bs-target="#deleteProductModal" data-product-id="<?= $product['id'] ?>">   <i class="bi bi-trash-fill me-2"></i>DELETE
                                     </button>
                                 </td>
                             </tr>

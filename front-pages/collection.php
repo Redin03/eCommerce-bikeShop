@@ -15,8 +15,6 @@ $sql = "SELECT
             p.category,
             pv.id AS variation_id,
             pv.price,
-            pv.discount_percentage,
-            pv.discount_expiry_date,
             pi.image_path,
             pi.is_main
         FROM
@@ -36,17 +34,12 @@ if (!empty($searchTerm)) {
     $paramTypes .= 's';
 }
 
-// Add category filtering
-if (!empty($selectedCategory)) {
-    if ($selectedCategory === 'Discounted') {
-        // Filter for discounted products where discount is active
-        $conditions[] = "pv.discount_percentage IS NOT NULL AND pv.discount_expiry_date >= CURDATE()";
-    } else {
-        // Filter by specific category
-        $conditions[] = "p.category = ?"; //
-        $params[] = $selectedCategory;
-        $paramTypes .= 's';
-    }
+// Add category filtering (excluding 'Discounted')
+if (!empty($selectedCategory) && $selectedCategory !== 'Discounted') {
+    // Filter by specific category
+    $conditions[] = "p.category = ?";
+    $params[] = $selectedCategory;
+    $paramTypes .= 's';
 }
 
 if (!empty($conditions)) {
@@ -77,33 +70,19 @@ if ($stmt) {
             }
 
             // Add image paths to the product, ensuring uniqueness
-            // Ltrim is used here to handle potential leading './' or '/' in database paths
             $cleanedImagePath = ltrim($row['image_path'], './');
             if (!empty($row['image_path']) && !in_array($cleanedImagePath, array_column($products[$product_id]['images'], 'path'))) {
-                 $products[$product_id]['images'][] = [
-                    'path' => $cleanedImagePath,
-                    'is_main' => $row['is_main']
-                ];
+                   $products[$product_id]['images'][] = [
+                        'path' => $cleanedImagePath,
+                        'is_main' => $row['is_main']
+                    ];
             }
 
-            // Calculate discounted price if applicable and store for the first variation
-            // We only need one price for display on the card, so we'll take the first variation's price
-            if (empty($products[$product_id]['variations'])) { // Only add if no variation has been added yet for this product
-                $current_price = $row['price'];
-                if ($row['discount_percentage'] !== null && $row['discount_expiry_date'] !== null) {
-                    $discount_expiry_timestamp = strtotime($row['discount_expiry_date']);
-                    if (time() <= $discount_expiry_timestamp) { // Check if discount is still valid
-                        $discount_amount = $current_price * ($row['discount_percentage'] / 100);
-                        $current_price = $current_price - $discount_amount;
-                    }
-                }
-
+            // Store the first variation's price for display
+            if (empty($products[$product_id]['variations'])) {
                 $products[$product_id]['variations'][] = [
                     'id' => $row['variation_id'],
-                    'original_price' => $row['price'],
-                    'display_price' => number_format($current_price, 2),
-                    'discount_percentage' => $row['discount_percentage'],
-                    'discount_expiry_date' => $row['discount_expiry_date']
+                    'price' => number_format($row['price'], 2) // Original price, formatted
                 ];
             }
         }
@@ -115,90 +94,89 @@ $conn->close(); // Close the database connection
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Bong Bicycle Shop - Shop</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Bong Bicycle Shop - Shop</title>
 
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
-
-  <link rel="icon" type="image/png" href="../assets/images/favicon/favicon.svg">
-
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css"
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/png" href="../assets/images/favicon/favicon.svg">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css"
         rel="stylesheet"
         integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC"
         crossorigin="anonymous">
-  <style>
-    .product-card {
-      border: 1px solid var(--border-gray);
-      border-radius: .25rem;
-      background-color: #fff;
-      transition: transform 0.2s;
-    }
+    <style>
+        .product-card {
+            border: 1px solid var(--border-gray);
+            border-radius: .25rem;
+            background-color: #fff;
+            transition: transform 0.2s;
+        }
 
-    .product-card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
-    }
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+        }
 
-    .product-card img {
-      width: 100%;
-      height: 200px;
-      object-fit: contain;
-      border-top-left-radius: .25rem;
-      border-top-right-radius: .25rem;
-    }
+        .product-card img {
+            width: 100%;
+            height: 200px;
+            object-fit: contain;
+            border-top-left-radius: .25rem;
+            border-top-right-radius: .25rem;
+        }
 
-    .product-price .original-price {
-      text-decoration: line-through;
-      color: #6c757d;
-      font-size: 0.9em;
-    }
+        .product-separator {
+            border-top: 1px solid var(--border-gray);
+            margin: 1rem 0;
+        }
 
-    .product-price .discounted-price {
-      color: var(--primary);
-      font-weight: bold;
-    }
-    .product-separator {
-        border-top: 1px solid var(--border-gray);
-        margin: 1rem 0;
-    }
-    /* Styles for the search header */
-    .search-header {
-        background-color: #ffffff;
-        padding: 2rem 0; /* Original padding */
-        box-shadow: 0 2px 4px rgba(0,0,0,.05);
-        top: 56px; /* Position below the navbar (assuming navbar height is ~56px) */
-        width: 100%;
-        z-index: 1020;
-    }
-    .search-header h1{
-         color: var(--primary);
-      font-weight: bold;
-    }
-    .search-header .form-control {
-        border-radius: .25rem;
-    }
-    .search-header .btn {
-        border-radius: .25rem;
-    }
-    /* Ensure icon is visible inside the button */
-    .search-header .btn i {
-        font-size: 1.2rem;
-    }
+        /* Styles for the search header */
+        .search-header {
+            background-color: #ffffff;
+            padding: 2rem 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,.05);
+            top: 56px;
+            width: 100%;
+            z-index: 1020;
+        }
+        .search-header h1 {
+            color: var(--primary);
+            font-weight: bold;
+        }
+        .search-header .form-control {
+            border-radius: .25rem;
+        }
+        .search-header .btn {
+            border-radius: .25rem;
+        }
+        .search-header .btn i {
+            font-size: 1.2rem;
+        }
 
-    /* Style for category buttons */
-    .category-buttons .btn {
-        margin: 0.25rem;
-    }
+        /* Styles for category buttons */
+        .category-buttons .btn {
+            margin: 0.25rem;
+            /* To make buttons the same size, you can use flexbox on their parent container
+               and/or give them a min-width. */
+            flex-grow: 1; /* Allows buttons to grow to fill space */
+            min-width: 120px; /* Example minimum width */
+            text-align: center;
+        }
 
-    .category-buttons .btn.active {
-        background-color: var(--primary);
-        color: var(--text-light);
-        border-color: var(--primary);
-    }
-  </style>
+        .category-buttons {
+            display: flex; /* Enable flexbox */
+            flex-wrap: wrap; /* Allow buttons to wrap to the next line */
+            justify-content: center; /* Center buttons horizontally */
+            gap: 0.5rem; /* Space between buttons */
+        }
+
+        .category-buttons .btn.active {
+            background-color: var(--primary);
+            color: var(--text-light);
+            border-color: var(--primary);
+        }
+    </style>
 </head>
 <body>
 
@@ -211,20 +189,18 @@ $conn->close(); // Close the database connection
             <div class="col-12 col-md-8 col-lg-6 mb-3 mb-md-0">
                 <form class="d-flex" action="collection.php" method="GET">
                     <input class="form-control me-2" type="search" placeholder="Search products..." aria-label="Search" name="search" value="<?php echo htmlspecialchars($searchTerm); ?>">
-                    <button class="btn btn-accent" type="submit">Search
-                    </button>
-                     <?php if (!empty($selectedCategory)): ?>
+                    <button class="btn btn-accent" type="submit">SEARCH</button>
+                    <?php if (!empty($selectedCategory)): ?>
                         <input type="hidden" name="category" value="<?php echo htmlspecialchars($selectedCategory); ?>">
                     <?php endif; ?>
                 </form>
             </div>
             <div class="col-12 col-lg-9 text-center category-buttons">
-                <a href="collection.php?search=<?php echo htmlspecialchars($searchTerm); ?>" class="btn btn-outline-secondary <?php echo empty($selectedCategory) ? 'active' : ''; ?>">All Products</a>
-                <a href="collection.php?search=<?php echo htmlspecialchars($searchTerm); ?>&category=Bikes" class="btn btn-outline-secondary <?php echo ($selectedCategory === 'Bikes') ? 'active' : ''; ?>">Bikes</a>
-                <a href="collection.php?search=<?php echo htmlspecialchars($searchTerm); ?>&category=Apparel" class="btn btn-outline-secondary <?php echo ($selectedCategory === 'Apparel') ? 'active' : ''; ?>">Apparel</a>
-                <a href="collection.php?search=<?php echo htmlspecialchars($searchTerm); ?>&category=<?php echo urlencode('Parts & Components'); ?>" class="btn btn-outline-secondary <?php echo ($selectedCategory === 'Parts & Components') ? 'active' : ''; ?>">Parts & Components</a>
-                <a href="collection.php?search=<?php echo htmlspecialchars($searchTerm); ?>&category=Accessories" class="btn btn-outline-secondary <?php echo ($selectedCategory === 'Accessories') ? 'active' : ''; ?>">Accessories</a>
-                <a href="collection.php?search=<?php echo htmlspecialchars($searchTerm); ?>&category=Discounted" class="btn btn-outline-danger <?php echo ($selectedCategory === 'Discounted') ? 'active' : ''; ?>">Discounted</a>
+                <a href="collection.php?search=<?php echo htmlspecialchars($searchTerm); ?>" class="btn btn-outline-secondary <?php echo empty($selectedCategory) ? 'active' : ''; ?>">ALL PRODUCTS</a>
+                <a href="collection.php?search=<?php echo htmlspecialchars($searchTerm); ?>&category=Bikes" class="btn btn-outline-secondary <?php echo ($selectedCategory === 'Bikes') ? 'active' : ''; ?>">BIKES</a>
+                <a href="collection.php?search=<?php echo htmlspecialchars($searchTerm); ?>&category=Apparel" class="btn btn-outline-secondary <?php echo ($selectedCategory === 'Apparel') ? 'active' : ''; ?>">APPAREL</a>
+                <a href="collection.php?search=<?php echo htmlspecialchars($searchTerm); ?>&category=<?php echo urlencode('Parts & Components'); ?>" class="btn btn-outline-secondary <?php echo ($selectedCategory === 'Parts & Components') ? 'active' : ''; ?>">PARTS & COMPONENTS</a>
+                <a href="collection.php?search=<?php echo htmlspecialchars($searchTerm); ?>&category=Accessories" class="btn btn-outline-secondary <?php echo ($selectedCategory === 'Accessories') ? 'active' : ''; ?>">ACCESSORIES</a>
             </div>
         </div>
     </div>
@@ -233,67 +209,61 @@ $conn->close(); // Close the database connection
 <div class="container my-5">
     <?php if (empty($products)): ?>
     <div class="alert alert-info text-center" role="alert">
-      <?php echo !empty($searchTerm) ? 'No products found matching "'.htmlspecialchars($searchTerm).'".' : 'No products found at the moment. Please check back later!'; ?>
+        <?php echo !empty($searchTerm) ? 'No products found matching "'.htmlspecialchars($searchTerm).'".' : 'No products found at the moment. Please check back later!'; ?>
     </div>
-  <?php else: ?>
+    <?php else: ?>
     <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 row-cols-xl-4 g-4 d-flex justify-content-center">
-      <?php foreach ($products as $productId => $product): ?>
-        <div class="col">
-          <div class="card h-100 product-card shadow-sm">
-            <?php
-            $displayImagePath = '../assets/images/no_image.png'; // Default local placeholder
+        <?php foreach ($products as $productId => $product): ?>
+            <div class="col">
+                <div class="card h-100 product-card shadow-sm">
+                    <?php
+                    $displayImagePath = '../assets/images/no_image.png'; // Default local placeholder
 
-            // Find the main image or the first image
-            if (!empty($product['images'])) {
-                $mainImageFound = false;
-                foreach ($product['images'] as $image) {
-                    if (isset($image['is_main']) && $image['is_main'] == 1) {
-                        $displayImagePath = '../' . htmlspecialchars($image['path']);
-                        $mainImageFound = true;
-                        break;
+                    // Find the main image or the first image
+                    if (!empty($product['images'])) {
+                        $mainImageFound = false;
+                        foreach ($product['images'] as $image) {
+                            if (isset($image['is_main']) && $image['is_main'] == 1) {
+                                $displayImagePath = '../' . htmlspecialchars($image['path']);
+                                $mainImageFound = true;
+                                break;
+                            }
+                        }
+                        // If no main image, just use the first one available
+                        if (!$mainImageFound && isset($product['images'][0]['path'])) {
+                            $displayImagePath = '../' . htmlspecialchars($product['images'][0]['path']);
+                        }
                     }
-                }
-                // If no main image, just use the first one available
-                if (!$mainImageFound && isset($product['images'][0]['path'])) {
-                    $displayImagePath = '../' . htmlspecialchars($product['images'][0]['path']);
-                }
-            }
-            ?>
-            <img src="<?php echo $displayImagePath; ?>" class="card-img-top" alt="<?php echo htmlspecialchars($product['name']); ?> Image">
+                    ?>
+                    <img src="<?php echo $displayImagePath; ?>" class="card-img-top" alt="<?php echo htmlspecialchars($product['name']); ?> Image">
 
-            <hr class="product-separator">
+                    <hr class="product-separator">
 
-            <div class="card-body d-flex flex-column">
-              <h6 class="card-title" style="color:var(--primary);"><?php echo htmlspecialchars($product['name']); ?></h6>
-              <?php
-              $displayPrice = 'N/A';
-              if (!empty($product['variations'])) {
-                  $firstVariation = $product['variations'][0];
-                  // Check if there's an active discount
-                  if ($firstVariation['discount_percentage'] !== null && strtotime($firstVariation['discount_expiry_date']) >= time()) {
-                      $displayPrice = '<span class="original-price">₱' . number_format($firstVariation['original_price'], 2) . '</span> ' .
-                                      '<span class="discounted-price">₱' . htmlspecialchars($firstVariation['display_price']) . '</span>';
-                  } else {
-                      $displayPrice = '<span class="discounted-price">₱' . htmlspecialchars($firstVariation['display_price']) . '</span>';
-                  }
-              }
-              ?>
-              <p class="card-text product-price mt-2"><?php echo $displayPrice; ?></p>
+                    <div class="card-body d-flex flex-column">
+                        <h6 class="card-title" style="color:var(--primary);"><?php echo htmlspecialchars($product['name']); ?></h6>
+                        <?php
+                        $displayPrice = 'N/A';
+                        if (!empty($product['variations'])) {
+                            $firstVariation = $product['variations'][0];
+                            $displayPrice = '<span class="price">₱' . htmlspecialchars($firstVariation['price']) . '</span>';
+                        }
+                        ?>
+                        <p class="card-text product-price mt-2"><?php echo $displayPrice; ?></p>
 
-              <div class="mt-auto">
-                <a href="product_details.php?id=<?php echo htmlspecialchars($productId); ?>" class="btn btn-accent btn-sm">View Details</a>
-              </div>
+                        <div class="mt-auto">
+                            <a href="product_details.php?id=<?php echo htmlspecialchars($productId); ?>" class="btn btn-accent btn-sm">VIEW DETAILS</a>
+                        </div>
+                    </div>
+                </div>
             </div>
-          </div>
-        </div>
-      <?php endforeach; ?>
+        <?php endforeach; ?>
     </div>
-  <?php endif; ?>
+    <?php endif; ?>
 </div>
 
 <?php include '../components/footer.php'; ?>
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
-          integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
-          crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+            crossorigin="anonymous"></script>
 </body>
 </html>

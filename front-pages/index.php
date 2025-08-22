@@ -30,8 +30,8 @@ require_once __DIR__ . '/../config/db.php';
   <div class="container position-relative text-center" style="z-index:2;">
     <h1 class="display-4 fw-bold text-light">Welcome to Bong Bicycle Shop</h1>
     <p class="lead text-light">Your one-stop shop for bikes, parts, and cycling guides at the best prices.</p>
-    <a href="collection.php" class="btn btn-accent btn-lg mt-3 me-2">Shop Now</a>
-    <a href="guides.php" class="btn btn-outline-light btn-lg mt-3">Guides</a>
+    <a href="collection.php" class="btn btn-accent btn-lg mt-3 me-2">SHOP NOW</a>
+    <a href="guides.php" class="btn btn-outline-light btn-lg mt-3">GUIDES</a>
   </div>
 </section>
 
@@ -93,7 +93,7 @@ require_once __DIR__ . '/../config/db.php';
           <div class="card-body text-center">
             <h5 class="card-title" style="color:var(--primary);">Bikes</h5>
             <p class="card-text">Explore our full range of mountain, road, electric, and kids' bikes.</p>
-            <a href="collection.php?category=Bikes" class="btn btn-accent">Shop Bikes</a>
+            <a href="collection.php?category=Bikes" class="btn btn-accent">BROWSE BIKES</a>
           </div>
         </div>
       </div>
@@ -103,7 +103,7 @@ require_once __DIR__ . '/../config/db.php';
           <div class="card-body text-center">
             <h5 class="card-title" style="color:var(--primary);">Accessories</h5>
             <p class="card-text">Helmets, lights, pumps, locks, and more for every cyclist.</p>
-            <a href="collection.php?category=Accessories" class="btn btn-accent">Shop Accessories</a>
+            <a href="collection.php?category=Accessories" class="btn btn-accent">BROWSE ACCESSORIES</a>
           </div>
         </div>
       </div>
@@ -113,7 +113,7 @@ require_once __DIR__ . '/../config/db.php';
           <div class="card-body text-center">
             <h5 class="card-title" style="color:var(--primary);">Apparel</h5>
             <p class="card-text">Explore our full range of cycling apparel — from performance jerseys and padded shorts to gloves, jackets, and protective gear.</p>
-            <a href="collection.php?category=Apparel" class="btn btn-accent">Shop Apparel</a>
+            <a href="collection.php?category=Apparel" class="btn btn-accent">BROWSE APPAREL</a>
           </div>
         </div>
       </div>
@@ -123,19 +123,11 @@ require_once __DIR__ . '/../config/db.php';
           <div class="card-body text-center">
             <h5 class="card-title" style="color:var(--primary);">Bike Parts / Components</h5>
             <p class="card-text">Quality parts and components to keep your bike running smoothly.</p>
-            <a href="collection.php?category=<?php echo urlencode('Parts & Components'); ?>" class="btn btn-accent">Shop Parts/ Components</a>
+            <a href="collection.php?category=<?php echo urlencode('Parts & Components'); ?>" class="btn btn-accent">BROWSE PARTS & COMPONENTS</a>
           </div>
         </div>
       </div>
     </div>
-  </div>
-</section>
-
-<section style="background: var(--secondary); color: var(--text-dark); padding: 40px 0;">
-  <div class="container text-center">
-    <h2 class="fw-bold mb-3">Limited-Time Savings on Our Most Popular Items!</h2>
-    <p class="mb-4">Explore incredible deals on a wide selection of products, available only for a short time.</p>
-    <a href="collection.php?category=Discounted" class="btn btn-primary btn-lg" style="background: var(--primary); border:none;">Discover Discounts</a>
   </div>
 </section>
 
@@ -244,7 +236,7 @@ require_once __DIR__ . '/../config/db.php';
     <h2 class="fw-bold mb-3">Boost Your Cycling Skills</h2>
     <p class="mb-4">Explore beginner to advanced tips on safety, handling, fitness, and urban riding.</p>
     <a href="guides.php" class="btn btn-secondary btn-lg" style="background: var(--secondary); color: var(--text-dark); border: none;">
-      View Cycling Guides
+      VIEW CYCLING GUIDES
     </a>
   </div>
 </section>

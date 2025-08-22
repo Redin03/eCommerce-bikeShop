@@ -151,7 +151,7 @@ if (isset($_SESSION['error'])) {
                 <label for="message" class="form-label">Message</label>
                 <textarea class="form-control" id="message" name="message" rows="4" placeholder="Type your message here..." required><?php echo htmlspecialchars($message ?? ''); ?></textarea>
               </div>
-              <button type="submit" class="btn btn-accent">Send Message</button>
+              <button type="submit" class="btn btn-accent">SEND MESSAGE</button>
             </form>
           </div>
         </div>

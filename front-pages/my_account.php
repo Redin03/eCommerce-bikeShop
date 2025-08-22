@@ -1,4 +1,3 @@
-
 <?php
 session_start();
 require_once __DIR__ . '/../config/db.php'; // Ensure this path is correct
@@ -59,8 +58,6 @@ $sql_cart = "SELECT
                 pv.size,
                 pv.color,
                 pv.price AS variation_price,
-                pv.discount_percentage,
-                pv.discount_expiry_date,
                 p.name AS product_name,
                 (SELECT image_path FROM product_images WHERE product_id = p.id AND is_main = 1 LIMIT 1) AS main_image
              FROM
@@ -81,17 +78,7 @@ if ($stmt_cart) {
     if ($result_cart->num_rows > 0) {
         while ($item = $result_cart->fetch_assoc()) {
             $current_price = (float)$item['variation_price'];
-            $display_price = $current_price;
-            $is_discounted = false;
-
-            if ($item['discount_percentage'] !== null && $item['discount_expiry_date'] !== null) {
-                $discount_expiry_timestamp = strtotime($item['discount_expiry_date']);
-                if (time() <= $discount_expiry_timestamp) { // Check if discount is still active
-                    $discount_amount = $current_price * ($item['discount_percentage'] / 100);
-                    $display_price = $current_price - $discount_amount;
-                    $is_discounted = true;
-                }
-            }
+            $display_price = $current_price; // Price without discount
 
             $subtotal = $display_price * $item['quantity'];
             $cart_total_amount += $subtotal;
@@ -102,9 +89,7 @@ if ($stmt_cart) {
                 'size' => $item['size'],
                 'color' => $item['color'],
                 'quantity' => $item['quantity'],
-                'original_price' => $current_price,
-                'display_price' => $display_price,
-                'is_discounted' => $is_discounted,
+                'display_price' => $display_price, // Only display price
                 'main_image' => $item['main_image'],
                 'subtotal' => $subtotal
             ];
@@ -163,8 +148,8 @@ unset($_SESSION['active_tab']);
 }
 
   /* Remove arrows from number input */
-input[type=number].no-arrow::-webkit-inner-spin-button, 
-input[type=number].no-arrow::-webkit-outer-spin-button { 
+input[type=number].no-arrow::-webkit-inner-spin-button,
+input[type=number].no-arrow::-webkit-outer-spin-button {
   -webkit-appearance: none;
   margin: 0;
 }
@@ -222,7 +207,7 @@ $error = isset($_GET['error']) ? urldecode($_GET['error']) : '';
           <p class="mb-3 text-muted"><?php echo htmlspecialchars($email); ?></p>
           <form action="../config/upload_profile_image.php" method="POST" enctype="multipart/form-data" class="mt-2">
             <input type="file" name="profile_image" accept="image/*" class="form-control form-control-sm mb-2" style="max-width:200px;display:inline-block;" required>
-            <button type="submit" class="btn btn-accent btn-sm">Upload Profile</button>
+            <button type="submit" class="btn btn-accent btn-sm">UPLOAD IMAGE</button>
           </form>
         </div>
         <div class="list-group list-group-flush">
@@ -267,12 +252,12 @@ $error = isset($_GET['error']) ? urldecode($_GET['error']) : '';
               <?php if (!empty($address['region'])) echo ', ' . htmlspecialchars($address['region']); ?>
             </div>
             <button type="button" class="btn btn-accent btn-sm mb-3" data-bs-toggle="modal" data-bs-target="#editProfileModal">
-              <i class="bi bi-pencil-square"></i> Edit Profile
+              <i class="bi bi-pencil-square"></i> EDIT DETAILS
             </button>
             <button type="button" class="btn btn-accent btn-sm mb-3" data-bs-toggle="modal" data-bs-target="#changePasswordModal">
-                <i class="bi bi-key"></i> Change Password
+                <i class="bi bi-key"></i> CHANGE PASSWORD
             </button>
-            
+
           <?php else: ?>
             <div class="mb-3 text-muted"><em>No shipping address saved yet.</em></div>
           <?php endif; ?>
@@ -307,9 +292,11 @@ $error = isset($_GET['error']) ? urldecode($_GET['error']) : '';
               <input id="street" name="street" class="form-control" type="text" placeholder="Enter Street Address" required
                 value="<?php echo isset($address['street']) ? htmlspecialchars($address['street']) : ''; ?>">
             </div>
-            <button type="submit" class="btn btn-accent mt-2">Save Address</button>
+            <button type="submit" class="btn btn-accent mt-2">SAVE ADDRESS</button>
           </form>
         </div>
+
+
        <div class="tab-pane fade <?php echo ($active_tab == 'cart') ? 'show active' : ''; ?>" id="cart">
           <h5 class="mb-3" style="color:var(--primary);">My Cart</h5>
           <?php if (!empty($cartItems)): ?>
@@ -339,7 +326,7 @@ $error = isset($_GET['error']) ? urldecode($_GET['error']) : '';
                         <?php
                         $imagePath = !empty($item['main_image']) ? '../' . htmlspecialchars($item['main_image']) : '../assets/images/no_image.png';
                         ?>
-                        <img src="<?php echo $imagePath; ?>" class="img-thumbnail" alt="<?php echo htmlspecialchars($item['product_name']); ?>" style="width: 60px; height: 60px; object-fit: cover;">
+                        <img src="<?php echo $imagePath; ?>" class="img-thumbnail" alt="<?php echo htmlspecialchars($item['product_name']); ?>" style="width: 60px; height: 60px; object-fit: contain;">
                       </td>
                       <td>
                         <div><strong><?php echo htmlspecialchars($item['product_name']); ?></strong></div>
@@ -353,12 +340,7 @@ $error = isset($_GET['error']) ? urldecode($_GET['error']) : '';
                         </div>
                       </td>
                       <td>
-                        <?php if ($item['is_discounted']): ?>
-                          <span class="text-muted text-decoration-line-through">₱<?php echo number_format($item['original_price'], 2); ?></span>
-                          <strong class="ms-1">₱<?php echo number_format($item['display_price'], 2); ?></strong>
-                        <?php else: ?>
-                          <strong>₱<?php echo number_format($item['display_price'], 2); ?></strong>
-                        <?php endif; ?>
+                        <strong>₱<?php echo number_format($item['display_price'], 2); ?></strong>
                       </td>
                       <td>
                         <div class="update-quantity-form d-flex align-items-center" data-cart-id="<?php echo $item['cart_id']; ?>">
@@ -393,8 +375,7 @@ $error = isset($_GET['error']) ? urldecode($_GET['error']) : '';
                 </table>
               </div>
               <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-3">
-                <button class="btn btn-accent btn-md" type="submit" id="proceedCheckoutBtn" disabled>
-                  <i class="bi bi-cash-stack"></i> Proceed to Checkout
+                <button class="btn btn-accent btn-md" type="submit" id="proceedCheckoutBtn" disabled>CHECKOUT
                 </button>
               </div>
             </form>
@@ -408,12 +389,10 @@ $error = isset($_GET['error']) ? urldecode($_GET['error']) : '';
         <div class="tab-pane fade <?php echo ($active_tab == 'ticket') ? 'show active' : ''; ?>" id="ticket">
           <h5 class="mb-3" style="color:var(--primary);">My Ticket</h5>
           <p>Your support tickets will appear here.</p>
-          <!-- You can add a table or ticket submission form here -->
-        </div>
+          </div>
 
         <div class="tab-pane fade <?php echo ($active_tab == 'orders') ? 'show active' : ''; ?>" id="orders">
-          <!-- My Orders content here -->
-           <h5 class="mb-3" style="color:var(--primary);">My Orders</h5>
+          <h5 class="mb-3" style="color:var(--primary);">My Orders</h5>
           <p>Your Orders will appear here.</p>
         </div>
 
@@ -421,7 +400,7 @@ $error = isset($_GET['error']) ? urldecode($_GET['error']) : '';
           <h5 class="mb-3" style="color:var(--primary);">My Activity Log</h5>
           <form method="POST" action="../config/clear_activity_log.php" class="mb-3">
             <button type="submit" name="clear_activity_log" class="btn btn-danger btn-sm">
-              <i class="bi bi-trash"></i> Clear All History
+              <i class="bi bi-trash"></i> CLEAR HISTORY
             </button>
           </form>
           <div class="table-responsive" style="max-height: 800px; overflow-y: auto;">
@@ -495,8 +474,8 @@ $error = isset($_GET['error']) ? urldecode($_GET['error']) : '';
         </div>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-        <button type="submit" class="btn btn-accent">Save Changes</button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">CANCEL</button>
+        <button type="submit" class="btn btn-accent">SAVE CHANGES</button>
       </div>
     </form>
   </div>
@@ -525,8 +504,8 @@ $error = isset($_GET['error']) ? urldecode($_GET['error']) : '';
         </div>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-        <button type="submit" class="btn btn-accent">Save Changes</button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">CANCEL</button>
+        <button type="submit" class="btn btn-accent">SAVE CHANGES</button>
       </div>
     </form>
   </div>
@@ -548,11 +527,3 @@ $error = isset($_GET['error']) ? urldecode($_GET['error']) : '';
         crossorigin="anonymous"></script>
 </body>
 </html>
-
-
-
-
-
-
-
-

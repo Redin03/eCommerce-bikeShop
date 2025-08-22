@@ -97,7 +97,7 @@ $order_items_data = [];
 
 if ($buy_now && $variation_id) {
     // Direct Buy Now: fetch variation and product info
-    $stmt = $conn->prepare("SELECT pv.id AS variation_id, pv.product_id, pv.price AS variation_price, pv.discount_percentage, pv.discount_expiry_date, pv.stock FROM product_variations pv WHERE pv.id = ?");
+    $stmt = $conn->prepare("SELECT pv.id AS variation_id, pv.product_id, pv.price AS variation_price, pv.stock FROM product_variations pv WHERE pv.id = ?");
     $stmt->bind_param("i", $variation_id);
     $stmt->execute();
     $result = $stmt->get_result();
@@ -106,15 +106,7 @@ if ($buy_now && $variation_id) {
             header("Location: ../front-pages/product_details.php?id=" . $row['product_id'] . "&error=" . urlencode("Not enough stock."));
             exit;
         }
-        $current_price = (float)$row['variation_price'];
-        $display_price = $current_price;
-        if ($row['discount_percentage'] !== null && $row['discount_expiry_date'] !== null) {
-            $discount_expiry_timestamp = strtotime($row['discount_expiry_date']);
-            if (time() <= $discount_expiry_timestamp) {
-                $discount_amount = $current_price * ($row['discount_percentage'] / 100);
-                $display_price = $current_price - $discount_amount;
-            }
-        }
+        $display_price = (float)$row['variation_price']; // Price without discount
         $subtotal = $display_price * $quantity;
         $total_amount_calculated = $subtotal;
         $order_items_data[] = [
@@ -136,7 +128,7 @@ if ($buy_now && $variation_id) {
     $placeholders = implode(',', array_fill(0, count($cart_ids), '?'));
     $types = str_repeat('i', count($cart_ids));
 
-    $sql_fetch_cart_items = "SELECT c.id AS cart_id, c.quantity, pv.id AS variation_id, pv.product_id, pv.price AS variation_price, pv.discount_percentage, pv.discount_expiry_date, pv.stock
+    $sql_fetch_cart_items = "SELECT c.id AS cart_id, c.quantity, pv.id AS variation_id, pv.product_id, pv.price AS variation_price, pv.stock
                              FROM cart c
                              JOIN product_variations pv ON c.variation_id = pv.id
                              WHERE c.user_id = ? AND c.id IN ($placeholders)";
@@ -152,15 +144,7 @@ if ($buy_now && $variation_id) {
     }
 
     while ($item = $result_fetch_cart->fetch_assoc()) {
-        $current_price = (float)$item['variation_price'];
-        $display_price = $current_price;
-        if ($item['discount_percentage'] !== null && $item['discount_expiry_date'] !== null) {
-            $discount_expiry_timestamp = strtotime($item['discount_expiry_date']);
-            if (time() <= $discount_expiry_timestamp) {
-                $discount_amount = $current_price * ($item['discount_percentage'] / 100);
-                $display_price = $current_price - $discount_amount;
-            }
-        }
+        $display_price = (float)$item['variation_price']; // Price without discount
         $subtotal = $display_price * $item['quantity'];
         $total_amount_calculated += $subtotal;
 

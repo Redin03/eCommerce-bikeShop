@@ -77,11 +77,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     if (typeof setupDynamicVariationLogic === 'function') {
                         setupDynamicVariationLogic('productVariationsContainer', 'addVariationBtn', 'variations', [], false); // For Add Modal
                     }
-                } else if (contentId === 'settings_promotions') { // Promotions page logic
-                    if (typeof setupPromotionsPageLogic === 'function') {
-                        setupPromotionsPageLogic();
-                    }
-                }
+                } 
 
                 // --- Reset Filter button handlers ---
                 // For log_history.php
@@ -170,7 +166,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
                     const currentActiveContent = localStorage.getItem('lastActiveContent');
                     // Reload content area if it's one of the affected pages
-                    if (currentActiveContent === 'settings_users' || currentActiveContent === 'log_history' || currentActiveContent === 'products' || currentActiveContent === 'settings_promotions') {
+                    if (currentActiveContent === 'settings_users' || currentActiveContent === 'log_history' || currentActiveContent === 'products' ) {
                         const modal = bootstrap.Modal.getInstance(apiForm.closest('.modal'));
                         if (modal) modal.hide();
 
@@ -365,193 +361,6 @@ document.addEventListener('DOMContentLoaded', function() {
             displayMessage(formMessageElement, `Error loading product: ${error.message}`, 'danger');
         }
     }
-
-    // --- Promotions Page Specific Logic (settings_promotions.php) ---
-    function setupPromotionsPageLogic() {
-        const selectProduct = document.getElementById('selectProduct');
-        const productVariationsContainer = document.getElementById('productVariationsContainer');
-        const selectVariation = document.getElementById('selectVariation');
-        // const removeItemDiscountBtn = document.getElementById('removeItemDiscountBtn'); // This button is removed from settings_promotions.php now
-        const itemDiscountValueInput = document.getElementById('itemDiscountValue');
-        const itemDiscountExpiryDateInput = document.getElementById('itemDiscountExpiryDate');
-        const applyItemDiscountForm = document.getElementById('applyItemDiscountForm');
-
-
-        // Function to populate variations dropdown
-        async function populateVariations(productId) {
-            selectVariation.innerHTML = '<option value="">-- Apply to All Variations of this Product --</option>'; // Reset
-            // removeItemDiscountBtn.style.display = 'none'; // No longer needed for the main form button
-            // removeItemDiscountBtn.dataset.productId = '';
-            // removeItemDiscountBtn.dataset.variationId = '';
-            itemDiscountValueInput.value = ''; // Clear discount fields
-            itemDiscountExpiryDateInput.value = '';
-
-            if (!productId) {
-                productVariationsContainer.style.display = 'none';
-                return;
-            }
-
-            productVariationsContainer.style.display = 'block';
-
-            try {
-                const response = await fetch(`api/get_product_variations.php?product_id=${productId}`);
-                const data = await response.json();
-
-                if (data.success) {
-                    data.variations.forEach(variation => {
-                        const option = document.createElement('option');
-                        option.value = variation.id;
-                        option.textContent = variation.text;
-                        selectVariation.appendChild(option);
-                    });
-                } else {
-                    console.error('Error fetching variations:', data.message);
-                    // Optionally display a message to the user
-                }
-            } catch (error) {
-                console.error('Network or server error fetching variations:', error);
-                // Optionally display a message to the user
-            }
-        }
-
-        // Event listener for product selection
-        if (selectProduct) {
-            selectProduct.addEventListener('change', function() {
-                populateVariations(this.value);
-            });
-        }
-
-        // --- Modals for Promotions Page (settings_promotions.php) ---
-        // Event listener for when the Edit Item Discount modal is shown
-        const editItemDiscountModal = document.getElementById('editItemDiscountModal');
-        if (editItemDiscountModal) {
-            editItemDiscountModal.addEventListener('show.bs.modal', function (event) {
-                const button = event.relatedTarget; // Button that triggered the modal
-                const productId = button.getAttribute('data-product-id');
-                const variationId = button.getAttribute('data-variation-id');
-                const discountPercentage = button.getAttribute('data-discount-percentage');
-                const discountExpiryDate = button.getAttribute('data-discount-expiry-date');
-
-                // Populate modal fields
-                const modalProductIdInput = this.querySelector('#editModalProductId');
-                const modalVariationIdInput = this.querySelector('#editModalVariationId');
-                const modalDiscountValueInput = this.querySelector('#editModalDiscountValue');
-                const modalExpiryDateInput = this.querySelector('#editModalExpiryDate');
-                const modalProductNameDisplay = this.querySelector('#editModalProductName');
-                const modalVariationDetailsDisplay = this.querySelector('#editModalVariationDetails');
-                const modalVariationDetailsContainer = this.querySelector('#editModalVariationDetailsContainer');
-
-                modalProductIdInput.value = productId;
-                modalVariationIdInput.value = variationId;
-                modalDiscountValueInput.value = discountPercentage;
-                modalExpiryDateInput.value = discountExpiryDate;
-
-                // Fetch product and variation details for display in modal
-                // This is crucial for showing readable names instead of just IDs
-                fetch(`api/get_product_variations.php?product_id=${productId}`)
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success && data.variations) {
-                            // Find the product name from the main selectProduct options
-                            const product = document.querySelector(`#selectProduct option[value="${productId}"]`);
-                            if (product) {
-                                modalProductNameDisplay.value = product.textContent; // Set product name
-                            } else {
-                                modalProductNameDisplay.value = 'Product Not Found';
-                            }
-
-                            if (variationId && variationId !== '0') { // Check if variationId is not empty or '0'
-                                const selectedVariation = data.variations.find(v => v.id == variationId);
-                                if (selectedVariation) {
-                                    // Extract and display size and color from selectedVariation.text
-                                    // Assuming selectedVariation.text format is "Size: X, Color: Y (Current Discount: Z%)"
-                                    const match = selectedVariation.text.match(/Size: (.*?), Color: (.*?)\s*(\(Current Discount:.*)?$/);
-                                    if (match) {
-                                        modalVariationDetailsDisplay.value = `Size: ${match[1]}, Color: ${match[2]}`;
-                                    } else {
-                                        modalVariationDetailsDisplay.value = selectedVariation.text; // Fallback
-                                    }
-                                    modalVariationDetailsContainer.style.display = 'block';
-                                } else {
-                                    modalVariationDetailsDisplay.value = 'Variation Not Found';
-                                    modalVariationDetailsContainer.style.display = 'block';
-                                }
-                            } else {
-                                modalVariationDetailsDisplay.value = 'All Variations';
-                                modalVariationDetailsContainer.style.display = 'block'; // Show even if "All Variations"
-                            }
-                        } else {
-                            modalProductNameDisplay.value = 'Error fetching product/variation details.';
-                            modalVariationDetailsContainer.style.display = 'none';
-                            console.error('Error fetching variations:', data.message);
-                        }
-                    })
-                    .catch(error => {
-                        modalProductNameDisplay.value = 'Network Error';
-                        modalVariationDetailsContainer.style.display = 'none';
-                        console.error('Fetch error:', error);
-                    });
-            });
-        }
-
-        // Event listener for when the Remove Item Discount modal is shown
-        const removeItemDiscountModal = document.getElementById('removeItemDiscountModal');
-        if (removeItemDiscountModal) {
-            removeItemDiscountModal.addEventListener('show.bs.modal', function (event) {
-                const button = event.relatedTarget; // Button that triggered the modal
-                const productId = button.getAttribute('data-product-id');
-                const variationId = button.getAttribute('data-variation-id');
-
-                // Populate hidden fields
-                this.querySelector('#removeModalProductId').value = productId;
-                this.querySelector('#removeModalVariationId').value = variationId;
-
-                // Populate display fields
-                const modalProductNameDisplay = this.querySelector('#removeModalProductName');
-                const modalVariationDetailsDisplay = this.querySelector('#removeModalVariationDetails');
-
-                // Fetch product and variation details for display in modal
-                fetch(`api/get_product_variations.php?product_id=${productId}`)
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success && data.variations) {
-                            const product = document.querySelector(`#selectProduct option[value="${productId}"]`);
-                            if (product) {
-                                modalProductNameDisplay.textContent = product.textContent; // Set product name
-                            } else {
-                                modalProductNameDisplay.textContent = 'Product Not Found';
-                            }
-
-                            if (variationId && variationId !== '0') { // Check if variationId is not empty or '0'
-                                const selectedVariation = data.variations.find(v => v.id == variationId);
-                                if (selectedVariation) {
-                                    const match = selectedVariation.text.match(/Size: (.*?), Color: (.*?)\s*(\(Current Discount:.*)?$/);
-                                    if (match) {
-                                        modalVariationDetailsDisplay.textContent = `Variation: Size: ${match[1]}, Color: ${match[2]}`;
-                                    } else {
-                                        modalVariationDetailsDisplay.textContent = `Variation: ${selectedVariation.text}`; // Fallback
-                                    }
-                                } else {
-                                    modalVariationDetailsDisplay.textContent = 'Variation Not Found';
-                                }
-                            } else {
-                                modalVariationDetailsDisplay.textContent = 'All Variations of this Product';
-                            }
-                        } else {
-                            modalProductNameDisplay.textContent = 'Error fetching product details.';
-                            modalVariationDetailsDisplay.textContent = '';
-                            console.error('Error fetching variations for remove modal:', data.message);
-                        }
-                    })
-                    .catch(error => {
-                        modalProductNameDisplay.textContent = 'Network Error';
-                        modalVariationDetailsDisplay.textContent = '';
-                        console.error('Fetch error for remove modal:', error);
-                    });
-            });
-        }
-    }
-
 
     // Initial content load based on URL or localStorage
     let initialContentIdToLoad = 'dashboard';

@@ -93,12 +93,12 @@ $sql .= " ORDER BY al.log_time DESC"; // Order by most recent first
         <span>Admin Activity Log</span>
         <button class="btn btn-sm btn-danger"
                 data-bs-toggle="modal" data-bs-target="#clearAllLogsModal">
-            <i class="bi bi-trash-fill me-2"></i>Clear All History
+            <i class="bi bi-trash-fill me-2"></i>CLEAR ALL LOGS
         </button>
     </div>
     <div class="card-body">
         <div class="table-responsive">
-            <table class="table table-striped table-hover">
+            <table class="table table-striped table-hover"  style="font-size: 0.85em;">
                 <thead>
                     <tr>
                         <th>Admin Username</th>

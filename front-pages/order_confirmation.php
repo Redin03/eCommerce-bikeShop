@@ -200,8 +200,8 @@ $conn->close();
         
 
         <div class="d-flex justify-content-center mt-4">
-          <a href="my_account.php?tab=orders" class="btn btn-secondary me-2"><i class="bi bi-box-seam me-2"></i>View My Orders</a>
-          <a href="my_account.php?tab=cart" class="btn btn-accent"><i class="bi bi-cart me-2"></i>Continue Shopping</a>
+          <a href="my_account.php?tab=orders" class="btn btn-secondary me-2"><i class="bi bi-box-seam me-2"></i>VIEW ORDERS</a>
+          <a href="my_account.php?tab=cart" class="btn btn-accent"><i class="bi bi-cart me-2"></i>CONTINUE SHOPPING</a>
         </div>
 
       <?php else: ?>
@@ -210,8 +210,8 @@ $conn->close();
           <?php echo htmlspecialchars($message ?: "There was an error processing your order or the order could not be found."); ?>
         </div>
         <div class="text-center">
-          <a href="checkout.php" class="btn btn-secondary me-2"><i class="bi bi-arrow-left me-2"></i>Back to Checkout</a>
-          <a href="my_account.php?tab=cart" class="btn btn-accent"><i class="bi bi-cart me-2"></i>Continue Shopping</a>
+          <a href="checkout.php" class="btn btn-secondary me-2"><i class="bi bi-arrow-left me-2"></i>BACK TO CHECKOUT</a>
+          <a href="my_account.php?tab=cart" class="btn btn-accent"><i class="bi bi-cart me-2"></i>CONTINUE SHOPPING</a>
         </div>
       <?php endif; ?>
     </div>

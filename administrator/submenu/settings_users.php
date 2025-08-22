@@ -8,7 +8,7 @@ require_once '../../config/db.php'; // Include your database connection
         Admin Users
     </div>
     <div class="card-body">
-        <table class="table table-striped">
+        <table class="table table-striped" style="font-size: 0.85em;">
             <thead>
                 <tr>
                     <th>ID</th>
@@ -38,13 +38,13 @@ require_once '../../config/db.php'; // Include your database connection
                                 data-bs-toggle="modal" data-bs-target="#resetPasswordModal"
                                 data-id="' . htmlspecialchars($row['id']) . '"
                                 data-username="' . htmlspecialchars($row['username']) . '">
-                                <i class="bi bi-arrow-repeat me-1"></i>Reset Password</button>';
+                                <i class="bi bi-arrow-repeat me-1"></i>RESET</button>';
                             // Delete Button - Opens Delete Confirmation Modal
                             echo '<button class="btn btn-sm btn-danger"
                                 data-bs-toggle="modal" data-bs-target="#deleteAdminModal"
                                 data-id="' . htmlspecialchars($row['id']) . '"
                                 data-username="' . htmlspecialchars($row['username']) . '">
-                                <i class="bi bi-trash"></i>Delete Account</button>';
+                                <i class="bi bi-trash"></i>DELETE</button>';
                             echo '</td>';
                             echo '</tr>';
                         }

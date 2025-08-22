@@ -36,7 +36,7 @@ $total = 0;
 
 if ($buy_now && $variation_id) {
     // Direct Buy Now: fetch the variation and product info
-    $stmt = $conn->prepare("SELECT pv.id AS variation_id, pv.size, pv.color, pv.price AS variation_price, pv.discount_percentage, pv.discount_expiry_date, pv.stock, p.name AS product_name, (SELECT image_path FROM product_images WHERE product_id = p.id AND is_main = 1 LIMIT 1) AS main_image, pv.product_id FROM product_variations pv JOIN products p ON pv.product_id = p.id WHERE pv.id = ?");
+    $stmt = $conn->prepare("SELECT pv.id AS variation_id, pv.size, pv.color, pv.price AS variation_price, pv.stock, p.name AS product_name, (SELECT image_path FROM product_images WHERE product_id = p.id AND is_main = 1 LIMIT 1) AS main_image, pv.product_id FROM product_variations pv JOIN products p ON pv.product_id = p.id WHERE pv.id = ?");
     $stmt->bind_param("i", $variation_id);
     $stmt->execute();
     $result = $stmt->get_result();
@@ -45,15 +45,7 @@ if ($buy_now && $variation_id) {
             header("Location: product_details.php?id=" . $row['product_id'] . "&error=" . urlencode("Not enough stock."));
             exit;
         }
-        $current_price = (float)$row['variation_price'];
-        $display_price = $current_price;
-        if ($row['discount_percentage'] !== null && $row['discount_expiry_date'] !== null) {
-            $discount_expiry_timestamp = strtotime($row['discount_expiry_date']);
-            if (time() <= $discount_expiry_timestamp) {
-                $discount_amount = $current_price * ($row['discount_percentage'] / 100);
-                $display_price = $current_price - $discount_amount;
-            }
-        }
+        $display_price = (float)$row['variation_price']; // Price without discount
         $subtotal = $display_price * $quantity;
         $total += $subtotal;
         $row['display_price'] = $display_price;
@@ -75,7 +67,7 @@ if ($buy_now && $variation_id) {
     $placeholders = implode(',', array_fill(0, count($cart_ids), '?'));
     $types = str_repeat('i', count($cart_ids));
 
-    $sql = "SELECT c.id AS cart_id, c.quantity, pv.size, pv.color, pv.price AS variation_price, pv.discount_percentage, pv.discount_expiry_date, pv.stock, p.name AS product_name, (SELECT image_path FROM product_images WHERE product_id = p.id AND is_main = 1 LIMIT 1) AS main_image, pv.product_id
+    $sql = "SELECT c.id AS cart_id, c.quantity, pv.size, pv.color, pv.price AS variation_price, pv.stock, p.name AS product_name, (SELECT image_path FROM product_images WHERE product_id = p.id AND is_main = 1 LIMIT 1) AS main_image, pv.product_id
             FROM cart c
             JOIN product_variations pv ON c.variation_id = pv.id
             JOIN products p ON pv.product_id = p.id
@@ -87,15 +79,7 @@ if ($buy_now && $variation_id) {
     $result = $stmt->get_result();
 
     while ($item = $result->fetch_assoc()) {
-        $current_price = (float)$item['variation_price'];
-        $display_price = $current_price;
-        if ($item['discount_percentage'] !== null && $item['discount_expiry_date'] !== null) {
-            $discount_expiry_timestamp = strtotime($item['discount_expiry_date']);
-            if (time() <= $discount_expiry_timestamp) {
-                $discount_amount = $current_price * ($item['discount_percentage'] / 100);
-                $display_price = $current_price - $discount_amount;
-            }
-        }
+        $display_price = (float)$item['variation_price']; // Price without discount
         $subtotal = $display_price * $item['quantity'];
         $total += $subtotal;
         $item['display_price'] = $display_price;
@@ -341,7 +325,7 @@ $conn->close();
                 <h5 class="total-amount">Total: <span style="color:var(--primary);">₱<?php echo number_format($total, 2); ?></span></h5>
               </div>
               <div class="d-flex justify-content-end">
-                <button type="button" class="btn btn-accent" id="nextToShipping">Next: Shipping Information <i class="bi bi-arrow-right"></i></button>
+                <button type="button" class="btn btn-accent" id="nextToShipping">NEXT STEP</button>
               </div>
             </div>
 
@@ -404,8 +388,8 @@ $conn->close();
                 </div>
               </div>
               <div class="d-flex justify-content-between mt-4">
-                <button type="button" class="btn btn-secondary" id="prevToProducts"><i class="bi bi-arrow-left"></i> Previous</button>
-                <button type="button" class="btn btn-accent" id="nextToReview">Next: Review Order <i class="bi bi-arrow-right"></i></button>
+                <button type="button" class="btn btn-secondary" id="prevToProducts">PREVIOUS</button>
+                <button type="button" class="btn btn-accent" id="nextToReview">NEXT STEP</button>
               </div>
             </div>
 
@@ -431,8 +415,8 @@ $conn->close();
               </div>
 
               <div class="d-flex justify-content-between mt-4">
-                <button type="button" class="btn btn-secondary" id="prevToShipping"><i class="bi bi-arrow-left"></i> Previous</button>
-                <button type="submit" class="btn btn-accent btn-md" id="placeOrderBtn"><i class="bi bi-bag-check"></i> Place Order</button>
+                <button type="button" class="btn btn-secondary" id="prevToShipping">PREVIOUS</button>
+                <button type="submit" class="btn btn-accent btn-md" id="placeOrderBtn">PLACE ORDER</button>
               </div>
             </div>
           </div>

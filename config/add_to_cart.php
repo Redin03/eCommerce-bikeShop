@@ -31,13 +31,11 @@ if (!is_numeric($quantity) || $quantity <= 0) {
 $conn->begin_transaction(); // Start transaction for atomicity
 
 try {
-    // 1. Fetch product and variation details, including stock and prices
+    // 1. Fetch product and variation details, including stock and price
     $stmt = $conn->prepare("SELECT
                                 pv.product_id,
                                 pv.stock,
                                 pv.price,
-                                pv.discount_percentage,
-                                pv.discount_expiry_date,
                                 p.name AS product_name,
                                 pv.size,
                                 pv.color
@@ -62,25 +60,15 @@ try {
 
     $product_id = $variation_data['product_id'];
     $current_stock = $variation_data['stock'];
-    $original_price = (float)$variation_data['price'];
-    $discount_percentage = $variation_data['discount_percentage'];
-    $discount_expiry_date = $variation_data['discount_expiry_date'];
+    $original_price = (float)$variation_data['price']; // This is now the definitive price
     $product_name = $variation_data['product_name'];
     $size = $variation_data['size'];
     $color = $variation_data['color'];
 
-    // Calculate effective price at the time of addition
+    // The price at which the item is added to the cart is simply its original price
     $price_at_addition = $original_price;
-    if ($discount_percentage !== null && $discount_expiry_date !== null) {
-        $discount_expiry_timestamp = strtotime($discount_expiry_date);
-        if (time() <= $discount_expiry_timestamp) {
-            $discount_amount = $original_price * ($discount_percentage / 100);
-            $price_at_addition = $original_price - $discount_amount;
-        }
-    }
 
-    // IMPORTANT: Stock check remains, but deduction is removed from here.
-    // Stock will only be deducted upon order completion.
+    // IMPORTANT: Stock check remains. Stock will only be deducted upon order completion.
     if ($current_stock < $quantity) {
         throw new Exception('Not enough stock available for this variation. Available: ' . $current_stock);
     }
@@ -123,9 +111,6 @@ try {
         $stmt->close();
         $cart_action = "added";
     }
-
-    // **Stock deduction logic is REMOVED from here.**
-    // It should be handled during the order completion process.
 
     // 3. Log customer activity
     $activity_type = "Cart Interaction";

@@ -17,8 +17,6 @@ if ($productId) {
                 pv.color,
                 pv.stock,
                 pv.price,
-                pv.discount_percentage,
-                pv.discount_expiry_date,
                 pi.image_path,
                 pi.is_main
             FROM
@@ -56,28 +54,13 @@ if ($productId) {
                 $variation_id = $row['variation_id'];
                 if ($variation_id && !isset($product['variations'][$variation_id])) {
                     $current_price = (float)$row['price'];
-                    $discounted_price = $current_price;
-                    $is_discounted = false;
-
-                    if ($row['discount_percentage'] !== null && $row['discount_expiry_date'] !== null) {
-                        $discount_expiry_timestamp = strtotime($row['discount_expiry_date']);
-                        if (time() <= $discount_expiry_timestamp) {
-                            $discount_amount = $current_price * ($row['discount_percentage'] / 100);
-                            $discounted_price = $current_price - $discount_amount;
-                            $is_discounted = true;
-                        }
-                    }
 
                     $product['variations'][$variation_id] = [
                         'id' => $variation_id,
                         'size' => $row['size'],
                         'color' => $row['color'],
                         'stock' => $row['stock'],
-                        'original_price' => $current_price,
-                        'display_price' => $discounted_price,
-                        'discount_percentage' => $row['discount_percentage'],
-                        'discount_expiry_date' => $row['discount_expiry_date'],
-                        'is_discounted' => $is_discounted
+                        'display_price' => $current_price, // Price without discount
                     ];
                 }
 
@@ -139,25 +122,10 @@ if ($productId) {
     .product-thumbnail-wrapper:hover {
         border-color: var(--primary);
     }
-    .price-display .original-price {
-        text-decoration: line-through;
-        color: #6c757d;
-        font-size: 1.1em;
-        margin-right: 8px;
-    }
     .price-display .current-price {
         color: var(--primary);
         font-weight: bold;
         font-size: 1.6em;
-    }
-    .price-display .discount-badge {
-        background-color: #dc3545;
-        color: white;
-        padding: .2em .5em;
-        border-radius: .2rem;
-        font-size: .7em;
-        vertical-align: middle;
-        margin-left: 8px;
     }
     .variation-select {
         margin-top: 12px;
@@ -261,17 +229,8 @@ if ($productId) {
                         <?php
                         $firstVariation = reset($product['variations']);
                         if ($firstVariation) {
-                            $formattedOriginalPrice = number_format($firstVariation['original_price'], 2);
                             $formattedDisplayPrice = number_format($firstVariation['display_price'], 2);
-
-                            if ($firstVariation['is_discounted']) {
-                                echo '<span class="original-price">₱' . $formattedOriginalPrice . '</span> ';
-                                echo '<span class="current-price">₱' . $formattedDisplayPrice . '</span>';
-                                echo '<span class="badge discount-badge">SAVE ' . htmlspecialchars($firstVariation['discount_percentage']) . '%</span>';
-                                echo '<p class="text-danger mt-1" style="font-size:0.85rem;">Discount ends: ' . date('M d, Y', strtotime($firstVariation['discount_expiry_date'])) . '</p>';
-                            } else {
-                                echo '<span class="current-price">₱' . $formattedDisplayPrice . '</span>';
-                            }
+                            echo '<span class="current-price">₱' . $formattedDisplayPrice . '</span>';
                         } else {
                             echo '<span class="current-price">Price Not Available</span>';
                         }
@@ -286,11 +245,7 @@ if ($productId) {
                         <select class="form-select" id="productVariation">
                             <?php foreach ($product['variations'] as $variation): ?>
                                 <option value="<?php echo htmlspecialchars($variation['id']); ?>"
-                                        data-original-price="<?php echo htmlspecialchars($variation['original_price']); ?>"
                                         data-display-price="<?php echo htmlspecialchars($variation['display_price']); ?>"
-                                        data-discount-percentage="<?php echo htmlspecialchars($variation['discount_percentage']); ?>"
-                                        data-discount-expiry-date="<?php echo htmlspecialchars($variation['discount_expiry_date']); ?>"
-                                        data-is-discounted="<?php echo $variation['is_discounted'] ? 'true' : 'false'; ?>"
                                         data-stock="<?php echo htmlspecialchars($variation['stock']); ?>">
                                     <?php
                                     $variation_display = [];
@@ -328,11 +283,10 @@ if ($productId) {
                     <?php endif; ?>
 
                     <div class="button-group mt-3">
-                        <button class="btn btn-primary btn-accent" type="button" id="addToCartBtn"><i class="bi bi-cart-plus"></i> Add to Cart</button>
-                        <button class="btn btn-outline-secondary" type="button" id="buyNowBtn"><i class="bi bi-bag-check"></i> Buy Now</button>
+                        <button class="btn btn-primary btn-accent" type="button" id="addToCartBtn"><i class="bi bi-cart-plus"></i> ADD TO CART</button>
+                        <button class="btn btn-outline-secondary" type="button" id="buyNowBtn"><i class="bi bi-bag-check"></i> BUY NOW</button>
                     </div>
 
-                    <!-- Hidden Buy Now Form -->
                     <form id="buyNowForm" method="POST" action="checkout.php" style="display:none;">
                         <input type="hidden" name="buy_now" value="1">
                         <input type="hidden" name="variation_id" id="buyNowVariationId">
@@ -423,24 +377,13 @@ if ($productId) {
             }
 
             const selectedOption = variationSelect.options[variationSelect.selectedIndex];
-            const originalPrice = parseFloat(selectedOption.dataset.originalPrice);
             const displayPrice = parseFloat(selectedOption.dataset.displayPrice);
-            const discountPercentage = selectedOption.dataset.discountPercentage;
-            const discountExpiryDate = selectedOption.dataset.discountExpiryDate;
-            const isDiscounted = selectedOption.dataset.isDiscounted === 'true';
             const stock = parseInt(selectedOption.dataset.stock);
 
             const priceDisplay = document.querySelector('.price-display');
             let priceHtml = '<strong>Price: </strong>';
 
-            if (isDiscounted) {
-                priceHtml += `<span class="original-price">₱${formatCurrency(originalPrice)}</span> `;
-                priceHtml += `<span class="current-price">₱${formatCurrency(displayPrice)}</span>`;
-                priceHtml += `<span class="badge discount-badge">SAVE ${discountPercentage}%</span>`;
-                priceHtml += `<p class="text-danger mt-1" style="font-size:0.85rem;">Discount ends: ${new Date(discountExpiryDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</p>`;
-            } else {
-                priceHtml += `<span class="current-price">₱${formatCurrency(displayPrice)}</span>`;
-            }
+            priceHtml += `<span class="current-price">₱${formatCurrency(displayPrice)}</span>`;
             priceDisplay.innerHTML = priceHtml;
 
             if (currentStockSpan) {

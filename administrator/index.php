@@ -73,23 +73,11 @@ $loggedInAdminUsername = $_SESSION['admin_username'] ?? 'Admin User';
         </a>
         <a href="submenu/reports_analytics.php" class="list-group-item list-group-item-action" data-content-id="reports_analytics">
           <i class="bi bi-file-earmark-bar-graph-fill"></i>
-          <span>Reports</span>
-        </a>
-        <a href="submenu/payments_transactions.php" class="list-group-item list-group-item-action" data-content-id="payments_transactions">
-          <i class="bi bi-wallet-fill"></i>
-          <span>Payments</span>
-        </a>
-        <a href="submenu/reviews_ratings.php" class="list-group-item list-group-item-action" data-content-id="reviews_ratings">
-          <i class="bi bi-star-fill"></i>
-          <span>Reviews</span>
+          <span>Sales Reports</span>
         </a>
         <a href="submenu/log_history.php" class="list-group-item list-group-item-action" data-content-id="log_history">
             <i class="bi bi-clock-history"></i>
             <span>Log History</span>
-        </a>
-        <a href="submenu/settings_promotions.php" class="list-group-item list-group-item-action" data-content-id="settings_promotions">
-              <i class="bi bi-tag-fill"></i>
-            <span>Promotions</span>
         </a>
         <a href="submenu/settings_users.php" class="list-group-item list-group-item-action" data-content-id="settings_users">
               <i class="bi bi-person-circle"></i>
